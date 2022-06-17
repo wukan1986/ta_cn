@@ -3,7 +3,7 @@ import talib as ta
 from talib import MA_Type
 
 import ta_cn.talib as ta2d
-from . import TA_SET_COMPATIBILITY, TA_COMPATIBILITY_METASTOCK
+from .ta import TA_SET_COMPATIBILITY, TA_COMPATIBILITY_METASTOCK
 from .maths import MEAN
 from .reference import COUNT, REF, DIFF, MA
 

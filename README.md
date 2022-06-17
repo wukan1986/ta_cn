@@ -30,6 +30,17 @@
 2. TA-LIB。封装了常用函数，次要选择
 3. numba。速度受影响，最后才用它
 
+## 安装
+1. 只想使用二维矩阵TA-LIB，只需安装基础版即可
+```commandline
+pip install ta_cn -i https://mirrors.aliyun.com/pypi/simple --upgrade
+```
+
+2. 使用全功能版，包括中国版指标加速
+```commandline
+pip install ta_cn[all] -i https://mirrors.aliyun.com/pypi/simple --upgrade
+```
+
 ## TA-LIB由一维向量扩展到二维矩阵
 使用了一些编程技巧，可以直接输入二维矩阵。需要注意的是：TA-LIB遇到空值后面结果全为NaN, 所以二维矩阵计算前需要特殊处理
 ```python

@@ -18,12 +18,18 @@ setuptools.setup(
     url="https://github.com/wukan1986/ta_cn",
     packages=setuptools.find_packages(),
     install_requires=[
-        # 'numpy>=1.20.0',  # 主要是为了sliding_window_view
-        'pandas',
-        'bottleneck',
-        'TA-Lib>=0.4.19',
-        'numba',
+        'TA-Lib',
+        'numpy',
     ],
+    extras_require={
+        'all': [
+            # 'numpy>=1.20.0',  # 主要是为了sliding_window_view
+            'pandas',
+            'bottleneck',
+            'TA-Lib>=0.4.19',
+            'numba',
+        ],
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

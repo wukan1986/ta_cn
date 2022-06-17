@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from ta_cn import TA_SET_COMPATIBILITY
+from ta_cn.ta import TA_SET_COMPATIBILITY
 from ta_cn.slow import MACD_CN
 from ta_cn.ta import TA_SET_COMPATIBILITY_ENABLE
 from ta_cn.trend import MACD

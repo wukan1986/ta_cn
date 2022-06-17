@@ -1,7 +1,9 @@
 """这里存放因速度慢被淘汰的代码，因为有教学意义而保留"""
 import numpy as np
 import pandas as pd
+import talib as ta
 
+import ta_cn.talib as ta2d
 from .ema import EMA_1_PD, WS_SUM, SMA
 from .maths import MAX, ABS
 from .nb import fill_notna
@@ -17,6 +19,19 @@ def ATR(high, low, close, timeperiod=14):
     talib的ATR算法类似于SMA，所以要重写此处才与中国ATR相同
     """
     return SMA(TR(high, low, close), timeperiod)
+
+
+def ATR_CN(high, low, close, timeperiod=14):
+    """ATR真实波幅N日平均
+
+    talib的ATR算法类似于EMA，所以要重写此处才与中国ATR相同
+    """
+
+    # 以下要慢一些，不采用了
+    def func(high, low, close, timeperiod):
+        return ta.SMA(ta.TRANGE(high, low, close), timeperiod)
+
+    return ta2d.tafunc_nditer(func, [high, low, close], {'timeperiod': timeperiod}, ['real'])
 
 
 def MACD_CN(real: pd.DataFrame, fastperiod=12, slowperiod=26, signalperiod=9):
