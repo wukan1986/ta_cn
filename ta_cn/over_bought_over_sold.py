@@ -1,19 +1,23 @@
 import talib as ta
 from talib import MA_Type
 
-from .ema import EMA_1_PD, SMA
-from .maths import MEAN, MAX, ABS
-from .reference import LLV, HHV, TR, REF, MA
-from .statistics import AVEDEV
+import ta_cn.talib as ta2d
+from .maths import MEAN
+from .reference import LLV, HHV, REF, MA, TR
+from .ta import TA_SET_COMPATIBILITY, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 
 
-def ATR(high, low, close, timeperiod=20):
-    """ATR真实波幅N日平均"""
-    if close.ndim == 2:
-        return MA(TR(high, low, close), timeperiod)
-    else:
-        # talib的ATR算法类似于EMA，所以要重写此处才与中国ATR相同
-        return ta.SMA(ta.TRANGE(high, low, close), timeperiod=timeperiod)
+def ATR_CN(high, low, close, timeperiod=14):
+    """ATR真实波幅N日平均
+
+    talib的ATR算法类似于EMA，所以要重写此处才与中国ATR相同
+    """
+    # 以下要慢一些，不采用了
+    # def func(high, low, close, timeperiod):
+    #     return ta.SMA(ta.TRANGE(high, low, close), timeperiod)
+    #
+    # return ta2d.tafunc_nditer(func, [high, low, close], {'timeperiod': timeperiod}, ['real'])
+    return MA(TR(high, low, close), timeperiod)
 
 
 def BIAS(real, timeperiod=6):
@@ -29,29 +33,17 @@ def BIAS(real, timeperiod=6):
     return (real / MA(real, timeperiod) - 1) * 100
 
 
-def CCI(high, low, close, timeperiod=14):
-    if close.ndim == 2:
-        tp = TYP(high, low, close)
-        return (tp - MA(tp, timeperiod)) / (0.015 * AVEDEV(tp, timeperiod))
-    else:
-        # AVEDEV计算慢，talib要快一些
-        return ta.CCI(high, low, close, timeperiod=timeperiod)
+def KDJ(high, low, close, fastk_period=9, M1=3, M2=3):
+    """KDJ指标
 
+    talib中EMA的参数用法不同
+    """
+    TA_SET_COMPATIBILITY(TA_COMPATIBILITY_METASTOCK)
 
-def KDJ(close, high, low, fastk_period=9, M1=3, M2=3):
-    """KDJ指标"""
-    if close.ndim == 2:
-        hh = HHV(high, fastk_period)
-        ll = LLV(low, fastk_period)
-        RSV = (close - ll) / (hh - ll) * 100
-        K = EMA_1_PD(RSV, (M1 * 2 - 1))
-        D = EMA_1_PD(K, (M2 * 2 - 1))
-    else:
-        # talib中EMA的参数用法不同
-        K, D = ta.STOCH(high, low, close,
-                        fastk_period=fastk_period,
-                        slowk_period=(M1 * 2 - 1), slowk_matype=MA_Type.EMA,
-                        slowd_period=(M2 * 2 - 1), slowd_matype=MA_Type.EMA)
+    K, D = ta2d.STOCH(high, low, close,
+                      fastk_period=fastk_period,
+                      slowk_period=(M1 * 2 - 1), slowk_matype=MA_Type.EMA,
+                      slowd_period=(M2 * 2 - 1), slowd_matype=MA_Type.EMA)
 
     J = K * 3 - D * 2
     return K, D, J
@@ -112,11 +104,7 @@ def WR(high, low, close, timeperiod=10):
 
 def RSI(real, timeperiod=24):
     """RSI指标"""
-    if real.ndim == 2:
-        DIF = real - REF(real, 1)
-        return SMA(MAX(DIF, 0), timeperiod, 1) / SMA(ABS(DIF), timeperiod, 1) * 100
-    else:
-        # 请在循环外调用
-        ta.set_compatibility(0)
-        # 如果设置成1，将会多一个数字
-        return ta.RSI(real, timeperiod=timeperiod)
+    # 如果设置成1，将会多一个数字
+    TA_SET_COMPATIBILITY(TA_COMPATIBILITY_DEFAULT)
+
+    return ta2d.RSI(real, timeperiod=timeperiod)

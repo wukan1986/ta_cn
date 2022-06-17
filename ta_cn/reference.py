@@ -1,9 +1,7 @@
 import bottleneck as bn
 import numpy as np
-import talib as ta
 
 from .maths import MAX, ABS
-from .utils import np_to_pd
 
 
 def CONST(real):
@@ -68,11 +66,8 @@ def SUM(real, timeperiod: int = 5):
 
 def TR(high, low, close):
     """TR真实波幅"""
-    if close.ndim == 2:
-        lc = REF(close, 1)
-        return MAX(high - low, ABS(high - lc), ABS(lc - low))
-    else:
-        return ta.TRANGE(high, low, close)
+    lc = REF(close, 1)
+    return MAX(high - low, ABS(high - lc), ABS(lc - low))
 
 
 def MA(real, timeperiod: int = 5):
@@ -80,15 +75,3 @@ def MA(real, timeperiod: int = 5):
 
     等价于talib中的SMA"""
     return bn.move_mean(real, window=timeperiod, axis=0)
-
-
-def WMA(real, timeperiod=5):
-    """加权移动平均"""
-    if real.ndim == 2:
-        def func(x):
-            # 复制于MyTT,比tqsdk中tafunc中计算要快
-            return x[::-1].cumsum().sum() * 2 / timeperiod / (timeperiod + 1)
-
-        return np_to_pd(real).rolling(timeperiod).apply(func, raw=True)
-    else:
-        return ta.WMA(real, timeperiod=timeperiod)

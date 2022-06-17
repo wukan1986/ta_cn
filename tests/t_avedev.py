@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from ta_cn import np_to_pd
+from ta_cn.utils import np_to_pd
 
 
 def AVEDEV0(real, timeperiod: int = 100):
@@ -40,7 +40,7 @@ if __name__ == '__main__':
         print(func)
 
         t1 = time.time()
-        r1 = AVEDEV1(a).iloc[:, 0]
+        r1 = AVEDEV3(a)[:, 0]
         t2 = time.time()
         r2 = AVEDEV2(a)[:, 0]
         t3 = time.time()

@@ -9,13 +9,16 @@ def ABS(x):
 
 
 def LN(x):
-    """底是e的对数"""
-    return np.log(x)
+    """底是e的对数
+
+    0返回-inf。不好看，还是先用where过滤
+    """
+    return np.log(np.where(x > 0, x, np.nan))
 
 
 def LOG(x):
     """底是10的对数"""
-    return np.log10(x)
+    return np.log10(np.where(x > 0, x, np.nan))
 
 
 def POW(x1, x2):
@@ -30,7 +33,8 @@ def REVERSE(x):
 
 def SQRT(x):
     """平方根"""
-    return np.sqrt(x)
+    with np.errstate(invalid='ignore'):
+        return np.sqrt(x)
 
 
 def MAX(*args):
@@ -73,8 +77,12 @@ def MUL(*args):
 
 
 def DIV(*args):
-    """连除"""
-    return reduce(np.true_divide, args)
+    """连除
+
+    RuntimeWarning: invalid value encountered in true_divide
+    """
+    with np.errstate(divide='ignore', invalid='ignore'):
+        return reduce(np.true_divide, args)
 
 
 def MEAN(*args):
@@ -90,6 +98,25 @@ def ROUND(a, decimals=3):
 def SGN(x):
     """求符号方向
 
-    np.sign对nan会报错，所以另实现了一版
-    """
     return (0 < x) * 1 - (x < 0)
+    """
+    return np.sign(x)
+
+
+if __name__ == '__main__':
+    a = np.random.rand(10000)
+    a[:20] = np.nan
+    a[:10] = -10
+    a[:5] = 0
+    b = ABS(a)
+    print(b)
+    b = LN(a)
+    print(b)
+    b = LOG(a)
+    print(b)
+    b = SQRT(a)
+    print(b)
+    b = DIV(a, a)
+    print(b)
+    b = SGN(a)
+    print(b)

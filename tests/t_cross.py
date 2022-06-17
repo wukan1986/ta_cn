@@ -1,7 +1,6 @@
 import numpy as np
 
 from ta_cn.logical import CROSS
-from ta_cn.nb import _FILTER_2d_nb
 from ta_cn.logical import FILTER
 
 a = np.random.rand(10000)
