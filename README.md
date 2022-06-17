@@ -27,7 +27,7 @@
 
 ## 实现方案优先级
 1. bottleneck。支持二维数据，优先使用
-2. TA-LIB。封装了常用函数，次要选择
+2. TA-Lib。封装了常用函数，次要选择
 3. numba。速度受影响，最后才用它
 
 ## 安装
@@ -42,7 +42,11 @@ pip install ta_cn[all] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 ```
 
 ## TA-LIB由一维向量扩展到二维矩阵
-使用了一些编程技巧，可以直接输入二维矩阵。需要注意的是：TA-LIB遇到空值后面结果全为NaN, 所以二维矩阵计算前需要特殊处理
+使用了一些编程技巧，可以直接输入二维矩阵。需要注意的是：
+1. TA-Lib遇到空值后面结果全为NaN
+2. 停牌时，数据为NaN, 所以二维矩阵计算前需要特殊处理
+3. 本人提供的方案是将数据压到最尾部，计算，然后还原
+
 ```python
 import numpy as np
 
@@ -74,13 +78,8 @@ r = pullna(rr, row, col)
 print(r)
 ```
 
-## 有区别的指标清单
-1. EMA
-2. MACD
-3. SMA
-4. OBV
-5. DMI
-6. 其它待补充...
+## 指标对比清单
+参考 [指标对比](指标对比.xlsx) 未完工，待补充
 
 ## 停牌处理2
 1. 板块指数，停牌了也要最近的行情进行计算，否则指数过小
@@ -93,6 +92,3 @@ print(r)
 4. [funcat](https://github.com/cedricporter/funcat) 公式移植
 5. [pandas-ta](https://github.com/twopirllc/pandas-ta) 支持Pandas扩展的技术指标
 6. [ta](https://github.com/bukosabino/ta) 通过类实现的技术指标
-
-
-
