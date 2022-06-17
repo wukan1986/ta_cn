@@ -23,29 +23,53 @@
 ## 目标
 1. 按通达信等国内常用软件命名和分类各指标
 2. 支持二维矩阵计算
-3. 计算方法区别很大时，两个版本都提供，同时说明区别处
+3. 国内外计算方法区别很大时，两个版本都提供，同时说明区别处
 
 ## 实现方案优先级
 1. bottleneck。支持二维数据，优先使用
 2. TA-LIB。封装了常用函数，次要选择
 3. numba。速度受影响，最后才用它
 
-## 有区别的指标
+## TA-LIB由一维向量扩展到二维矩阵
+使用了一些编程技巧，可以直接输入二维矩阵。需要注意的是：TA-LIB遇到空值后面结果全为NaN, 所以二维矩阵计算前需要特殊处理
+```python
+import numpy as np
+
+# 原版talib,不支持二维数据
+# import talib as ta
+
+# 新版talib,只要替换引用即可直接支持二维数据
+import ta_cn.talib as ta
+from ta_cn.utils import pushna, pullna
+
+# 准备数据
+h = np.random.rand(10000000).reshape(-1, 50000) + 10
+l = np.random.rand(10000000).reshape(-1, 50000)
+c = np.random.rand(10000000).reshape(-1, 50000)
+
+# 几个调用函数演示
+r = ta.ATR(h, l, c, 10)
+print(r)
+x, y, z = ta.BBANDS(c, timeperiod=10, nbdevup=2, nbdevdn=2)
+print(z)
+
+# 将少量值设置为空，用来模拟停牌
+c[c < 0.05] = np.nan
+
+# 跳过停牌进行计算，再还原的演示
+arr, row, col = pushna(c, direction='down')
+rr = ta.SMA(real=arr, timeperiod=10)
+r = pullna(rr, row, col)
+print(r)
+```
+
+## 有区别的指标清单
 1. EMA
 2. MACD
 3. SMA
 4. OBV
 5. DMI
 6. 其它待补充...
-
-## TODO List
-1. ...
-
-## 停牌处理1
-1. TA-LIB在数据中段出现nan时，后面所有输出都是nan
-2. 使用ffill又会导致指标结果产生巨大偏差
-3. 所以计算时最好跳过nan
-4. 可以将数据向下堆积，nan都移到最前，计算指标后再还原位置
 
 ## 停牌处理2
 1. 板块指数，停牌了也要最近的行情进行计算，否则指数过小
