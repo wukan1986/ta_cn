@@ -31,7 +31,7 @@
 3. numba。速度受影响，最后才用它
 
 ## 安装
-1. 只想使用二维矩阵TA-LIB，只需安装基础版即可
+1. 只想使用二维矩阵TA-Lib，只需安装基础版即可
 ```commandline
 pip install ta_cn -i https://mirrors.aliyun.com/pypi/simple --upgrade
 ```
@@ -101,6 +101,30 @@ TA_SET_COMPATIBILITY_ENABLE(False)
 
 x, y, z = MACD(c)
 print(z)
+```
+
+## DataFrame输出，输出是ndarray?
+只要通过np_to_pd，并传入index/columns两参数即可还原成DataFrame
+```python
+import pandas as pd
+
+from ta_cn.imports import *
+from ta_cn.utils import np_to_pd
+
+pd._testing._N = 250
+pd._testing._K = 30
+h = pd._testing.makeTimeDataFrame() + 10
+l = pd._testing.makeTimeDataFrame()
+c = pd._testing.makeTimeDataFrame()
+
+r = ATR_CN(h, l, c)
+# 返回的数据可能是np.ndarray
+print(r[-5:])
+
+# 可以再封装回pd.DataFrame
+d = np_to_pd(r, copy=False, index=c.index, columns=c.columns)
+print(d.iloc[-5:])
+
 ```
 
 ## 指标对比清单
