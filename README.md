@@ -103,7 +103,7 @@ x, y, z = MACD(c)
 print(z)
 ```
 
-## DataFrame输出，输出是ndarray?
+## 输入DataFrame，输出是ndarray?
 只要通过np_to_pd，并传入index/columns两参数即可还原成DataFrame
 ```python
 import pandas as pd
