@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from ta_cn.slow import AVEDEV as AVEDEV2
+from ta_cn.slow import _AVEDEV as AVEDEV2
 from ta_cn.statistics import AVEDEV as AVEDEV1
 
 if __name__ == '__main__':

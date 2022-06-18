@@ -64,7 +64,7 @@ def TRIX_CN(real, timeperiod=12):
 
 
 def CCI(high, low, close, timeperiod=14):
-    """CCI指标，talib版更快"""
+    """CCI顺势指标，talib版更快"""
     tp = TYP(high, low, close)
     return (tp - MA(tp, timeperiod)) / (0.015 * AVEDEV(tp, timeperiod))
 

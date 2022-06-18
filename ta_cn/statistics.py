@@ -1,9 +1,9 @@
 import bottleneck as _bn
 
-from .nb import _avedev
+from .nb import numpy_rolling_apply, _rolling_func_nb, _avedev_nb
 
 """平均绝对偏差"""
-AVEDEV = _avedev
+AVEDEV = lambda data, window=20: numpy_rolling_apply(data, window, _rolling_func_nb, _avedev_nb)
 
 
 def STD(real, timeperiod: int = 5):

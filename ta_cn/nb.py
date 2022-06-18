@@ -127,22 +127,29 @@ def sum_1st(arr, n=1):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
-def _AVEDEV_nb(arr, out, timeperiod):
+def _avedev_nb(a):
+    """avedev平均绝对偏差"""
+    return _np.mean(_np.abs(a - _np.mean(a)))
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _rolling_func_nb(arr, out, timeperiod, func, *args):
+    """滚动函数"""
     if arr.ndim == 3:
         for i, aa in enumerate(arr):
             for j, a in enumerate(aa):
-                out[i + timeperiod - 1, j] = _np.mean(_np.abs(a - _np.mean(a)))
+                out[i + timeperiod - 1, j] = func(a, *args)
     elif arr.ndim == 2:
         for i, a in enumerate(arr):
-            out[i + timeperiod - 1] = _np.mean(_np.abs(a - _np.mean(a)))
+            out[i + timeperiod - 1] = func(a, *args)
 
     return out
 
 
-def _avedev(real, timeperiod: int = 20):
-    """平均绝对偏差"""
-    arr = _np.lib.stride_tricks.sliding_window_view(real, timeperiod, axis=0)
-    out = _np.empty_like(real)
-    out[:timeperiod] = _np.nan
+def numpy_rolling_apply(data, window, func1, func2, *args):
+    """滚动应用方法"""
+    arr = _np.lib.stride_tricks.sliding_window_view(data, window, axis=0)
+    out = _np.empty_like(data)
+    out[:window] = _np.nan
 
-    return _AVEDEV_nb(arr, out, timeperiod)
+    return func1(arr, out, window, func2, *args)
