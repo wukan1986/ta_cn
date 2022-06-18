@@ -23,7 +23,7 @@ setuptools.setup(
     ],
     extras_require={
         'all': [
-            # 'numpy>=1.20.0',  # 主要是为了sliding_window_view
+            'numpy>=1.20.0',  # 主要是为了sliding_window_view
             'pandas',
             'bottleneck',
             'TA-Lib>=0.4.19',

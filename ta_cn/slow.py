@@ -64,6 +64,7 @@ def TRIX_CN(real, timeperiod=12):
 
 
 def CCI(high, low, close, timeperiod=14):
+    """CCI指标，talib版更快"""
     tp = TYP(high, low, close)
     return (tp - MA(tp, timeperiod)) / (0.015 * AVEDEV(tp, timeperiod))
 
@@ -173,3 +174,12 @@ def DMI_CN(high, low, close, timeperiod=14):
     # timeperiod与timeperiod-1不同
     ADXR = (ADX + REF(ADX, timeperiod)) / 2
     return PDI, MDI, ADX, ADXR
+
+
+def _AVEDEV(real, timeperiod: int = 20):
+    """平均绝对偏差,慢，请用nb版"""
+
+    def mad(x):
+        return _np.abs(x - x.mean()).mean()
+
+    return np_to_pd(real).rolling(window=timeperiod).apply(mad, raw=True)

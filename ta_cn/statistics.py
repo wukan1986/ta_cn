@@ -1,16 +1,9 @@
 import bottleneck as _bn
-import numpy as _np
 
-from .utils import np_to_pd
+from .nb import _avedev
 
-
-def AVEDEV(real, timeperiod: int = 5):
-    """平均绝对偏差"""
-
-    def mad(x):
-        return _np.abs(x - x.mean()).mean()
-
-    return np_to_pd(real).rolling(window=timeperiod).apply(mad, raw=True)
+"""平均绝对偏差"""
+AVEDEV = _avedev
 
 
 def STD(real, timeperiod: int = 5):

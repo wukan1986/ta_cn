@@ -124,3 +124,25 @@ def sum_1st(arr, n=1):
         return arr
     arr = pd_to_np(arr, copy=True)
     return _sum_1st_nb(arr, n)
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _AVEDEV_nb(arr, out, timeperiod):
+    if arr.ndim == 3:
+        for i, aa in enumerate(arr):
+            for j, a in enumerate(aa):
+                out[i + timeperiod - 1, j] = _np.mean(_np.abs(a - _np.mean(a)))
+    elif arr.ndim == 2:
+        for i, a in enumerate(arr):
+            out[i + timeperiod - 1] = _np.mean(_np.abs(a - _np.mean(a)))
+
+    return out
+
+
+def _avedev(real, timeperiod: int = 20):
+    """平均绝对偏差"""
+    arr = _np.lib.stride_tricks.sliding_window_view(real, timeperiod, axis=0)
+    out = _np.empty_like(real)
+    out[:timeperiod] = _np.nan
+
+    return _AVEDEV_nb(arr, out, timeperiod)
