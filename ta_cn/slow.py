@@ -187,3 +187,7 @@ def _AVEDEV(real, timeperiod: int = 20):
 
 def _SLOPE(S, N=14):
     return np_to_pd(S).rolling(N).apply(lambda x: _np.polyfit(range(N), x, deg=1)[0], raw=True)
+
+
+def _FORCAST(S, N=14):
+    return np_to_pd(S).rolling(N).apply(lambda x: _np.polyval(_np.polyfit(range(N), x, deg=1), N - 1), raw=True)

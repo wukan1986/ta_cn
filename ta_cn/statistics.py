@@ -1,6 +1,7 @@
 import bottleneck as _bn
 import numpy as _np
 
+import ta_cn.talib as _ta2d
 from .nb import numpy_rolling_apply, _rolling_func_nb, _avedev_nb, _slope_nb
 from .utils import pd_to_np
 
@@ -11,10 +12,39 @@ def AVEDEV(real, timeperiod=20):
 
 
 def SLOPE(real, timeperiod=14):
-    """线性回归斜率"""
+    """线性回归斜率
+
+    Parameters
+    ----------
+    real
+    timeperiod
+
+    References
+    ----------
+    https://github.com/TA-Lib/ta-lib/blob/master/src/ta_func/ta_LINEARREG_SLOPE.c
+
+    """
+    return _ta2d.LINEARREG_SLOPE(real, timeperiod=timeperiod)
+    # !!! 以下代码也很有价值，不要删除
     x = _np.arange(timeperiod)
     m_x = _np.mean(x)
     return numpy_rolling_apply(pd_to_np(real), timeperiod, _rolling_func_nb, _slope_nb, x, m_x)
+
+
+def FORCAST(real, timeperiod=14):
+    """线性回归预测值
+
+    Parameters
+    ----------
+    real
+    timeperiod
+
+    References
+    ----------
+    https://github.com/TA-Lib/ta-lib/blob/master/src/ta_func/ta_LINEARREG.c
+
+    """
+    return _ta2d.LINEARREG(real, timeperiod=timeperiod)
 
 
 def STD(real, timeperiod: int = 5):
