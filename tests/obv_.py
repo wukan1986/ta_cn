@@ -14,6 +14,9 @@ if __name__ == '__main__':
     c = np.random.rand(10000000).reshape(-1, 50000)
     v = np.random.rand(10000000).reshape(-1, 50000) * 1000
 
+    c[:20, -1] = np.nan
+    v[:20, -1] = np.nan
+
     t1 = time.time()
     z1 = ta.OBV(c, v)
     t2 = time.time()
@@ -22,6 +25,6 @@ if __name__ == '__main__':
 
     print(t2 - t1, t3 - t2)
 
-    pd.DataFrame({'TA': z1[:, 0], 'MY': z2[:, 0]}).plot()
-    pd.DataFrame({'MY': z2[:, 0], 'TA': z1[:, 0]}).plot()
+    pd.DataFrame({'TA': z1[:, -1], 'MY': z2[:, -1]}).plot()
+    pd.DataFrame({'MY': z2[:, -1], 'TA': z1[:, -1]}).plot()
     plt.show()

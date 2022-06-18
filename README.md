@@ -41,7 +41,7 @@ pip install ta_cn -i https://mirrors.aliyun.com/pypi/simple --upgrade
 pip install ta_cn[all] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 ```
 
-## TA-LIB由一维向量扩展到二维矩阵
+## TA-Lib由一维向量扩展到二维矩阵
 使用了一些编程技巧，可以直接输入二维矩阵。需要注意的是：
 1. TA-Lib遇到空值后面结果全为NaN
 2. 停牌时，数据为NaN, 所以二维矩阵计算前需要特殊处理
@@ -76,6 +76,31 @@ arr, row, col = pushna(c, direction='down')
 rr = ta.SMA(real=arr, timeperiod=10)
 r = pullna(rr, row, col)
 print(r)
+```
+
+## 使用ta_cn中定义的公式
+```python
+import numpy as np
+
+# ta_cn.talib库底层是循环调用talib，部分计算效率不高
+# 可导入ta_cn中的公式，只加这一句即导入多个文件中的函数
+from ta_cn.imports import *
+
+# 准备数据
+h = np.random.rand(10000000).reshape(-1, 50000) + 10
+l = np.random.rand(10000000).reshape(-1, 50000)
+c = np.random.rand(10000000).reshape(-1, 50000)
+
+r = ATR_CN(h, l, c, timeperiod=10)
+print(r)
+
+# 设置参数，让MACD中的EMA算法与国内算法相同
+TA_SET_COMPATIBILITY_ENABLE(True)
+TA_SET_COMPATIBILITY(1)
+TA_SET_COMPATIBILITY_ENABLE(False)
+
+x, y, z = MACD(c)
+print(z)
 ```
 
 ## 指标对比清单

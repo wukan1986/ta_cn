@@ -1,9 +1,9 @@
 """这里存放因速度慢被淘汰的代码，因为有教学意义而保留"""
-import numpy as np
-import pandas as pd
-import talib as ta
+import numpy as _np
+import pandas as _pd
+import talib as _ta1d
 
-import ta_cn.talib as ta2d
+import ta_cn.talib as _ta2d
 from .ema import EMA_1_PD, WS_SUM, SMA
 from .maths import MAX, ABS
 from .nb import fill_notna
@@ -29,12 +29,12 @@ def ATR_CN(high, low, close, timeperiod=14):
 
     # 以下要慢一些，不采用了
     def func(high, low, close, timeperiod):
-        return ta.SMA(ta.TRANGE(high, low, close), timeperiod)
+        return _ta1d.SMA(_ta1d.TRANGE(high, low, close), timeperiod)
 
-    return ta2d.tafunc_nditer(func, [high, low, close], {'timeperiod': timeperiod}, ['real'])
+    return _ta2d.tafunc_nditer(func, [high, low, close], {'timeperiod': timeperiod}, ['real'])
 
 
-def MACD_CN(real: pd.DataFrame, fastperiod=12, slowperiod=26, signalperiod=9):
+def MACD_CN(real: _pd.DataFrame, fastperiod=12, slowperiod=26, signalperiod=9):
     # 中国区使用公式自行实现的算法，由于多次用到EMA，效率不高，建议直接使用MACDEXT
     DIF = EMA_1_PD(real, fastperiod) - EMA_1_PD(real, slowperiod)
     DEA = EMA_1_PD(DIF, signalperiod)
@@ -89,7 +89,7 @@ def MFI(high, low, close, volume, timeperiod=14):
     tp = TYP(high, low, close)
     tpv = tp * volume
     # 比TALIB结果多一个数字，通过置空实现与TA-LIB完全一样
-    tpv = fill_notna(tpv, fill_value=np.nan, n=1)
+    tpv = fill_notna(tpv, fill_value=_np.nan, n=1)
 
     is_raising = tp > REF(tp, 1)
     pos_sum = SUM(is_raising * tpv, timeperiod)
@@ -104,6 +104,11 @@ def DM(high, low, timeperiod=14):
     """
     HD = high - REF(high, 1)
     LD = REF(low, 1) - low
+
+    # REF导至出现空，处理一下，防止空值出现
+    HD[_np.isnan(HD) & (~_np.isnan(high))] = 0
+    LD[_np.isnan(LD) & (~_np.isnan(low))] = 0
+
     # talib中是用的威尔德平滑
     PDM = WS_SUM(((HD > 0) & (HD > LD)) * HD, timeperiod)
     MDM = WS_SUM(((LD > 0) & (LD > HD)) * LD, timeperiod)
@@ -125,10 +130,13 @@ def DM_CN(high, low, timeperiod=14):
 
 def DI(high, low, close, timeperiod=14):
     """Directional Indicator方向指标"""
-    TRS = WS_SUM(TR(high, low, close), timeperiod)
+    tr = TR(high, low, close)
+    # 数据有效区开始，值由nan要设成0
+    tr[_np.isnan(tr) & (~_np.isnan(close))] = 0
 
-    # 与talib相比多了一个数字，所以删除一下
-    TRS = fill_notna(TRS, fill_value=np.nan, n=1)
+    TRS = WS_SUM(tr, timeperiod)
+    # 比talib多一个，删除它
+    TRS = fill_notna(TRS, fill_value=_np.nan, n=1)
 
     PDM, MDM = DM(high, low, timeperiod)
     PDI = PDM * 100 / TRS

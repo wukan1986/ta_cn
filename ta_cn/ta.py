@@ -1,4 +1,4 @@
-import talib as ta
+import talib as _ta1d
 
 TA_COMPATIBILITY_DEFAULT = 0  # 使用MA做第一个值
 TA_COMPATIBILITY_METASTOCK = 1  # 使用Price做第一个值
@@ -15,4 +15,4 @@ def TA_SET_COMPATIBILITY(compatibility):
     global _COMPATIBILITY_ENABLE_
     if _COMPATIBILITY_ENABLE_:
         print('do ta.set_compatibility', compatibility)
-        ta.set_compatibility(compatibility)
+        _ta1d.set_compatibility(compatibility)

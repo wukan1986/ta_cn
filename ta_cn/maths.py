@@ -1,11 +1,11 @@
 from functools import reduce
 
-import numpy as np
+import numpy as _np
 
 
 def ABS(x):
     """绝对值"""
-    return np.abs(x)
+    return _np.abs(x)
 
 
 def LN(x):
@@ -13,17 +13,17 @@ def LN(x):
 
     0返回-inf。不好看，还是先用where过滤
     """
-    return np.log(np.where(x > 0, x, np.nan))
+    return _np.log(_np.where(x > 0, x, _np.nan))
 
 
 def LOG(x):
     """底是10的对数"""
-    return np.log10(np.where(x > 0, x, np.nan))
+    return _np.log10(_np.where(x > 0, x, _np.nan))
 
 
 def POW(x1, x2):
     """次方"""
-    return np.power(x1, x2)
+    return _np.power(x1, x2)
 
 
 def REVERSE(x):
@@ -33,8 +33,8 @@ def REVERSE(x):
 
 def SQRT(x):
     """平方根"""
-    with np.errstate(invalid='ignore'):
-        return np.sqrt(x)
+    with _np.errstate(invalid='ignore'):
+        return _np.sqrt(x)
 
 
 def MAX(*args):
@@ -46,12 +46,12 @@ def MAX(*args):
     >>> MAX(1, 2, 3)
 
     """
-    return reduce(np.maximum, args)
+    return reduce(_np.maximum, args)
 
 
 def MIN(*args):
     """求min"""
-    return reduce(np.minimum, args)
+    return reduce(_np.minimum, args)
 
 
 def ADD(*args):
@@ -63,17 +63,17 @@ def ADD(*args):
     >>> ADD(1, 2, 3)
 
     """
-    return reduce(np.add, args)
+    return reduce(_np.add, args)
 
 
 def SUB(*args):
     """相减"""
-    return reduce(np.subtract, args)
+    return reduce(_np.subtract, args)
 
 
 def MUL(*args):
     """连乘"""
-    return reduce(np.multiply, args)
+    return reduce(_np.multiply, args)
 
 
 def DIV(*args):
@@ -81,8 +81,8 @@ def DIV(*args):
 
     RuntimeWarning: invalid value encountered in true_divide
     """
-    with np.errstate(divide='ignore', invalid='ignore'):
-        return reduce(np.true_divide, args)
+    with _np.errstate(divide='ignore', invalid='ignore'):
+        return reduce(_np.true_divide, args)
 
 
 def MEAN(*args):
@@ -92,7 +92,7 @@ def MEAN(*args):
 
 def ROUND(a, decimals=3):
     """四舍五入取3位小数"""
-    return np.round(a, decimals)
+    return _np.round(a, decimals)
 
 
 def SGN(x):
@@ -100,12 +100,12 @@ def SGN(x):
 
     return (0 < x) * 1 - (x < 0)
     """
-    return np.sign(x)
+    return _np.sign(x)
 
 
 if __name__ == '__main__':
-    a = np.random.rand(10000)
-    a[:20] = np.nan
+    a = _np.random.rand(10000)
+    a[:20] = _np.nan
     a[:10] = -10
     a[:5] = 0
     b = ABS(a)

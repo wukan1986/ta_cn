@@ -13,6 +13,8 @@ if __name__ == '__main__':
     l = np.random.rand(10000000).reshape(-1, 50000)
     c = np.random.rand(10000000).reshape(-1, 50000)
 
+    c[:20, -1] = np.nan
+
     t1 = time.time()
     z1 = ta.TRANGE(h, l, c)
     t2 = time.time()

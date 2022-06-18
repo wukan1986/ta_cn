@@ -13,6 +13,8 @@ if __name__ == '__main__':
     l = np.random.rand(10000000).reshape(-1, 50000)
     c = np.random.rand(10000000).reshape(-1, 50000)
 
+    c[:20, -1] = np.nan
+
     t1 = time.time()
     x1, y1, z1 = ta.BBANDS(c, timeperiod=10, nbdevup=2, nbdevdn=2)
     t2 = time.time()

@@ -1,7 +1,8 @@
-import numpy as np
-import pandas as pd
+import numpy as _np
+import pandas as _pd
 
-import ta_cn.talib as ta2d
+import ta_cn.talib as _ta2d
+from .nb import ma_1st, sum_1st
 from .ta import TA_SET_COMPATIBILITY, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 from .utils import np_to_pd
 
@@ -24,17 +25,12 @@ Warnings
 
 
 def _MA_EMA(real, timeperiod, com=None, span=None, alpha=None):
-    """内部函数。先计算MA做第一个值，然后再算EMA
-
-    好几处开头的MA算法是一样的，但EMA的参数不同
-
-    Notes
-    -----
+    """内部函数，已经废弃。先计算MA做第一个值，然后再算EMA
     二维矩阵如果开头有NaN，那么求均值的位置就不统一，得做特别处理
-
+    好不容易想出来的，删了可惜
     """
     real = np_to_pd(real, copy=True)  # 开头部分将写入SMA
-    ma = np_to_pd(np.zeros_like(real), copy=False)  # 来计算sma
+    ma = np_to_pd(_np.zeros_like(real), copy=False)  # 来计算sma
 
     # 取最长位置, 用于计算SMA，没有必要全算一次MA
     max_end = real.notna().idxmax() + timeperiod
@@ -52,18 +48,18 @@ def _MA_EMA(real, timeperiod, com=None, span=None, alpha=None):
 def EMA_0_TA(real, timeperiod=24):
     """EMA第一个值用MA"""
     TA_SET_COMPATIBILITY(TA_COMPATIBILITY_DEFAULT)
-    return ta2d.EMA(real, timeperiod=timeperiod)
+    return _ta2d.EMA(real, timeperiod=timeperiod)
 
 
 def EMA_0_PD(real, timeperiod=24):
     """EMA第一个值用MA"""
-    return _MA_EMA(real, timeperiod=timeperiod, span=timeperiod)
+    return np_to_pd(ma_1st(real, timeperiod)).ewm(span=timeperiod, min_periods=0, adjust=False).mean()
 
 
 def EMA_1_TA(real, timeperiod=24):
     """EMA第一个值用Price"""
     TA_SET_COMPATIBILITY(TA_COMPATIBILITY_METASTOCK)
-    return ta2d.EMA(real, timeperiod=timeperiod)
+    return _ta2d.EMA(real, timeperiod=timeperiod)
 
 
 def EMA_1_PD(real, timeperiod=24):
@@ -76,7 +72,7 @@ def EMA_1_PD(real, timeperiod=24):
 
 def SMA(real, timeperiod=24, M=1):
     """EMA第一个值用MA"""
-    return _MA_EMA(real, timeperiod=timeperiod, alpha=M / timeperiod)
+    return np_to_pd(ma_1st(real, timeperiod)).ewm(alpha=M / timeperiod, min_periods=0, adjust=False).mean()
 
 
 def DMA(real, alpha):
@@ -87,34 +83,12 @@ def DMA(real, alpha):
     return np_to_pd(real).ewm(alpha=alpha, adjust=False).mean()
 
 
-def WS_SUM(real: pd.DataFrame, timeperiod: int = 5):
-    """Wilder Smooth 威尔德平滑求和"""
-    # 二维数据起始位置不同时，这里的算法会有问题
-    # TODO: 还要再检查
-    real = np_to_pd(real, copy=True)
-    real[timeperiod - 1:timeperiod] = np.nansum(real[:timeperiod], axis=0)
-    real[:timeperiod - 1] = 0
+def WS_SUM(real: _pd.DataFrame, timeperiod: int = 5):
+    """Wilder Smooth 威尔德平滑求和
 
-    return real.ewm(alpha=1 / timeperiod, min_periods=timeperiod).sum()
+    Notes
+    -----
+    在ADX/DMI这个指标中，数据的起始位置不是real，而是real的上层数据，所以需要将nan改成0
 
-# if __name__ == '__main__':
-#     import matplotlib.pyplot as plt
-#
-#     b = np.random.rand(10000).reshape(-1, 2)
-#     b[:30, 0] = np.nan
-#     b[:35, 1] = np.nan
-#     a = b[:, 0]
-#
-#     r3 = WS_SUM(b).loc[:, 0]
-#
-#     r2 = EMA_0_PD(b).loc[:, 0]
-#     r1 = EMA_0_TA(a)
-#     pd.DataFrame({'DEFAULT_TALIB': r1, 'DEFAULT_PANDAS': r2}).plot()
-#     pd.DataFrame({'DEFAULT_PANDAS': r2, 'DEFAULT_TALIB': r1}).plot()
-#     plt.show()
-#
-#     r1 = EMA_1_TA(a)
-#     r2 = EMA_1_PD(a)
-#     pd.DataFrame({'METASTOCK_TALIB': r1, 'METASTOCK_PANDAS': r2}).plot()
-#     pd.DataFrame({'METASTOCK_PANDAS': r2, 'METASTOCK_TALIB': r1}).plot()
-#     plt.show()
+    """
+    return np_to_pd(sum_1st(real, timeperiod)).ewm(alpha=1 / timeperiod, min_periods=timeperiod).sum()

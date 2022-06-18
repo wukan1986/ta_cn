@@ -19,6 +19,8 @@ if __name__ == '__main__':
     l = np.random.rand(100000).reshape(-1, 500)
     c = np.random.rand(100000).reshape(-1, 500)
 
+    c[:20, -1] = np.nan
+
     t1 = time.time()
     z1 = MACD(c)[-1]
     t2 = time.time()

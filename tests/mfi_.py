@@ -14,6 +14,8 @@ if __name__ == '__main__':
     c = np.random.rand(10000000).reshape(-1, 50000)
     v = np.random.rand(10000000).reshape(-1, 50000) * 1000
 
+    c[:20, -1] = np.nan
+
     t1 = time.time()
     z1 = ta.MFI(h, l, c, v)
     t2 = time.time()

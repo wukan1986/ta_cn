@@ -17,6 +17,8 @@ if __name__ == '__main__':
     l = np.random.rand(100000).reshape(-1, 500)
     c = np.random.rand(100000).reshape(-1, 500)
 
+    c[:20, -1] = np.nan
+
     t1 = time.time()
 
     z1 = ta.TRIX(c, timeperiod=10)
@@ -26,6 +28,6 @@ if __name__ == '__main__':
 
     print(t2 - t1, t3 - t2)
 
-    pd.DataFrame({'TA': z1[:, 0], 'MY': z2[:, 0]}).plot()
-    pd.DataFrame({'MY': z2[:, 0], 'TA': z1[:, 0]}).plot()
+    pd.DataFrame({'TA': z1[:, -1], 'MY': z2[:, -1]}).plot()
+    pd.DataFrame({'MY': z2[:, -1], 'TA': z1[:, -1]}).plot()
     plt.show()

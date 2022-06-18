@@ -1,10 +1,8 @@
-import pandas as pd
-
 from .reference import MA
 from .statistics import STDP
 
 
-def BOLL(real: pd.DataFrame, timeperiod=20, nbdevup=2, nbdevdn=2):
+def BOLL(real, timeperiod=20, nbdevup=2, nbdevdn=2):
     """BOLL指标，布林带
 
     使用总体标准差

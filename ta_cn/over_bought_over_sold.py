@@ -1,7 +1,7 @@
-import talib as ta
+import talib as _ta1d
 from talib import MA_Type
 
-import ta_cn.talib as ta2d
+import ta_cn.talib as _ta2d
 from .maths import MEAN
 from .reference import LLV, HHV, REF, MA, TR
 from .ta import TA_SET_COMPATIBILITY, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
@@ -35,10 +35,10 @@ def KDJ(high, low, close, fastk_period=9, M1=3, M2=3):
     """
     TA_SET_COMPATIBILITY(TA_COMPATIBILITY_METASTOCK)
 
-    K, D = ta2d.STOCH(high, low, close,
-                      fastk_period=fastk_period,
-                      slowk_period=(M1 * 2 - 1), slowk_matype=MA_Type.EMA,
-                      slowd_period=(M2 * 2 - 1), slowd_matype=MA_Type.EMA)
+    K, D = _ta2d.STOCH(high, low, close,
+                       fastk_period=fastk_period,
+                       slowk_period=(M1 * 2 - 1), slowk_matype=MA_Type.EMA,
+                       slowd_period=(M2 * 2 - 1), slowd_matype=MA_Type.EMA)
 
     J = K * 3 - D * 2
     return K, D, J
@@ -62,7 +62,7 @@ def ROC(real, timeperiod=12):  # 变动率指标
     if real.ndim == 2:
         return (real / REF(real, timeperiod) - 1) * 100
     else:
-        return ta.ROC(real, timeperiod=timeperiod)
+        return _ta1d.ROC(real, timeperiod=timeperiod)
 
 
 def TYP(high, low, close):
@@ -70,7 +70,7 @@ def TYP(high, low, close):
     if close.ndim == 2:
         return MEAN(high, low, close)
     else:
-        return ta.TYPPRICE(high, low, close)
+        return _ta1d.TYPPRICE(high, low, close)
 
 
 def WR(high, low, close, timeperiod=10):
@@ -94,7 +94,7 @@ def WR(high, low, close, timeperiod=10):
         ll = LLV(low, timeperiod)
         return (hh - close) / (hh - ll) * 100
     else:
-        return ta.WILLR(high, low, close, timeperiod=timeperiod)
+        return _ta1d.WILLR(high, low, close, timeperiod=timeperiod)
 
 
 def RSI(real, timeperiod=24):
@@ -102,4 +102,4 @@ def RSI(real, timeperiod=24):
     # 如果设置成1，将会多一个数字
     TA_SET_COMPATIBILITY(TA_COMPATIBILITY_DEFAULT)
 
-    return ta2d.RSI(real, timeperiod=timeperiod)
+    return _ta2d.RSI(real, timeperiod=timeperiod)
