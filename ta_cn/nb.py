@@ -133,6 +133,13 @@ def _avedev_nb(a):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
+def _slope_nb(y, x, m_x):
+    """slope线性回归斜率"""
+    m_y = _np.mean(y)
+    return _np.sum((x - m_x) * (y - m_y)) / _np.sum((x - m_x) ** 2)
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
 def _rolling_func_nb(arr, out, timeperiod, func, *args):
     """滚动函数"""
     if arr.ndim == 3:

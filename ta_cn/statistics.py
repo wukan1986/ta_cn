@@ -1,9 +1,20 @@
 import bottleneck as _bn
+import numpy as _np
 
-from .nb import numpy_rolling_apply, _rolling_func_nb, _avedev_nb
+from .nb import numpy_rolling_apply, _rolling_func_nb, _avedev_nb, _slope_nb
+from .utils import pd_to_np
 
-"""平均绝对偏差"""
-AVEDEV = lambda data, window=20: numpy_rolling_apply(data, window, _rolling_func_nb, _avedev_nb)
+
+def AVEDEV(real, timeperiod=20):
+    """平均绝对偏差"""
+    return numpy_rolling_apply(pd_to_np(real), timeperiod, _rolling_func_nb, _avedev_nb)
+
+
+def SLOPE(real, timeperiod=14):
+    """线性回归斜率"""
+    x = _np.arange(timeperiod)
+    m_x = _np.mean(x)
+    return numpy_rolling_apply(pd_to_np(real), timeperiod, _rolling_func_nb, _slope_nb, x, m_x)
 
 
 def STD(real, timeperiod: int = 5):

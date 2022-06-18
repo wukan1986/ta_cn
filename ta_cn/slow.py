@@ -183,3 +183,7 @@ def _AVEDEV(real, timeperiod: int = 20):
         return _np.abs(x - x.mean()).mean()
 
     return np_to_pd(real).rolling(window=timeperiod).apply(mad, raw=True)
+
+
+def _SLOPE(S, N=14):
+    return np_to_pd(S).rolling(N).apply(lambda x: _np.polyfit(range(N), x, deg=1)[0], raw=True)
