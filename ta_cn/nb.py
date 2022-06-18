@@ -20,6 +20,8 @@ def _filter_nb(arr, n):
             if a[i]:
                 a[i + 1:i + 1 + n] = 0
                 i += n + 1
+            else:
+                i += 1
     return arr
 
 
