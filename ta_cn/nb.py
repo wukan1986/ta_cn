@@ -26,6 +26,58 @@ def _filter_nb(arr, n):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
+def _bars_last_nb(arr, out):
+    """上一次条件成立到当前的周期数"""
+    is_1d = arr.ndim == 1
+    x = arr.shape[0]
+    y = 1 if is_1d else arr.shape[1]
+
+    for j in range(y):
+        a = arr if is_1d else arr[:, j]
+        b = out if is_1d else out[:, j]
+        s = 0
+        for i in range(x):
+            if a[i]:
+                s = 0
+            b[i] = s
+            s += 1
+
+    return out
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _bars_last_count_nb(arr, out):
+    """
+
+    Parameters
+    ----------
+    arr
+    out
+
+    References
+    ----------
+    https://stackoverflow.com/questions/18196811/cumsum-reset-at-nan
+
+    """
+    is_1d = arr.ndim == 1
+    x = arr.shape[0]
+    y = 1 if is_1d else arr.shape[1]
+
+    for j in range(y):
+        a = arr if is_1d else arr[:, j]
+        b = out if is_1d else out[:, j]
+        s = 0
+        for i in range(x):
+            if a[i]:
+                s += 1
+                b[i] = s
+            else:
+                s = 0
+
+    return out
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
 def _fill_notna_nb(arr, fill_value, n: int):
     is_1d = arr.ndim == 1
     x = arr.shape[0]
@@ -104,12 +156,6 @@ def fill_notna(arr, fill_value, n=1):
     return _fill_notna_nb(arr, fill_value, n)
 
 
-def _filter(S, N):
-    """FILTER函数，S满足条件后，将其后N周期内的数据置为0"""
-    S = pd_to_np(S, copy=True)
-    return _filter_nb(S, N)
-
-
 def ma_1st(arr, n=1):
     """前部分数据求平均，之前的设置成np.nan"""
     if n < 1:
@@ -130,6 +176,15 @@ def sum_1st(arr, n=1):
 def _avedev_nb(a):
     """avedev平均绝对偏差"""
     return _np.mean(_np.abs(a - _np.mean(a)))
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _bars_since_n_nb(a, n):
+    """BARSSINCEN(X,N):N周期内第一次X不为0到现在的天数"""
+    for i, x in enumerate(a):
+        if x:
+            return n - i - 1
+    return 0
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
@@ -157,6 +212,10 @@ def numpy_rolling_apply(data, window, func1, func2, *args):
     """滚动应用方法"""
     arr = _np.lib.stride_tricks.sliding_window_view(data, window, axis=0)
     out = _np.empty_like(data)
-    out[:window] = _np.nan
+
+    try:
+        out[:window] = _np.nan
+    except:
+        out[:window] = 0
 
     return func1(arr, out, window, func2, *args)
