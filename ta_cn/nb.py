@@ -195,6 +195,12 @@ def _slope_nb(y, x, m_x):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
+def _last_nb(arr, n, m):
+    """LAST(X,A,B)，A>B，表示从前A日到前B日一致满足X条件"""
+    return _np.all(arr[:n - m])
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
 def _rolling_func_nb(arr, out, timeperiod, func, *args):
     """滚动函数"""
     if arr.ndim == 3:

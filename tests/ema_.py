@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from ta_cn.ema import EMA_0_PD, EMA_0_TA, EMA_1_TA, EMA_1_PD
+from ta_cn.ema import EXPMEMA, EMA_0_TA, EMA_1_TA, EMA_1_PD
 from ta_cn.ta import TA_SET_COMPATIBILITY_ENABLE
 
 if __name__ == '__main__':
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     t1 = time.time()
     z1 = EMA_0_TA(c)
     t2 = time.time()
-    z2 = EMA_0_PD(c).values
+    z2 = EXPMEMA(c).values
     t3 = time.time()
 
     print(t2 - t1, t3 - t2)

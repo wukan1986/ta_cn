@@ -4,6 +4,22 @@ import numpy as np
 import pandas as pd
 
 
+def num_to_np(x, like):
+    """将单字数字转成矩阵
+
+    Parameters
+    ----------
+    x: int or float
+    like: array like
+
+    """
+    if isinstance(x, (pd.DataFrame, pd.Series, np.ndarray)):
+        return x
+    if not isinstance(like, (pd.DataFrame, pd.Series, np.ndarray)):
+        return x
+    return np.full_like(like, fill_value=x)
+
+
 def np_to_pd(x: np.ndarray,
              copy: bool = False,
              index=None,
@@ -114,54 +130,6 @@ def fillna(arr, direction='down'):
     return out
 
 
-def zero_runs(a):
-    """查找0的边界
-
-    Parameters
-    ----------
-    a
-
-    Examples
-    --------
-    >>> a = [1, 2, 3, 0, 0, 0, 0, 0, 0, 4, 5, 6, 0, 0, 0, 0, 9, 8, 7, 0, 10, 11, 0]
-    >>> zero_runs(a)
-
-    References
-    ----------
-    https://stackoverflow.com/questions/24885092/finding-the-consecutive-zeros-in-a-numpy-array/
-
-    """
-    # Create an array that is 1 where a is 0, and pad each end with an extra 0.
-    iszero = np.concatenate(([0], np.equal(a, 0).view(np.int8), [0]))
-    absdiff = np.abs(np.diff(iszero))
-    # Runs start and end where absdiff is 1.
-    ranges = np.where(absdiff == 1)[0].reshape(-1, 2)
-    return ranges
-
-
-def fill_zeros_with_last(arr):
-    """0用上一个值填充，类似于ffill
-
-    Parameters
-    ----------
-    arr
-
-    Examples
-    --------
-    >>> arr = np.array([1, 0, 0, 8, 0, 4, 6, 2, 0, 0, 0, 0, 2])
-    >>> fill_zeros_with_last(arr)
-
-    References
-    ----------
-    https://stackoverflow.com/questions/30488961/fill-zero-values-of-1d-numpy-array-with-last-non-zero-values
-
-    """
-    prev = np.arange(len(arr))
-    prev[arr == 0] = 0
-    prev = np.maximum.accumulate(prev)
-    return arr[prev]
-
-
 def pushna(arr, direction='down'):
     """将非空数据按方向移动
 
@@ -222,6 +190,54 @@ def pullna(arr, row, col):
     tmp = np.empty_like(arr)
     tmp[row, col] = arr
     return tmp
+
+
+def zero_runs(a):
+    """查找0的边界
+
+    Parameters
+    ----------
+    a
+
+    Examples
+    --------
+    >>> a = [1, 2, 3, 0, 0, 0, 0, 0, 0, 4, 5, 6, 0, 0, 0, 0, 9, 8, 7, 0, 10, 11, 0]
+    >>> zero_runs(a)
+
+    References
+    ----------
+    https://stackoverflow.com/questions/24885092/finding-the-consecutive-zeros-in-a-numpy-array/
+
+    """
+    # Create an array that is 1 where a is 0, and pad each end with an extra 0.
+    iszero = np.concatenate(([0], np.equal(a, 0).view(np.int8), [0]))
+    absdiff = np.abs(np.diff(iszero))
+    # Runs start and end where absdiff is 1.
+    ranges = np.where(absdiff == 1)[0].reshape(-1, 2)
+    return ranges
+
+
+def fill_zeros_with_last(arr):
+    """0用上一个值填充，类似于ffill
+
+    Parameters
+    ----------
+    arr
+
+    Examples
+    --------
+    >>> arr = np.array([1, 0, 0, 8, 0, 4, 6, 2, 0, 0, 0, 0, 2])
+    >>> fill_zeros_with_last(arr)
+
+    References
+    ----------
+    https://stackoverflow.com/questions/30488961/fill-zero-values-of-1d-numpy-array-with-last-non-zero-values
+
+    """
+    prev = np.arange(len(arr))
+    prev[arr == 0] = 0
+    prev = np.maximum.accumulate(prev)
+    return arr[prev]
 
 
 if __name__ == '__main__':

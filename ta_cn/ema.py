@@ -51,7 +51,7 @@ def EMA_0_TA(real, timeperiod=24):
     return _ta2d.EMA(real, timeperiod=timeperiod)
 
 
-def EMA_0_PD(real, timeperiod=24):
+def EXPMEMA(real, timeperiod=24):
     """EMA第一个值用MA"""
     return np_to_pd(ma_1st(real, timeperiod)).ewm(span=timeperiod, min_periods=0, adjust=False).mean()
 

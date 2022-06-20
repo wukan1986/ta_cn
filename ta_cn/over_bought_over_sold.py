@@ -65,12 +65,20 @@ def ROC(real, timeperiod=12):  # 变动率指标
         return _ta1d.ROC(real, timeperiod=timeperiod)
 
 
-def TYP(high, low, close):
+def TYPPRICE(high, low, close):
     """典型价格。高低收的平均值"""
     if close.ndim == 2:
         return MEAN(high, low, close)
     else:
         return _ta1d.TYPPRICE(high, low, close)
+
+
+def MEDPRICE(high, low):
+    """中间价格。高低平均值"""
+    if high.ndim == 2:
+        return MEAN(high, low)
+    else:
+        return _ta1d.MEDPRICE(high, low)
 
 
 def WR(high, low, close, timeperiod=10):

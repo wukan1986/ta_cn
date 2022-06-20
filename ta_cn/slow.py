@@ -7,7 +7,7 @@ import ta_cn.talib as _ta2d
 from .ema import EMA_1_PD, WS_SUM, SMA
 from .maths import MAX, ABS
 from .nb import fill_notna
-from .over_bought_over_sold import ROC, TYP
+from .over_bought_over_sold import ROC, TYPPRICE
 from .reference import HHV, LLV, MA, REF, SUM, TR
 from .statistics import AVEDEV
 from .utils import np_to_pd
@@ -65,7 +65,7 @@ def TRIX_CN(real, timeperiod=12):
 
 def CCI(high, low, close, timeperiod=14):
     """CCI顺势指标，talib版更快"""
-    tp = TYP(high, low, close)
+    tp = TYPPRICE(high, low, close)
     return (tp - MA(tp, timeperiod)) / (0.015 * AVEDEV(tp, timeperiod))
 
 
@@ -87,7 +87,7 @@ def WMA(real, timeperiod=5):
 
 def MFI(high, low, close, volume, timeperiod=14):
     """MFI指标"""
-    tp = TYP(high, low, close)
+    tp = TYPPRICE(high, low, close)
     tpv = tp * volume
     # 比TALIB结果多一个数字，通过置空实现与TA-LIB完全一样
     tpv = fill_notna(tpv, fill_value=_np.nan, n=1)

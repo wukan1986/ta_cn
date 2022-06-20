@@ -43,9 +43,9 @@ def LLVBARS(real, timeperiod: int = 5):
 
 def REF(real, timeperiod: int = 1):
     """向前引用，特意模仿shift"""
-    if timeperiod == 0:
+    if timeperiod == 0 or _np.isnan(timeperiod):
         # 该不该复制呢？
-        return real  # .copy()
+        return real
     arr = _np.empty_like(real)
     if timeperiod > 0:
         arr[:timeperiod] = _np.nan
