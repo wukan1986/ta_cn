@@ -16,11 +16,12 @@ if __name__ == '__main__':
     c = np.random.rand(100000).reshape(-1, 500)
 
     c[:20, -1] = np.nan
+    z2 = EXPMEMA(c)
 
     t1 = time.time()
     z1 = EMA_0_TA(c)
     t2 = time.time()
-    z2 = EXPMEMA(c).values
+    z2 = EXPMEMA(c)
     t3 = time.time()
 
     print(t2 - t1, t3 - t2)
@@ -32,7 +33,7 @@ if __name__ == '__main__':
     t1 = time.time()
     z1 = EMA_1_TA(c)
     t2 = time.time()
-    z2 = EMA_1_PD(c).values
+    z2 = EMA_1_PD(c)
     t3 = time.time()
 
     print(t2 - t1, t3 - t2)

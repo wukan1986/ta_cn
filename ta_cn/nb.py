@@ -87,7 +87,8 @@ def _fill_notna_nb(arr, fill_value, n: int):
         a = arr if is_1d else arr[:, j]
         k = n
         for i in range(x):
-            if _np.isnan(a[i]):
+            cur = a[i]
+            if cur != cur:
                 continue
             a[i] = fill_value
             k -= 1
@@ -110,13 +111,14 @@ def _sum_1st_nb(arr, n):
         s = 0.0
         skip_nan = True
         for i in range(x):
-            if _np.isnan(a[i]):
+            cur = a[i]
+            if cur != cur:  # 用来判断NaN
                 if skip_nan:
                     continue
                 else:
                     a[i] = 0
             skip_nan = False
-            s += a[i]
+            s += cur
             a[i] = 0
             k -= 1
             if k <= 0:
@@ -137,9 +139,10 @@ def _ma_1st_nb(arr, n):
         k = n
         s = 0.0
         for i in range(x):
-            if _np.isnan(a[i]):
+            cur = a[i]
+            if cur != cur:  # 用来判断NaN
                 continue
-            s += a[i]
+            s += cur
             a[i] = _np.nan
             k -= 1
             if k <= 0:
@@ -202,7 +205,27 @@ def _last_nb(arr, n, m):
 
 @numba.jit(nopython=True, cache=True, nogil=True)
 def _rolling_func_nb(arr, out, timeperiod, func, *args):
-    """滚动函数"""
+    """滚动函数，在二维或三维数上遍历
+
+    Parameters
+    ----------
+    arr:
+        输入。二维或三维
+    out:
+        输出。一维或二维。降了一个维度
+    window: int
+        窗口长度
+    func:
+        单向量处理函数
+    args:
+        func的位置参数
+
+    Returns
+    -------
+    np.ndarray
+        一维或二维数组
+
+    """
     if arr.ndim == 3:
         for i, aa in enumerate(arr):
             for j, a in enumerate(aa):
@@ -215,11 +238,31 @@ def _rolling_func_nb(arr, out, timeperiod, func, *args):
 
 
 def numpy_rolling_apply(data, window, func1, func2, *args):
-    """滚动应用方法"""
+    """滚动应用方法
+
+    Parameters
+    ----------
+    data: 1d array or 2d array
+        一维或二维数组
+    window: int
+        窗口长度
+    func1:
+        滚动函数。用于遍历二维或三维数组
+    func2:
+        单向量函数。计算一维数组
+    args:
+        单向量函数参数。限制为位置参数。因numba不支持命名参数
+
+    Returns
+    -------
+    np.ndarray
+
+    """
     arr = _np.lib.stride_tricks.sliding_window_view(data, window, axis=0)
     out = _np.empty_like(data)
 
     try:
+        # 可能出现类似int无法设置nan的情况
         out[:window] = _np.nan
     except:
         out[:window] = 0

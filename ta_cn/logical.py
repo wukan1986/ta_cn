@@ -41,6 +41,6 @@ def VALUEWHEN(S, X):
     return np_to_pd(_np.where(S, X, _np.nan)).ffill()
 
 
-def LAST1(real, n=20, m=10):
+def LAST(real, n=20, m=10):
     """LAST(X,A,B)，A>B，表示从前A日到前B日一致满足X条件"""
     return numpy_rolling_apply(pd_to_np(real), n, _rolling_func_nb, _last_nb, n, m)
