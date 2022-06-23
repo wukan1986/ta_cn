@@ -11,7 +11,7 @@ Examples
 >>> import ta_cn.talib as ta
 
 """
-import sys as _sys
+from functools import wraps
 
 import numpy as np
 import pandas as pd
@@ -19,15 +19,22 @@ import talib as _talib
 from talib import abstract as _abstract
 
 
+def tafunc_nditer_0(tafunc, args, kwargs, output_names):
+    """直接调用talib"""
+    return tafunc(*args, **kwargs)
+
+
 def tafunc_nditer_1(tafunc, args, kwargs, output_names):
-    """数据应用函数，输入参数完全仿照talib
+    """内部按列迭代函数，参数完全仿照talib
 
     Parameters
     ----------
     tafunc
         计算单列的函数
     args
+        位置参数
     kwargs
+        命名参数
     output_names: list
         tafunc输出参数名
 
@@ -96,19 +103,23 @@ def tafunc_nditer_1(tafunc, args, kwargs, output_names):
 
 
 def tafunc_nditer_2(tafunc, args, kwargs, output_names):
-    """数据应用函数。特殊设计的版本，可以通过命名参数实现每个参数列方向上不一样
+    """内部按列迭代函数，支持timeperiod等命名参数向量化
 
     Parameters
     ----------
     tafunc
         计算单列的函数
+    args
+        位置参数
+    kwargs
+        命名参数
     output_names: list
         tafunc输出参数名
 
     Returns
     -------
     tuple
-        输出数组
+        输出元组
 
     """
 
@@ -117,7 +128,8 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names):
         if hasattr(x, "__getitem__"):
             # 长度不足时，用最后一个值填充之后的参数
             y = np.full_like(like, fill_value=x[-1])
-            y[:len(x)] = x
+            # 长度超出时，截断
+            y[:len(x)] = x[:len(y)]
             return y
         # 单一值，填充成唯一值
         return np.full_like(like, fill_value=x)
@@ -157,77 +169,15 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names):
     return outputs
 
 
-def _make_func(func, func_name, docstring, globals_):
-    """复制一个函数，并命名"""
-    import types as _types
+def ta_decorator(func, mode, output_names):
+    # 设置对应处理函数
+    ff = {0: tafunc_nditer_0, 1: tafunc_nditer_1, 2: tafunc_nditer_2}.get(mode)
 
-    code_obj = func.__code__
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        return ff(func, args, kwargs, output_names)
 
-    attr_list = ['co_argcount',
-                 'co_kwonlyargcount',
-                 'co_nlocals',
-                 'co_stacksize',
-                 'co_flags',
-                 'co_code',
-                 'co_consts',
-                 'co_names',
-                 'co_varnames',
-                 'co_filename',
-                 'co_name',
-                 'co_firstlineno',
-                 'co_lnotab']
-    if _sys.version_info >= (3, 8):
-        attr_list = ['co_argcount',
-                     'co_posonlyargcount',
-                     'co_kwonlyargcount',
-                     'co_nlocals',
-                     'co_stacksize',
-                     'co_flags',
-                     'co_code',
-                     'co_consts',
-                     'co_names',
-                     'co_varnames',
-                     'co_filename',
-                     'co_name',
-                     'co_firstlineno',
-                     'co_lnotab']
-    co_kwargs = {k[3:]: getattr(code_obj, k) for k in attr_list}
-    co_kwargs['name'] = func_name  # 函数名在这里设置
-
-    mycode_obj = _types.CodeType(*co_kwargs.values())
-    f = _types.FunctionType(mycode_obj, globals_, func_name, ())
-    f.__doc__ = docstring
-    return f
-
-
-def _ta_func_0(*args, **kwargs):
-    """TA函数转发。直接转向talib"""
-    # 获取新函数名
-    func_name = _sys._getframe().f_code.co_name
-
-    return getattr(_talib, func_name)(*args, **kwargs)
-
-
-def _ta_func_1(*args, **kwargs):
-    """TA函数转发。二维数据"""
-    # 获取新函数名
-    func_name = _sys._getframe().f_code.co_name
-
-    # 获取指标信息
-    info = _abstract.Function(func_name)._Function__info
-
-    return tafunc_nditer_1(getattr(_talib, func_name), args, kwargs, info['output_names'])
-
-
-def _ta_func_2(*args, **kwargs):
-    """TA函数转发。一维参数"""
-    # 获取新函数名
-    func_name = _sys._getframe().f_code.co_name
-
-    # 获取指标信息
-    info = _abstract.Function(func_name)._Function__info
-
-    return tafunc_nditer_2(getattr(_talib, func_name), args, kwargs, info['output_names'])
+    return decorated
 
 
 def init(mode=1):
@@ -241,15 +191,22 @@ def init(mode=1):
         3. 输入参数支持一维向量。数据使用位置，周期等使用命名。否则报错
 
     """
-    _ta_func = {0: _ta_func_0, 1: _ta_func_1, 2: _ta_func_2}.get(mode)
-    # tips = {0: _ta_func_0, 1: _ta_func_1, 2: _ta_func_2}.get(mode)
-    for func_name in _talib.get_functions():
+    print(f'ta_cn 应用模式，当前为: {mode}')
+    if mode == 0:
+        print(f'\t0. 一维转发模式。直接转发的talib，因封装了一层，还失去了IDE智能提示，推荐直接使用原版talib')
+    if mode == 1:
+        print(f'\t1. 二维数据模式。既可以使用位置参数，也可以使用命名参数。与原talib完全一样。会根据类型自动区分是开高低收等数据，还是周期长度等参数')
+    if mode == 2:
+        print(f'\t2. 一维参数模式。在二维数据模式的基础上，周期参数由只支持标量升级为一维向量。命令参数用于传周期参数，位置参数用于传开高低收等数据，不可混淆。')
+
+    for i, func_name in enumerate(_talib.get_functions()):
         """talib遍历"""
-        # 主要是为了复制docstring
-        _func__doc__ = getattr(_talib, func_name).__doc__
+        _ta_func = getattr(_talib, func_name)
+        output_names = _abstract.Function(func_name)._Function__info['output_names']
+
         # 创建函数
-        globals()[func_name] = _make_func(_ta_func, func_name, _func__doc__, globals())
+        globals()[func_name] = ta_decorator(_ta_func, mode, output_names)
 
 
-# 默认支持二维矩阵
+# 默认使用二维矩阵模式
 init(mode=1)

@@ -78,6 +78,15 @@ r = pullna(rr, row, col)
 print(r)
 ```
 
+还支持为不同列指定不同参数。例如：
+```python
+import ta_cn.talib as ta
+
+ta.init(mode=2)
+ta.SMA(arr, timeperiod=[10, 20, 30])
+
+```
+
 ## 使用ta_cn中定义的公式
 ```python
 import numpy as np
@@ -96,7 +105,7 @@ print(r)
 
 # 设置参数，让MACD中的EMA算法与国内算法相同
 TA_SET_COMPATIBILITY_ENABLE(True)
-TA_SET_COMPATIBILITY(1)
+TA_SET_COMPATIBILITY(1) # 循环调用没有必要，所以放在前边
 TA_SET_COMPATIBILITY_ENABLE(False)
 
 x, y, z = MACD(c)
@@ -141,3 +150,6 @@ print(d.iloc[-5:])
 4. [funcat](https://github.com/cedricporter/funcat) 公式移植
 5. [pandas-ta](https://github.com/twopirllc/pandas-ta) 支持Pandas扩展的技术指标
 6. [ta](https://github.com/bukosabino/ta) 通过类实现的技术指标
+
+## 交流群
+ta_cn技术指标交流群: 601477228
