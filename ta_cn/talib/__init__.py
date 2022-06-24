@@ -78,11 +78,19 @@ def tafunc_nditer_1(tafunc, args, kwargs, output_names):
     # 输入源
     inputs = [*args_input, *kwargs_input.values()]
 
+    # 只有一行输入时需要特别处理
     with np.nditer(inputs + outputs,
-                   flags=['external_loop'], order='F',
+                   flags=['external_loop'] if real.shape[0] > 1 else None,
+                   order='F',
                    op_flags=[['readonly']] * len(inputs) + [['writeonly']] * len(outputs)) as it:
-        for in_out in it:
+
+        for i, in_out in enumerate(it):
+            if real.shape[0] == 1:
+                # 需要将0维array改成1维，否则talib报错
+                in_out = [v.reshape(1) for v in in_out]
+
             _in = in_out[:len(inputs)]  # 分离输入
+            _out = in_out[len(inputs):]  # 分离输出
             args_in = in_out[:len(args_input)]  # 分离位置输入
             kwargs_in = {k: v for k, v in zip(kwargs_input.keys(), _in[len(args_input):])}  # 分离命名输入
 
@@ -92,7 +100,6 @@ def tafunc_nditer_1(tafunc, args, kwargs, output_names):
                 ta_out = tuple([ta_out])
 
             # 转存数据
-            _out = in_out[len(inputs):]  # 分离输出
             for _i, _o in zip(_out, ta_out):
                 _i[...] = _o
 
@@ -146,11 +153,18 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names):
     outputs = [np.empty_like(real) for _ in output_names]
     kwargs = {k: num_to_np(v, real[0]) for k, v in kwargs.items()}
 
+    # 只有一行输入时需要特别处理
     with np.nditer(list(args) + outputs,
-                   flags=['external_loop'], order='F',
+                   flags=['external_loop'] if real.shape[0] > 1 else None,
+                   order='F',
                    op_flags=[['readonly']] * len(args) + [['writeonly']] * len(outputs)) as it:
         for i, in_out in enumerate(it):
+            if real.shape[0] == 1:
+                # 需要将0维array改成1维，否则talib报错
+                in_out = [v.reshape(1) for v in in_out]
+
             _in = in_out[:-len(outputs)]  # 分离输入
+            _out = in_out[-len(outputs):]  # 分离输出
             # 切片得到每列的参数
             _kw = {k: v[i] for k, v in kwargs.items()}
 
@@ -159,7 +173,6 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names):
             if not isinstance(ta_out, tuple):
                 ta_out = tuple([ta_out])
 
-            _out = in_out[-len(outputs):]  # 分离输出
             for _i, _o in zip(_out, ta_out):
                 _i[...] = _o
 

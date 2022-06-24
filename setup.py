@@ -18,16 +18,18 @@ setuptools.setup(
     url="https://github.com/wukan1986/ta_cn",
     packages=setuptools.find_packages(),
     install_requires=[
-        'TA-Lib',
-        'numpy',
+        'numpy',  # 基础版，希望用户自己能解决talib的安装问题
     ],
     extras_require={
+        'talib': [
+            'TA-Lib>=0.4.19',  # 有编译条件的用户通过它也能编译安装
+        ],
         'all': [
             'numpy>=1.20.0',  # 主要是为了sliding_window_view
             'pandas',
             'bottleneck',
-            'TA-Lib>=0.4.19',
             'numba',
+            # 'TA-Lib>=0.4.19', # 担心talib安装不过导致失败，所以注释此句
         ],
     },
     classifiers=[
