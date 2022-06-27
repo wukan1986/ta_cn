@@ -18,7 +18,7 @@ if __name__ == '__main__':
     t1 = time.time()
     z1 = ta.RSI(c, timeperiod=10)
     t2 = time.time()
-    z2 = RSI(c, timeperiod=10).values
+    z2 = RSI(c, timeperiod=10)
     t3 = time.time()
 
     print(t2 - t1, t3 - t2)

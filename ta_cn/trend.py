@@ -2,7 +2,7 @@ import talib as _ta1d
 from talib import MA_Type
 
 import ta_cn.talib as _ta2d
-from .ta import TA_SET_COMPATIBILITY, TA_COMPATIBILITY_METASTOCK
+from ta_cn.talib import set_compatibility, TA_COMPATIBILITY_METASTOCK
 from .maths import MEAN
 from .reference import COUNT, REF, DIFF, MA
 
@@ -35,7 +35,7 @@ def DPO(real, timeperiod=20):
 
 def MACD(real, fastperiod=12, slowperiod=26, signalperiod=9):
     """MACD指标"""
-    TA_SET_COMPATIBILITY(TA_COMPATIBILITY_METASTOCK)
+    set_compatibility(TA_COMPATIBILITY_METASTOCK)
 
     macd, macdsignal, macdhist = _ta2d.MACDEXT(real,
                                                fastperiod=fastperiod, fastmatype=MA_Type.EMA,
@@ -114,6 +114,6 @@ def TRIX(real, timeperiod=12):
 
     由EMA算法差异导致的不同
     """
-    TA_SET_COMPATIBILITY(TA_COMPATIBILITY_METASTOCK)
+    set_compatibility(TA_COMPATIBILITY_METASTOCK)
 
     return _ta2d.TRIX(real, timeperiod=timeperiod)

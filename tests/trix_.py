@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-import ta_cn.talib as ta
+from ta_cn.talib import set_compatibility_enable, TA_COMPATIBILITY_METASTOCK, set_compatibility
 from ta_cn.slow import TRIX_CN
-from ta_cn.ta import TA_SET_COMPATIBILITY_ENABLE, TA_SET_COMPATIBILITY
+import ta_cn.talib as ta
 
 if __name__ == '__main__':
-    TA_SET_COMPATIBILITY_ENABLE(True)
-    TA_SET_COMPATIBILITY(1)
-    TA_SET_COMPATIBILITY_ENABLE(False)
+    set_compatibility_enable(True)
+    set_compatibility(TA_COMPATIBILITY_METASTOCK)
+    set_compatibility_enable(False)
     # 准备数据
     h = np.random.rand(100000).reshape(-1, 500) + 10
     l = np.random.rand(100000).reshape(-1, 500)
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     z1 = ta.TRIX(c, timeperiod=10)
     t2 = time.time()
-    z2 = TRIX_CN(c, timeperiod=10).values
+    z2 = TRIX_CN(c, timeperiod=10)
     t3 = time.time()
 
     print(t2 - t1, t3 - t2)

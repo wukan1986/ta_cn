@@ -12,7 +12,6 @@ from .over_bought_over_sold import *
 from .pressure_support import *
 from .reference import *
 from .statistics import *
-from .ta import *
 from .trend import *
 from .volume import *
 
@@ -29,7 +28,6 @@ try:
     ROUND
     DMA
     LLVBARS
-    TA_SET_COMPATIBILITY_ENABLE
     # CCI
 except:
     pass

@@ -2,9 +2,9 @@ import talib as _ta1d
 from talib import MA_Type
 
 import ta_cn.talib as _ta2d
+from ta_cn.talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 from .maths import MEAN
 from .reference import LLV, HHV, REF, MA, TR
-from .ta import TA_SET_COMPATIBILITY, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 
 
 def ATR_CN(high, low, close, timeperiod=14):
@@ -33,7 +33,7 @@ def KDJ(high, low, close, fastk_period=9, M1=3, M2=3):
 
     talib中EMA的参数用法不同
     """
-    TA_SET_COMPATIBILITY(TA_COMPATIBILITY_METASTOCK)
+    set_compatibility(TA_COMPATIBILITY_METASTOCK)
 
     K, D = _ta2d.STOCH(high, low, close,
                        fastk_period=fastk_period,
@@ -108,6 +108,6 @@ def WR(high, low, close, timeperiod=10):
 def RSI(real, timeperiod=24):
     """RSI指标"""
     # 如果设置成1，将会多一个数字
-    TA_SET_COMPATIBILITY(TA_COMPATIBILITY_DEFAULT)
+    set_compatibility(TA_COMPATIBILITY_DEFAULT)
 
     return _ta2d.RSI(real, timeperiod=timeperiod)

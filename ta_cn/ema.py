@@ -1,9 +1,9 @@
 import pandas as _pd
 
 import ta_cn.talib as _ta2d
+from ta_cn.talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 from .ewm_nb import ewm_mean
 from .nb import ma_1st, sum_1st
-from .ta import TA_SET_COMPATIBILITY, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 from .utils import np_to_pd
 
 """
@@ -26,7 +26,7 @@ Warnings
 
 def EMA_0_TA(real, timeperiod=24):
     """EMA第一个值用MA"""
-    TA_SET_COMPATIBILITY(TA_COMPATIBILITY_DEFAULT)
+    set_compatibility(TA_COMPATIBILITY_DEFAULT)
     return _ta2d.EMA(real, timeperiod=timeperiod)
 
 
@@ -40,7 +40,7 @@ def EXPMEMA(real, timeperiod=24):
 
 def EMA_1_TA(real, timeperiod=24):
     """EMA第一个值用Price"""
-    TA_SET_COMPATIBILITY(TA_COMPATIBILITY_METASTOCK)
+    set_compatibility(TA_COMPATIBILITY_METASTOCK)
     return _ta2d.EMA(real, timeperiod=timeperiod)
 
 

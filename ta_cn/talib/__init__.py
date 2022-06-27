@@ -223,3 +223,24 @@ def init(mode=1):
 
 # 默认使用二维矩阵模式
 init(mode=1)
+
+# =============================================
+
+TA_COMPATIBILITY_DEFAULT = 0  # 使用MA做第一个值
+TA_COMPATIBILITY_METASTOCK = 1  # 使用Price做第一个值
+
+_COMPATIBILITY_ENABLE_ = False
+
+
+def set_compatibility_enable(enable):
+    """talib兼容性设置"""
+    global _COMPATIBILITY_ENABLE_
+    _COMPATIBILITY_ENABLE_ = enable
+
+
+def set_compatibility(compatibility):
+    """talib兼容性设置"""
+    global _COMPATIBILITY_ENABLE_
+    if _COMPATIBILITY_ENABLE_:
+        print('do talib.set_compatibility', compatibility)
+        _talib.set_compatibility(compatibility)

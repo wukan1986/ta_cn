@@ -20,7 +20,7 @@ if __name__ == '__main__':
     t1 = time.time()
     z1 = DMI1(h, l, c, 3)[3]  # 查看的是ADXR
     t2 = time.time()
-    z2 = DMI2(h, l, c, 3)[3].values
+    z2 = DMI2(h, l, c, 3)[3]
     t3 = time.time()
 
     print(t2 - t1, t3 - t2)
