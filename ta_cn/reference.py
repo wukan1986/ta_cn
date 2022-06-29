@@ -1,8 +1,10 @@
 import bottleneck as _bn
 import numpy as _np
 
+import ta_cn.talib as _ta2d
 from .maths import MAX, ABS
-from .nb import _filter_nb, _bars_last_nb, _bars_last_count_nb, numpy_rolling_apply, _bars_since_n_nb, _rolling_func_1_nb
+from .nb import _filter_nb, _bars_last_nb, _bars_last_count_nb, numpy_rolling_apply, _bars_since_n_nb, \
+    _rolling_func_1_nb
 from .utils import pd_to_np
 
 
@@ -116,3 +118,7 @@ def BARSLASTCOUNT(S):
 def BARSSINCEN(cond, timeperiod):
     """BARSSINCEN(X,N):N周期内第一次X不为0到现在的天数"""
     return numpy_rolling_apply([pd_to_np(cond)], timeperiod, _rolling_func_1_nb, _bars_since_n_nb, timeperiod)
+
+
+def WMA(real, timeperiod: int = 5):
+    return _ta2d.WMA(real, timeperiod=timeperiod)
