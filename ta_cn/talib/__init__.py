@@ -47,7 +47,7 @@ def tafunc_nditer_1(tafunc, args, kwargs, output_names):
 
     def is_np_pd(x):
         """是否几种特数类型"""
-        return isinstance(x, (pd.DataFrame, pd.DataFrame, np.ndarray))
+        return isinstance(x, (pd.DataFrame, pd.Series, np.ndarray))
 
     def pd_to_np(x):
         """pandas格式转numpy"""

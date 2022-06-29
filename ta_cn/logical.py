@@ -1,6 +1,6 @@
 import numpy as _np
 
-from .nb import numpy_rolling_apply, _rolling_func_nb, _last_nb
+from .nb import numpy_rolling_apply, _rolling_func_1_nb, _last_nb
 from .reference import SUM
 from .utils import np_to_pd, num_to_np, pd_to_np
 
@@ -43,4 +43,4 @@ def VALUEWHEN(S, X):
 
 def LAST(real, n=20, m=10):
     """LAST(X,A,B)，A>B，表示从前A日到前B日一致满足X条件"""
-    return numpy_rolling_apply(pd_to_np(real), n, _rolling_func_nb, _last_nb, n, m)
+    return numpy_rolling_apply([pd_to_np(real)], n, _rolling_func_1_nb, _last_nb, n, m)
