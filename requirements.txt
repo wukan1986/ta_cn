@@ -3,3 +3,4 @@ numpy
 pandas
 TA-Lib>=0.4.19
 numba
+loguru

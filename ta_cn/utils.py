@@ -1,7 +1,49 @@
+from functools import wraps
 from typing import Union
 
 import numpy as np
 import pandas as pd
+
+
+def to_pd(func):
+    """将算子的numpy输出转成pandas的装饰器"""
+
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if len(args) > 0:
+            real = args[0]
+        else:
+            real = kwargs.values()[0]
+        return np_to_pd(func(*args, **kwargs),
+                        index=getattr(real, 'index', None),
+                        columns=getattr(real, 'columns', None))
+
+    return decorated
+
+
+def series_groupby_apply(func, by):
+    @wraps(func)
+    def decorated(s: pd.Series, *args, **kwargs):
+        return s.groupby(by=by, group_keys=False).apply(to_pd(func), *args, **kwargs)
+
+    return decorated
+
+
+def dataframe_split(func):
+    @wraps(func)
+    def decorated(df: pd.DataFrame, *args, **kwargs):
+        return func(*[v for k, v in df.items()], *args, **kwargs)
+
+    return decorated
+
+
+def dataframe_groupby_apply(func, by):
+    @wraps(func)
+    def decorated(real0: pd.Series, real1: pd.Series, *args, **kwargs):
+        df = pd.DataFrame({'_001': real0, '_002': real1}).dropna()
+        return df.groupby(by=by, group_keys=False).apply(to_pd(dataframe_split(func)), *args, **kwargs)
+
+    return decorated
 
 
 def num_to_np(x, like):
