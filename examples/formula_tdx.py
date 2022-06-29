@@ -3,8 +3,9 @@ import numpy as np
 # ta_cn.talib库底层是循环调用talib，部分计算效率不高
 # 可导入ta_cn中的公式，只加这一句即导入多个文件中的函数
 from ta_cn.imports import *
-
 # 准备数据
+from ta_cn.talib import set_compatibility_enable, set_compatibility
+
 h = np.random.rand(10000000).reshape(-1, 50000) + 10
 l = np.random.rand(10000000).reshape(-1, 50000)
 c = np.random.rand(10000000).reshape(-1, 50000)
@@ -13,9 +14,9 @@ r = ATR_CN(h, l, c, timeperiod=10)
 print(r)
 
 # 设置参数，让MACD中的EMA算法与国内算法相同
-TA_SET_COMPATIBILITY_ENABLE(True)
-TA_SET_COMPATIBILITY(1)
-TA_SET_COMPATIBILITY_ENABLE(False)
+set_compatibility_enable(True)
+set_compatibility(1)
+set_compatibility_enable(False)
 
 x, y, z = MACD(c)
 print(z)
