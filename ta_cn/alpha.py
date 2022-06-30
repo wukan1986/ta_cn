@@ -38,3 +38,12 @@ def scale(real, a=1):
         b = _np.nansum(abs(real))
 
     return real / b * a
+
+
+def demean(x):
+    """行业中性化
+
+    RuntimeWarning: Mean of empty slice
+    nanmean在全nan时报此警告。这个警告还不好屏蔽
+    """
+    return x - _np.nanmean(x)

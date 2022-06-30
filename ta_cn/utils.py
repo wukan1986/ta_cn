@@ -21,29 +21,85 @@ def to_pd(func):
     return decorated
 
 
-def series_groupby_apply(func, by):
+def series_groupby_apply(func, by, dropna):
+    """普通指标转换成按分组处理的指标。只支持单参数
+
+    Parameters
+    ----------
+    func
+    by
+    dropna
+
+    Notes
+    -----
+    只能处理Series
+
+    """
+
     @wraps(func)
     def decorated(s: pd.Series, *args, **kwargs):
+        if dropna:
+            s = s.dropna()
         return s.groupby(by=by, group_keys=False).apply(to_pd(func), *args, **kwargs)
 
     return decorated
 
 
+def dataframe_groupby_apply(func, by, dropna):
+    """普通指标转换成按分组处理的指标。支持多输入
+
+    Parameters
+    ----------
+    func
+    by
+    dropna
+
+    Notes
+    -----
+    即能处理DataFrame，又能处理Series,但考虑到效率，单输入时使用series_groupby_apply
+
+    """
+
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        df = args[0]
+        if isinstance(df, pd.DataFrame):
+            # 用一个DataFrame实现多参数
+            kwargs.update(df.to_dict(orient='series'))
+            args = list(args)[1:]
+
+        args_input = [v for v in args if is_np_pd(v)]  # 位置非数字参数
+        args_param = [v for v in args if not is_np_pd(v)]  # 位置数字参数
+        kwargs_input = {k: v for k, v in kwargs.items() if is_np_pd(v)}  # 命名非数字参数
+        kwargs_param = {k: v for k, v in kwargs.items() if not is_np_pd(v)}  # 命名数字参数
+
+        df1 = pd.DataFrame(kwargs_input)
+        df2 = pd.DataFrame({k: v for k, v in enumerate(args_input)})
+        df = pd.concat([df1, df2], axis=1)
+
+        if dropna:
+            df = df.dropna()
+        return df.groupby(by=by, group_keys=False).apply(to_pd(dataframe_split(func)), *args_param, **kwargs_param)
+
+    return decorated
+
+
 def dataframe_split(func):
+    """将第一个DataFrame分拆传到指定函数"""
+
     @wraps(func)
     def decorated(df: pd.DataFrame, *args, **kwargs):
-        return func(*[v for k, v in df.items()], *args, **kwargs)
+        ss = df.to_dict(orient='series')
+        args_input = [v for k, v in ss.items() if isinstance(k, int)]
+        kwargs_input = {k: v for k, v in ss.items() if not isinstance(k, int)}
+        return func(*args_input, *args, **kwargs_input, **kwargs)
 
     return decorated
 
 
-def dataframe_groupby_apply(func, by):
-    @wraps(func)
-    def decorated(real0: pd.Series, real1: pd.Series, *args, **kwargs):
-        df = pd.DataFrame({'_001': real0, '_002': real1}).dropna()
-        return df.groupby(by=by, group_keys=False).apply(to_pd(dataframe_split(func)), *args, **kwargs)
-
-    return decorated
+def is_np_pd(x):
+    """是否几种特数类型"""
+    return isinstance(x, (pd.DataFrame, pd.Series, np.ndarray))
 
 
 def num_to_np(x, like):

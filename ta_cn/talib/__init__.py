@@ -14,9 +14,10 @@ Examples
 from functools import wraps
 
 import numpy as np
-import pandas as pd
 import talib as _talib
 from talib import abstract as _abstract
+
+from ta_cn.utils import pd_to_np, is_np_pd
 
 
 def tafunc_nditer_0(tafunc, args, kwargs, output_names):
@@ -44,17 +45,6 @@ def tafunc_nditer_1(tafunc, args, kwargs, output_names):
         输出数组
 
     """
-
-    def is_np_pd(x):
-        """是否几种特数类型"""
-        return isinstance(x, (pd.DataFrame, pd.Series, np.ndarray))
-
-    def pd_to_np(x):
-        """pandas格式转numpy"""
-        if isinstance(x, (pd.Series, pd.DataFrame)):
-            return x.values
-        return x
-
     # 分组
     args_input = [pd_to_np(v) for v in args if is_np_pd(v)]  # 位置非数字参数
     args_param = [pd_to_np(v) for v in args if not is_np_pd(v)]  # 位置数字参数
