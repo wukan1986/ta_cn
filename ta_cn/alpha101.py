@@ -188,8 +188,9 @@ def alpha_028(high, low, close, adv20, **kwargs):
 
 def alpha_029(close, returns, **kwargs):
     """Alpha#29: (min(product(rank(rank(scale(log(sum(ts_min(rank(rank((-1 * rank(delta((close - 1), 5))))), 2), 1))))), 1), 5) + ts_rank(delay((-1 * returns), 6), 5))"""
-    pass
-    # return (min(product(rank(rank(scale(log(sum(ts_min(rank(rank((-1 * rank(delta((close - 1), 5))))), 2), 1))))), 1), 5) + ts_rank(delay((-1 * returns), 6), 5))
+    t1 = rank(rank(-rank(delta((close - 1), 5))))
+    t2 = rank(rank(scale(log(sum(ts_min(t1, 2), 1)))))
+    return MIN(t2, 5) + ts_rank(delay(- returns, 6), 5)
 
 
 def alpha_030(close, volume, **kwargs):
@@ -530,44 +531,299 @@ IndClass.industry), adv50, 17.8256), 17.9171)) * -1)"""
     return -(rank(t1) ** ts_rank(t3, round(17.9171)))
 
 
-def alpha_101(open_, high, low, close, **kwargs):
-    """Alpha#101: ((close - open) / ((high - low) + .001))"""
-    return (close - open_) / ((high - low) + .001)
+def alpha_071(open_, low, close, vwap, adv180, **kwargs):
+    """Alpha#71: max(Ts_Rank(decay_linear(correlation(Ts_Rank(close, 3.43976), Ts_Rank(adv180,
+12.0647), 18.0175), 4.20501), 15.6948), Ts_Rank(decay_linear((rank(((low + open) - (vwap +
+vwap)))^2), 16.4662), 4.4388))"""
+    t1 = ts_rank(close, round(3.43976))
+    t2 = ts_rank(adv180, round(12.0647))
+    t3 = correlation(t1, t2, round(18.0175))
+    t4 = (low + open_) - (vwap + vwap)
+    return MAX(ts_rank(decay_linear(t3, round(4.20501)),
+                       round(15.6948)),
+               ts_rank(decay_linear(rank(t4) ** 2, round(16.4662)),
+                       round(4.4388)))
 
 
-def alpha_101(open_, high, low, close, **kwargs):
-    """Alpha#101: ((close - open) / ((high - low) + .001))"""
-    return (close - open_) / ((high - low) + .001)
+def alpha_072(high, low, volume, vwap, adv40, **kwargs):
+    """Alpha#72: (rank(decay_linear(correlation(((high + low) / 2), adv40, 8.93345), 10.1519)) /
+rank(decay_linear(correlation(Ts_Rank(vwap, 3.72469), Ts_Rank(volume, 18.5188), 6.86671),
+2.95011)))"""
+    t1 = ((high + low) / 2)
+    t2 = ts_rank(vwap, round(3.72469))
+    t3 = ts_rank(volume, round(18.5188))
+    return (rank(decay_linear(correlation(t1, adv40, round(8.93345)), round(10.1519))) /
+            rank(decay_linear(correlation(t2, t3, round(6.86671)), round(2.95011))))
 
 
-def alpha_101(open_, high, low, close, **kwargs):
-    """Alpha#101: ((close - open) / ((high - low) + .001))"""
-    return (close - open_) / ((high - low) + .001)
+def alpha_073(open_, low, vwap, **kwargs):
+    """Alpha#73: (max(rank(decay_linear(delta(vwap, 4.72775), 2.91864)),
+Ts_Rank(decay_linear(((delta(((open * 0.147155) + (low * (1 - 0.147155))), 2.03608) / ((open *
+0.147155) + (low * (1 - 0.147155)))) * -1), 3.33829), 16.7411)) * -1)"""
+    t1 = (open_ * 0.147155) + (low * (1 - 0.147155))
+    t2 = ((delta(t1, round(2.03608)) / t1) * -1)
+    return -MAX(rank(decay_linear(delta(vwap, round(4.72775)), round(2.91864))),
+                ts_rank(decay_linear(t2, round(3.33829)), round(16.7411)))
 
 
-def alpha_101(open_, high, low, close, **kwargs):
-    """Alpha#101: ((close - open) / ((high - low) + .001))"""
-    return (close - open_) / ((high - low) + .001)
+def alpha_074(high, close, volume, vwap, adv30, **kwargs):
+    """Alpha#74: ((rank(correlation(close, sum(adv30, 37.4843), 15.1365)) <
+rank(correlation(rank(((high * 0.0261661) + (vwap * (1 - 0.0261661)))), rank(volume), 11.4791)))
+* -1)"""
+    t1 = sum(adv30, round(37.4843))
+    t2 = rank((high * 0.0261661) + (vwap * (1 - 0.0261661)))
+    t3 = rank(correlation(close, t1, round(15.1365)))
+    t4 = rank(correlation(t2, rank(volume), round(11.4791)))
+    return -(t3 - t4 < 0)
 
 
-def alpha_101(open_, high, low, close, **kwargs):
-    """Alpha#101: ((close - open) / ((high - low) + .001))"""
-    return (close - open_) / ((high - low) + .001)
+def alpha_075(low, volume, vwap, adv50, **kwargs):
+    """Alpha#75: (rank(correlation(vwap, volume, 4.24304)) < rank(correlation(rank(low), rank(adv50),
+12.4413)))"""
+    t1 = correlation(vwap, volume, round(4.24304))
+    t2 = correlation(rank(low), rank(adv50), round(12.4413))
+    return rank(t1) - rank(t2) < 0
 
 
-def alpha_101(open_, high, low, close, **kwargs):
-    """Alpha#101: ((close - open) / ((high - low) + .001))"""
-    return (close - open_) / ((high - low) + .001)
+def alpha_076(low, vwap, adv81, sector, **kwargs):
+    """Alpha#76: (max(rank(decay_linear(delta(vwap, 1.24383), 11.8259)),
+Ts_Rank(decay_linear(Ts_Rank(correlation(IndNeutralize(low, IndClass.sector), adv81,
+8.14941), 19.569), 17.1543), 19.383)) * -1)"""
+    t1 = decay_linear(delta(vwap, round(1.24383)), round(11.8259))
+    t2 = correlation(indneutralize(low, group=sector), adv81, round(8.14941))
+    t3 = decay_linear(ts_rank(t2, round(19.569)), round(17.1543))
+    return -MAX(rank(t1),
+                ts_rank(t3, round(19.383)))
 
 
-def alpha_101(open_, high, low, close, **kwargs):
-    """Alpha#101: ((close - open) / ((high - low) + .001))"""
-    return (close - open_) / ((high - low) + .001)
+def alpha_077(high, low, vwap, adv40, **kwargs):
+    """Alpha#77: min(rank(decay_linear(((((high + low) / 2) + high) - (vwap + high)), 20.0451)),
+rank(decay_linear(correlation(((high + low) / 2), adv40, 3.1614), 5.64125)))"""
+    t0 = (high + low) / 2
+    t1 = t0 - vwap
+    t2 = correlation(t0, adv40, round(3.1614))
+    return MIN(rank(decay_linear(t1, round(20.0451))),
+               rank(decay_linear(t2, round(5.64125))))
 
 
-def alpha_101(open_, high, low, close, **kwargs):
-    """Alpha#101: ((close - open) / ((high - low) + .001))"""
-    return (close - open_) / ((high - low) + .001)
+def alpha_078(low, volume, vwap, adv40, **kwargs):
+    """Alpha#78: (rank(correlation(sum(((low * 0.352233) + (vwap * (1 - 0.352233))), 19.7428),
+sum(adv40, 19.7428), 6.83313))^rank(correlation(rank(vwap), rank(volume), 5.77492)))"""
+    t1 = (low * 0.352233) + (vwap * (1 - 0.352233))
+    t2 = correlation(sum(t1, round(19.7428)),
+                     sum(adv40, round(19.7428)),
+                     round(6.83313))
+    t3 = correlation(rank(vwap), rank(volume), round(5.77492))
+    return rank(t2) ** rank(t3)
+
+
+def alpha_079(open_, close, vwap, adv150, sector, **kwargs):
+    """Alpha#79: (rank(delta(IndNeutralize(((close * 0.60733) + (open * (1 - 0.60733))),
+IndClass.sector), 1.23438)) < rank(correlation(Ts_Rank(vwap, 3.60973), Ts_Rank(adv150,
+9.18637), 14.6644)))"""
+    t1 = ((close * 0.60733) + (open_ * (1 - 0.60733)))
+    t2 = delta(indneutralize(t1, group=sector), round(1.23438))
+    t3 = correlation(ts_rank(vwap, round(3.60973)), ts_rank(adv150, round(9.18637)), round(14.6644))
+    return rank(t2) - rank(t3) < 0
+
+
+def alpha_080(open_, high, adv10, industry, **kwargs):
+    """Alpha#80: ((rank(Sign(delta(IndNeutralize(((open * 0.868128) + (high * (1 - 0.868128))),
+IndClass.industry), 4.04545)))^Ts_Rank(correlation(high, adv10, 5.11456), 5.53756)) * -1)"""
+    t1 = ((open_ * 0.868128) + (high * (1 - 0.868128)))
+    t2 = sign(delta(indneutralize(t1, group=industry), round(4.04545)))
+    t3 = correlation(high, adv10, round(5.11456))
+    return -(rank(t2) ** ts_rank(t3, round(5.53756)))
+
+
+def alpha_081(volume, vwap, adv10, **kwargs):
+    """Alpha#81: ((rank(Log(product(rank((rank(correlation(vwap, sum(adv10, 49.6054),
+8.47743))^4)), 14.9655))) < rank(correlation(rank(vwap), rank(volume), 5.07914))) * -1)"""
+    t1 = correlation(vwap, sum(adv10, round(49.6054)), round(8.47743))
+    t2 = product(rank(rank(t1) ** 4), round(14.9655))
+    t3 = correlation(rank(vwap), rank(volume), 5.07914)
+    return -(rank(log(t2)) - rank(t3) < 0)
+
+
+def alpha_082(open_, volume, sector, **kwargs):
+    """Alpha#82: (min(rank(decay_linear(delta(open, 1.46063), 14.8717)),
+Ts_Rank(decay_linear(correlation(IndNeutralize(volume, IndClass.sector), ((open * 0.634196) +
+(open * (1 - 0.634196))), 17.4842), 6.92131), 13.4283)) * -1)"""
+    t1 = decay_linear(delta(open_, round(1.46063)), round(14.8717))
+    t2 = correlation(indneutralize(volume, group=sector), open_, round(17.4842))
+    t3 = decay_linear(t2, round(6.92131))
+    return -MIN(rank(t1), ts_rank(t3, round(13.4283)))
+
+
+def alpha_083(high, low, close, volume, vwap, **kwargs):
+    """Alpha#83: ((rank(delay(((high - low) / (sum(close, 5) / 5)), 2)) * rank(rank(volume))) / (((high -
+low) / (sum(close, 5) / 5)) / (vwap - close)))"""
+    t1 = (sum(close, 5) / 5)
+    t2 = ((high - low) / t1)
+    return rank(delay(t2, 2)) * rank(volume) / (t2 / (vwap - close))
+
+
+def alpha_084(close, vwap, **kwargs):
+    """Alpha#84: SignedPower(Ts_Rank((vwap - ts_max(vwap, 15.3217)), 20.7127), delta(close,
+4.96796))"""
+    # TODO: 这里要验证
+    assert False
+    return signedpower(ts_rank((vwap - ts_max(vwap, 15.3217)), 20.7127), delta(close, 4.96796))
+
+
+def alpha_085(open_, high, low, close, volume, adv30, **kwargs):
+    """Alpha#85: (rank(correlation(((high * 0.876703) + (close * (1 - 0.876703))), adv30,
+9.61331))^rank(correlation(Ts_Rank(((high + low) / 2), 3.70596), Ts_Rank(volume, 10.1595),
+7.11408)))"""
+    t1 = ((high * 0.876703) + (close * (1 - 0.876703)))
+    t2 = ts_rank(((high + low) / 2), round(3.70596))
+    t3 = ts_rank(volume, round(10.1595))
+    return rank(correlation(t1, adv30, round(9.61331))) ** rank(correlation(t2, t3, round(7.11408)))
+
+
+def alpha_086(close, vwap, adv20, **kwargs):
+    """Alpha#86: ((Ts_Rank(correlation(close, sum(adv20, 14.7444), 6.00049), 20.4195) < rank(((open
++ close) - (vwap + open)))) * -1)"""
+    t1 = correlation(close, sum(adv20, round(14.7444)), round(6.00049))
+    return -(ts_rank(t1, round(20.4195)) - rank(close - vwap) < 0)
+
+
+def alpha_087(close, vwap, adv81, industry, **kwargs):
+    """Alpha#87: (max(rank(decay_linear(delta(((close * 0.369701) + (vwap * (1 - 0.369701))),
+1.91233), 2.65461)), Ts_Rank(decay_linear(abs(correlation(IndNeutralize(adv81,
+IndClass.industry), close, 13.4132)), 4.89768), 14.4535)) * -1)"""
+    t1 = ((close * 0.369701) + (vwap * (1 - 0.369701)))
+    t2 = correlation(indneutralize(adv81, group=industry), close, round(13.4132))
+    return -MAX(rank(decay_linear(delta(t1, round(1.91233)), round(2.65461))),
+                ts_rank(decay_linear(abs(t2), round(4.89768)), round(14.4535)))
+
+
+def alpha_088(open_, high, low, close, adv60, **kwargs):
+    """Alpha#88: min(rank(decay_linear(((rank(open) + rank(low)) - (rank(high) + rank(close))),
+8.06882)), Ts_Rank(decay_linear(correlation(Ts_Rank(close, 8.44728), Ts_Rank(adv60,
+20.6966), 8.01266), 6.65053), 2.61957))"""
+    t1 = (rank(open_) + rank(low)) - (rank(high) + rank(close))
+    t2 = correlation(ts_rank(close, round(8.44728)), ts_rank(adv60, round(20.6966)), round(8.01266))
+    return MIN(rank(decay_linear(t1, round(8.06882))),
+               ts_rank(decay_linear(t2, round(6.65053)), round(2.61957)))
+
+
+def alpha_089(low, vwap, adv10, industry, **kwargs):
+    """Alpha#89: (Ts_Rank(decay_linear(correlation(((low * 0.967285) + (low * (1 - 0.967285))), adv10,
+6.94279), 5.51607), 3.79744) - Ts_Rank(decay_linear(delta(IndNeutralize(vwap,
+IndClass.industry), 3.48158), 10.1466), 15.3012))"""
+    t1 = correlation(low, adv10, round(6.94279))
+    t2 = delta(indneutralize(vwap, group=industry), round(3.48158))
+    return (ts_rank(decay_linear(t1, round(5.51607)), round(3.79744)) -
+            ts_rank(decay_linear(t2, round(10.1466)), round(15.3012)))
+
+
+def alpha_090(low, close, adv40, subindustry, **kwargs):
+    """Alpha#90: ((rank((close - ts_max(close, 4.66719)))^Ts_Rank(correlation(IndNeutralize(adv40,
+IndClass.subindustry), low, 5.38375), 3.21856)) * -1)"""
+    t1 = (close - ts_max(close, round(4.66719)))
+    t2 = correlation(indneutralize(adv40, group=subindustry), low, round(5.38375))
+    return -(rank(t1) ** ts_rank(t2, round(3.21856)))
+
+
+def alpha_091(close, volume, vwap, adv30, industry, **kwargs):
+    """Alpha#91: ((Ts_Rank(decay_linear(decay_linear(correlation(IndNeutralize(close,
+IndClass.industry), volume, 9.74928), 16.398), 3.83219), 4.8667) -
+rank(decay_linear(correlation(vwap, adv30, 4.01303), 2.6809))) * -1)"""
+    t1 = decay_linear(correlation(indneutralize(close, group=industry), volume, round(9.74928)), round(16.398))
+    t2 = correlation(vwap, adv30, round(4.01303))
+    return ((ts_rank(decay_linear(t1, round(3.83219)), round(4.8667)) -
+             rank(decay_linear(t2, round(2.6809)))) * -1)
+
+
+def alpha_092(open_, high, low, close, adv30, **kwargs):
+    """Alpha#92: min(Ts_Rank(decay_linear(((((high + low) / 2) + close) < (low + open)), 14.7221),
+18.8683), Ts_Rank(decay_linear(correlation(rank(low), rank(adv30), 7.58555), 6.94024),
+6.80584))"""
+    t1 = ((((high + low) / 2) + close) < (low + open_)) * 1.
+    t2 = correlation(rank(low), rank(adv30), round(7.58555))
+    return MIN(ts_rank(decay_linear(t1, round(14.7221)), round(18.8683)),
+               ts_rank(decay_linear(t2, round(6.94024)), round(6.80584)))
+
+
+def alpha_093(close, vwap, adv81, industry, **kwargs):
+    """Alpha#93: (Ts_Rank(decay_linear(correlation(IndNeutralize(vwap, IndClass.industry), adv81,
+17.4193), 19.848), 7.54455) / rank(decay_linear(delta(((close * 0.524434) + (vwap * (1 -
+0.524434))), 2.77377), 16.2664)))"""
+    t1 = correlation(indneutralize(vwap, group=industry), adv81, round(17.4193))
+    t2 = delta(((close * 0.524434) + (vwap * (1 - 0.524434))), round(2.77377))
+    return (ts_rank(decay_linear(t1, round(19.848)), round(7.54455)) /
+            rank(decay_linear(t2, round(16.2664))))
+
+
+def alpha_094(vwap, adv60, **kwargs):
+    """Alpha#94: ((rank((vwap - ts_min(vwap, 11.5783)))^Ts_Rank(correlation(Ts_Rank(vwap,
+19.6462), Ts_Rank(adv60, 4.02992), 18.0926), 2.70756)) * -1)"""
+    t1 = (vwap - ts_min(vwap, round(11.5783)))
+    t2 = correlation(ts_rank(vwap, round(19.6462)), ts_rank(adv60, round(4.02992)), round(18.0926))
+    return -(rank(t1) ** ts_rank(t2, round(2.70756)))
+
+
+def alpha_095(open_, high, low, adv40, **kwargs):
+    """Alpha#95: (rank((open - ts_min(open, 12.4105))) < Ts_Rank((rank(correlation(sum(((high + low)
+/ 2), 19.1351), sum(adv40, 19.1351), 12.8742))^5), 11.7584))"""
+    t1 = (open_ - ts_min(open_, round(12.4105)))
+    t2 = correlation(sum(((high + low) / 2), round(19.1351)), sum(adv40, round(19.1351)), round(12.8742))
+    return rank(t1) - ts_rank((rank(t2) ** 5), round(11.7584)) < 0
+
+
+def alpha_096(close, volume, vwap, adv60, **kwargs):
+    """Alpha#96: (max(Ts_Rank(decay_linear(correlation(rank(vwap), rank(volume), 3.83878),
+4.16783), 8.38151), Ts_Rank(decay_linear(Ts_ArgMax(correlation(Ts_Rank(close, 7.45404),
+Ts_Rank(adv60, 4.13242), 3.65459), 12.6556), 14.0365), 13.4143)) * -1)"""
+    t1 = correlation(rank(vwap), rank(volume), round(3.83878))
+    t2 = correlation(ts_rank(close, round(7.45404)), ts_rank(adv60, round(4.13242)), round(3.65459))
+    t3 = ts_argmax(t2, round(12.6556))
+    return -MAX(ts_rank(decay_linear(t1, round(4.16783)), round(8.38151)),
+                ts_rank(decay_linear(t3, round(14.0365)), round(13.4143)))
+
+
+def alpha_097(low, vwap, adv60, industry, **kwargs):
+    """Alpha#97: ((rank(decay_linear(delta(IndNeutralize(((low * 0.721001) + (vwap * (1 - 0.721001))),
+IndClass.industry), 3.3705), 20.4523)) - Ts_Rank(decay_linear(Ts_Rank(correlation(Ts_Rank(low,
+7.87871), Ts_Rank(adv60, 17.255), 4.97547), 18.5925), 15.7152), 6.71659)) * -1)"""
+    t1 = ((low * 0.721001) + (vwap * (1 - 0.721001)))
+    t2 = correlation(ts_rank(low, round(7.87871)), ts_rank(adv60, round(17.255)), round(4.97547))
+    t3 = delta(indneutralize(t1, group=industry), round(3.3705))
+    t4 = ts_rank(t2, round(18.5925))
+    return ts_rank(decay_linear(t4, round(15.7152)), round(6.71659)) - rank(decay_linear(t3, round(20.4523)))
+
+
+def alpha_098(open_, vwap, adv5, adv15, **kwargs):
+    """Alpha#98: (rank(decay_linear(correlation(vwap, sum(adv5, 26.4719), 4.58418), 7.18088)) -
+rank(decay_linear(Ts_Rank(Ts_ArgMin(correlation(rank(open), rank(adv15), 20.8187), 8.62571),
+6.95668), 8.07206)))"""
+    t1 = correlation(vwap, sum(adv5, round(26.4719)), round(4.58418))
+    t2 = correlation(rank(open_), rank(adv15), round(20.8187))
+    t3 = ts_rank(ts_argmin(t2, round(8.62571)), round(6.95668))
+    return (rank(decay_linear(t1, round(7.18088))) -
+            rank(decay_linear(t3, round(8.07206))))
+
+
+def alpha_099(high, low, volume, adv60, **kwargs):
+    """Alpha#99: ((rank(correlation(sum(((high + low) / 2), 19.8975), sum(adv60, 19.8975), 8.8136)) <
+rank(correlation(low, volume, 6.28259))) * -1)"""
+    t1 = sum(((high + low) / 2), round(19.8975))
+    t2 = sum(adv60, round(19.8975))
+    return -(rank(correlation(t1, t2, round(8.8136))) -
+             rank(correlation(low, volume, round(6.28259))) < 0)
+
+
+def alpha_100(high, low, close, volume, adv20, subindustry, **kwargs):
+    """Alpha#100: (0 - (1 * (((1.5 * scale(indneutralize(indneutralize(rank(((((close - low) - (high -
+close)) / (high - low)) * volume)), IndClass.subindustry), IndClass.subindustry))) -
+scale(indneutralize((correlation(close, rank(adv20), 5) - rank(ts_argmin(close, 30))),
+IndClass.subindustry))) * (volume / adv20))))"""
+    t1 = rank((((close - low) - (high - close)) / (high - low)) * volume)
+    t2 = (correlation(close, rank(adv20), 5) - rank(ts_argmin(close, 30)))
+    t3 = indneutralize(t1, group=subindustry)
+    t4 = 1.5 * scale(indneutralize(t3, group=subindustry)) - scale(indneutralize(t2, group=subindustry))
+    return - t4 * (volume / adv20)
 
 
 def alpha_101(open_, high, low, close, **kwargs):

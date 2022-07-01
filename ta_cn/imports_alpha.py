@@ -7,12 +7,15 @@ from .alpha import scale
 from .alpha import signedpower
 from .logical import IF
 from .maths import LOG as log
+from .maths import MAX
+from .maths import MIN
 from .maths import SGN as sign
 from .reference import DIFF as delta
 from .reference import HHV as ts_max
 from .reference import HHVBARS as ts_argmax
 from .reference import LLV as ts_min
 from .reference import LLVBARS as ts_argmin
+from .reference import PRODUCT as product
 from .reference import REF as delay
 from .reference import SUM as sum
 from .reference import WMA as decay_linear
@@ -32,6 +35,8 @@ signedpower = to_pd(signedpower)
 IF = to_pd(IF)
 log = to_pd(log)
 sign = to_pd(sign)
+MAX = to_pd(MAX)
+MIN = to_pd(MIN)
 
 # 按股票分组，计算时序指标。注意，组内时序需要已经排序
 BY_ASSET = 'asset'
@@ -51,6 +56,7 @@ ts_max = series_groupby_apply(ts_max, by=BY_ASSET, dropna=False)
 ts_min = series_groupby_apply(ts_min, by=BY_ASSET, dropna=False)
 sum = series_groupby_apply(sum, by=BY_ASSET, dropna=False)
 decay_linear = series_groupby_apply(decay_linear, by=BY_ASSET, dropna=False)
+product = series_groupby_apply(product, by=BY_ASSET, dropna=False)
 
 # 时序，双输入
 correlation = dataframe_groupby_apply(correlation, by=BY_ASSET, dropna=True)

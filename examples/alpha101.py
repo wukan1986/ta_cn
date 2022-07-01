@@ -25,11 +25,17 @@ if __name__ == '__main__':
         'returns': returns.stack(),
         'volume': volume.stack(),
         'vwap': vwap.stack(),
+        'adv5': adv20.stack(),
+        'adv10': adv20.stack(),
         'adv15': adv20.stack(),
         'adv20': adv20.stack(),
+        'adv30': adv20.stack(),
+        'adv40': adv20.stack(),
         'adv50': adv20.stack(),
         'adv60': adv20.stack(),
+        'adv81': adv20.stack(),
         'adv120': adv20.stack(),
+        'adv150': adv20.stack(),
         'adv180': adv20.stack(),
         'subindustry': group.stack(),
         'sector': group.stack(),
@@ -41,17 +47,10 @@ if __name__ == '__main__':
     kwargs = df.to_dict(orient='series')
 
     # for i in range(1, 19):
-    for i in range(70, 70 + 1):
-        name = f'alpha_{i:03d}'
-        f = getattr(a101, name, None)
-        if f is None:
+    for i in range(80, 101 + 1):
+        if i in (84,):
             continue
-        print(name)
-        r = f(**kwargs)
-        print(r.unstack())
-
-    for i in range(69, 69 + 1):
-        name = f'alpha_{i:03d}_1'
+        name = f'alpha_{i:03d}'
         f = getattr(a101, name, None)
         if f is None:
             continue

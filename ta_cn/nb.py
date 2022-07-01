@@ -191,6 +191,11 @@ def _bars_since_n_nb(a, n):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
+def _product_nb(a):
+    return _np.nanprod(a)
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
 def _slope_nb(y, x, m_x):
     """slope线性回归斜率"""
     m_y = _np.mean(y)
