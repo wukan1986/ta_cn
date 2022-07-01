@@ -46,10 +46,7 @@ if __name__ == '__main__':
     df.index.names = ['date', 'asset']
     kwargs = df.to_dict(orient='series')
 
-    # for i in range(1, 19):
-    for i in range(80, 101 + 1):
-        if i in (84,):
-            continue
+    for i in range(1, 101 + 1):
         name = f'alpha_{i:03d}'
         f = getattr(a101, name, None)
         if f is None:

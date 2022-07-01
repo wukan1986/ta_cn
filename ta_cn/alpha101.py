@@ -666,9 +666,10 @@ low) / (sum(close, 5) / 5)) / (vwap - close)))"""
 def alpha_084(close, vwap, **kwargs):
     """Alpha#84: SignedPower(Ts_Rank((vwap - ts_max(vwap, 15.3217)), 20.7127), delta(close,
 4.96796))"""
-    # TODO: 这里要验证
-    assert False
-    return signedpower(ts_rank((vwap - ts_max(vwap, 15.3217)), 20.7127), delta(close, 4.96796))
+    t1 = (vwap - ts_max(vwap, round(15.3217)))
+    t2 = ts_rank(t1, round(20.7127))
+    t3 = delta(close, round(4.96796))
+    return signedpower(t2, t3)
 
 
 def alpha_085(open_, high, low, close, volume, adv30, **kwargs):
