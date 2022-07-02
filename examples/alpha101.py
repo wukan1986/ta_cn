@@ -18,7 +18,7 @@ if __name__ == '__main__':
     group = close.copy() * 100 // 1 % 5
 
     df = {
-        'open_': open_.stack(),
+        'open': open_.stack(),
         'high': high.stack(),
         'low': low.stack(),
         'close': close.stack(),
@@ -47,6 +47,8 @@ if __name__ == '__main__':
     kwargs = df.to_dict(orient='series')
 
     for i in range(1, 101 + 1):
+        # if i not in (62,):
+        #     continue
         name = f'alpha_{i:03d}'
         f = getattr(a101, name, None)
         if f is None:
