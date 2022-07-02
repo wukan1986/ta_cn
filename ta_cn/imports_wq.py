@@ -8,7 +8,7 @@ from .alpha import TS_RANK as ts_rank
 from .alpha import scale
 from .alpha import signedpower as SignedPower
 from .logical import IF
-from .maths import LOG as log
+from .maths import LN as log  # 引入的是自然对数
 from .maths import MAX
 from .maths import MIN
 from .maths import SGN as sign
@@ -23,7 +23,7 @@ from .reference import SUM as sum
 from .reference import WMA as decay_linear
 from .statistics import CORREL as correlation
 from .statistics import COVAR as covariance
-from .statistics import STDP as stddev
+from .statistics import STDP as stddev  # 引入的是全体标准差
 from .utils import to_pd, series_groupby_apply, dataframe_groupby_apply
 
 """
