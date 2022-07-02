@@ -47,3 +47,8 @@ def demean(x):
     nanmean在全nan时报此警告。这个警告还不好屏蔽
     """
     return x - _np.nanmean(x)
+
+
+def LessThan(x, y):
+    # ValueError: Can only compare identically-labeled Series objects
+    return x - y < 0

@@ -3,6 +3,7 @@
 """
 from functools import wraps
 
+from .alpha import LessThan
 from .alpha import RANK as rank, demean
 from .alpha import TS_RANK as ts_rank
 from .alpha import scale
@@ -54,11 +55,6 @@ def round_a_a_i(func):
     return decorated
 
 
-def LessThan(x, y):
-    # ValueError: Can only compare identically-labeled Series objects
-    return x - y < 0
-
-
 # 逐元素, 输出由numpy转pandas
 SignedPower = to_pd(SignedPower)
 IF = to_pd(IF)
@@ -98,8 +94,9 @@ scale = series_groupby_apply(scale, by=BY_DATE, dropna=False)
 # 行业中性。demean法
 indneutralize = dataframe_groupby_apply(demean, by=BY_GROUP, dropna=False)
 
-## 部分别名，这样官方公式可以减少改动
+# 部分别名，这样官方公式可以减少改动
 Ts_Rank = ts_rank
 IndNeutralize = indneutralize
 Ts_ArgMax = ts_argmax
 Ts_ArgMin = ts_argmin
+LessThan = LessThan
