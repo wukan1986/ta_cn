@@ -1,6 +1,8 @@
 import pandas as pd
+from pandas._testing import assert_series_equal
 
-import ta_cn.alpha191 as a191
+import ta_cn.alpha191 as a
+import ta_cn.tests.alpha191 as b
 
 if __name__ == '__main__':
     pd._testing._N = 500
@@ -35,13 +37,17 @@ if __name__ == '__main__':
     df.index.names = ['date', 'asset']
     kwargs = df.to_dict(orient='series')
 
-    for i in range(1, 191 + 1):
-        # if i not in (62,):
-        #     continue
+    for i in range(166, 166 + 1):
+        if i in (27, 30, 55, 143, 149, 165, 166, 183):
+            continue
         name = f'alpha_{i:03d}'
-        f = getattr(a191, name, None)
-        if f is None:
+        f1 = getattr(a, name, None)
+        f2 = getattr(b, name, None)
+        if f1 is None:
             continue
         print(name)
-        r = f(**kwargs)
-        print(r.unstack())
+        #r1 = f1(**kwargs)
+        r2 = f2(**kwargs)
+        #assert_series_equal(r1, r2)
+        print(r2)
+        # print(r2.unstack())

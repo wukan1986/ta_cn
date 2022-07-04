@@ -25,6 +25,7 @@ from .reference import MA
 from .reference import PRODUCT as PROD
 from .reference import REF as DELAY
 from .reference import SUM
+from .reference import SUMIF
 from .reference import WMA as DECAYLINEAR
 from .statistics import CORREL as CORR
 from .statistics import COVAR as COVIANCE
@@ -63,6 +64,7 @@ DELAY = series_groupby_apply(DELAY, by=BY_ASSET, dropna=False)
 TSMAX = series_groupby_apply(TSMAX, by=BY_ASSET, dropna=False)
 TSMIN = series_groupby_apply(TSMIN, by=BY_ASSET, dropna=False)
 SUM = series_groupby_apply(SUM, by=BY_ASSET, dropna=False)
+
 DECAYLINEAR = series_groupby_apply(DECAYLINEAR, by=BY_ASSET, dropna=False)
 PROD = series_groupby_apply(PROD, by=BY_ASSET, dropna=False)
 MEAN = series_groupby_apply(MEAN, by=BY_ASSET, dropna=False)
@@ -74,6 +76,7 @@ MA = series_groupby_apply(MA, by=BY_ASSET, dropna=False)
 # 时序，双输入
 CORR = dataframe_groupby_apply(CORR, by=BY_ASSET, dropna=True)
 COVIANCE = dataframe_groupby_apply(COVIANCE, by=BY_ASSET, dropna=True)
+SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET, dropna=False)
 
 # 截面
 RANK = series_groupby_apply(RANK, by=BY_DATE, dropna=False)

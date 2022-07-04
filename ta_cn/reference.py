@@ -76,6 +76,11 @@ def SUM(real, timeperiod: int = 5):
         return _np.cumsum(real, axis=0)
 
 
+def SUMIF(real, condition, timeperiod):
+    """注意，condition位置"""
+    return _bn.move_sum(real * condition, window=timeperiod, axis=0)
+
+
 def TR(high, low, close):
     """TR真实波幅"""
     lc = REF(close, 1)

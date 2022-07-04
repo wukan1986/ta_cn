@@ -1,5 +1,9 @@
-"""alpha191的实现"""
-from .imports_gtja import *
+"""alpha191的实现
+
+
+1. =要改成==
+"""
+from ..imports_gtja import *
 
 
 def alpha_001(OPEN, CLOSE, VOLUME, **kwargs):
@@ -14,24 +18,23 @@ def alpha_002(HIGH, LOW, CLOSE, **kwargs):
 
 def alpha_003(HIGH, LOW, CLOSE, **kwargs):
     """Alpha3 SUM((CLOSE=DELAY(CLOSE,1)?0:CLOSE-(CLOSE>DELAY(CLOSE,1)?MIN(LOW,DELAY(CLOSE,1)):MAX(HIGH,DELAY(CLOSE,1)))),6)"""
-    t1 = MAX(HIGH, DELAY(CLOSE, 1))
-    t2 = MIN(LOW, DELAY(CLOSE, 1))
-    t3 = IF(CLOSE > DELAY(CLOSE, 1), t2, t1)
-    t4 = IF(CLOSE == DELAY(CLOSE, 1), 0, CLOSE - t3)
-    return SUM(t4, 6)
+    return SUM(IF(CLOSE == DELAY(CLOSE, 1),
+                  0,
+                  CLOSE - IF(CLOSE > DELAY(CLOSE, 1),
+                             MIN(LOW, DELAY(CLOSE, 1)),
+                             MAX(HIGH, DELAY(CLOSE, 1)))),
+               6)
 
 
 def alpha_004(CLOSE, VOLUME, **kwargs):
     """Alpha4 ((((SUM(CLOSE, 8) / 8) + STD(CLOSE, 8)) < (SUM(CLOSE, 2) / 2)) ? (-1 * 1) : (((SUM(CLOSE, 2) / 2) <
 ((SUM(CLOSE, 8) / 8) - STD(CLOSE, 8))) ? 1 : (((1 < (VOLUME / MEAN(VOLUME,20))) || ((VOLUME /
 MEAN(VOLUME,20)) == 1)) ? 1 : (-1 * 1))))"""
-    x1 = (SUM(CLOSE, 8) / 8)
-    x2 = STD(CLOSE, 8)
-    t1 = x1 + x2
-    t2 = (SUM(CLOSE, 2) / 2)
-    t3 = x1 - x2
-    t4 = (VOLUME / MEAN(VOLUME, 20))
-    return IF(t1 < t2, -1, IF(t2 < t3, 1, IF(1 <= t4, 1, -1)))
+    return IF((((SUM(CLOSE, 8) / 8) + STD(CLOSE, 8)) < (SUM(CLOSE, 2) / 2)), (-1 * 1), IF(((SUM(CLOSE, 2) / 2) <
+                                                                                           ((SUM(CLOSE, 8) / 8) - STD(
+                                                                                               CLOSE, 8))), 1, IF(
+        ((1 < (VOLUME / MEAN(VOLUME, 20))) | ((VOLUME /
+                                               MEAN(VOLUME, 20)) == 1)), 1, (-1 * 1))))
 
 
 def alpha_005(HIGH, VOLUME, **kwargs):
@@ -107,9 +110,8 @@ def alpha_018(CLOSE, **kwargs):
 def alpha_019(CLOSE, **kwargs):
     """Alpha19
 (CLOSE<DELAY(CLOSE,5)?(CLOSE-DELAY(CLOSE,5))/DELAY(CLOSE,5):(CLOSE=DELAY(CLOSE,5)?0:(CLOSE-DELAY(CLOSE,5))/CLOSE))"""
-    t1 = DELAY(CLOSE, 5)
-    t2 = (CLOSE - t1)
-    return IF(CLOSE < t1, t2 / t1, IF(CLOSE == t1, 0, t2 / CLOSE))
+    return IF(CLOSE < DELAY(CLOSE, 5), (CLOSE - DELAY(CLOSE, 5)) / DELAY(CLOSE, 5),
+              IF(CLOSE == DELAY(CLOSE, 5), 0, (CLOSE - DELAY(CLOSE, 5)) / CLOSE))
 
 
 def alpha_020(CLOSE, **kwargs):
@@ -125,19 +127,17 @@ def alpha_021(CLOSE, **kwargs):
 def alpha_022(CLOSE, **kwargs):
     """Alpha22 SMEAN(((CLOSE-MEAN(CLOSE,6))/MEAN(CLOSE,6)-DELAY((CLOSE-MEAN(CLOSE,6))/MEAN(CLOSE,6),3)),12,1)"""
     # 文档中的SMEAN可能是SMA
-    t1 = MEAN(CLOSE, 6)
-    t2 = (CLOSE - t1) / t1
-    return SMA((t2 - DELAY(t2, 3)), 12, 1)
+    return SMA(((CLOSE - MEAN(CLOSE, 6)) / MEAN(CLOSE, 6) - DELAY((CLOSE - MEAN(CLOSE, 6)) / MEAN(CLOSE, 6), 3)), 12, 1)
 
 
 def alpha_023(CLOSE, **kwargs):
     """Alpha23
 SMA((CLOSE>DELAY(CLOSE,1)?STD(CLOSE:20),0),20,1)/(SMA((CLOSE>DELAY(CLOSE,1)?STD(CLOSE,20):0),20,1
 )+SMA((CLOSE<=DELAY(CLOSE,1)?STD(CLOSE,20):0),20,1))*100"""
-    t1 = DELAY(CLOSE, 1)
-    t2 = STD(CLOSE, 20)
-    t3 = SMA(IF(CLOSE > t1, t2, 0), 20, 1)
-    return t3 / (t3 + SMA(IF(CLOSE <= t1, t2, 0), 20, 1)) * 100
+    return SMA(IF(CLOSE > DELAY(CLOSE, 1), STD(CLOSE, 20), 0), 20, 1) / (
+            SMA(IF(CLOSE > DELAY(CLOSE, 1), STD(CLOSE, 20), 0),
+                20, 1) + SMA(
+        IF(CLOSE <= DELAY(CLOSE, 1), STD(CLOSE, 20), 0), 20, 1)) * 100
 
 
 def alpha_024(CLOSE, **kwargs):
@@ -161,18 +161,17 @@ def alpha_026(CLOSE, VWAP, **kwargs):
 
 def alpha_027(CLOSE, **kwargs):
     """Alpha27 WMA((CLOSE-DELAY(CLOSE,3))/DELAY(CLOSE,3)*100+(CLOSE-DELAY(CLOSE,6))/DELAY(CLOSE,6)*100,12)"""
-    t1 = DELAY(CLOSE, 3)
-    t2 = DELAY(CLOSE, 6)
-    return WMA((CLOSE - t1) / t1 * 100 + (CLOSE - t2) / t2 * 100, 12)
+    return WMA((CLOSE - DELAY(CLOSE, 3)) / DELAY(CLOSE, 3) * 100 + (CLOSE - DELAY(CLOSE, 6)) / DELAY(CLOSE, 6) * 100,
+               12)
 
 
 def alpha_028(HIGH, LOW, CLOSE, **kwargs):
     """Alpha28
 3*SMA((CLOSE-TSMIN(LOW,9))/(TSMAX(HIGH,9)-TSMIN(LOW,9))*100,3,1)-2*SMA(SMA((CLOSE-TSMIN(LOW,9))/(
 MAX(HIGH,9)-TSMAX(LOW,9))*100,3,1),3,1)"""
-    t1 = TSMIN(LOW, 9)
-    return 3 * SMA((CLOSE - t1) / (TSMAX(HIGH, 9) - t1) * 100, 3, 1) - \
-           2 * SMA(SMA((CLOSE - t1) / (MAX(HIGH, 9) - TSMAX(LOW, 9)) * 100, 3, 1), 3, 1)
+    return 3 * SMA((CLOSE - TSMIN(LOW, 9)) / (TSMAX(HIGH, 9) - TSMIN(LOW, 9)) * 100, 3, 1) - 2 * SMA(
+        SMA((CLOSE - TSMIN(LOW, 9)) / (
+                MAX(HIGH, 9) - TSMAX(LOW, 9)) * 100, 3, 1), 3, 1)
 
 
 def alpha_029(CLOSE, VOLUME, **kwargs):
@@ -212,7 +211,8 @@ def alpha_035(OPEN, VOLUME, **kwargs):
     """Alpha35
 (MIN(RANK(DECAYLINEAR(DELTA(OPEN, 1), 15)), RANK(DECAYLINEAR(CORR((VOLUME), ((OPEN * 0.65) +
 (OPEN *0.35)), 17),7))) * -1)"""
-    return (MIN(RANK(DECAYLINEAR(DELTA(OPEN, 1), 15)), RANK(DECAYLINEAR(CORR(VOLUME, OPEN, 17), 7))) * -1)
+    return (MIN(RANK(DECAYLINEAR(DELTA(OPEN, 1), 15)), RANK(DECAYLINEAR(CORR((VOLUME), ((OPEN * 0.65) +
+                                                                                        (OPEN * 0.35)), 17), 7))) * -1)
 
 
 def alpha_036(VOLUME, VWAP, **kwargs):
@@ -222,8 +222,7 @@ def alpha_036(VOLUME, VWAP, **kwargs):
 
 def alpha_037(OPEN, RET, **kwargs):
     """Alpha37 (-1 * RANK(((SUM(OPEN, 5) * SUM(RET, 5)) - DELAY((SUM(OPEN, 5) * SUM(RET, 5)), 10))))"""
-    t1 = (SUM(OPEN, 5) * SUM(RET, 5))
-    return (-1 * RANK((t1 - DELAY(t1, 10))))
+    return (-1 * RANK(((SUM(OPEN, 5) * SUM(RET, 5)) - DELAY((SUM(OPEN, 5) * SUM(RET, 5)), 10))))
 
 
 def alpha_038(HIGH, **kwargs):
@@ -264,7 +263,8 @@ def alpha_044(LOW, VOLUME, VWAP, **kwargs):
     """Alpha44
 (TSRANK(DECAYLINEAR(CORR(((LOW )), MEAN(VOLUME,10), 7), 6),4) + TSRANK(DECAYLINEAR(DELTA((VWAP),
 3), 10), 15))"""
-    return (TSRANK(DECAYLINEAR(CORR(LOW, MEAN(VOLUME, 10), 7), 6), 4) + TSRANK(DECAYLINEAR(DELTA(VWAP, 3), 10), 15))
+    return (TSRANK(DECAYLINEAR(CORR(((LOW)), MEAN(VOLUME, 10), 7), 6), 4) + TSRANK(DECAYLINEAR(DELTA((VWAP),
+                                                                                                     3), 10), 15))
 
 
 def alpha_045(OPEN, CLOSE, VOLUME, VWAP, **kwargs):
@@ -296,10 +296,12 @@ SUM(((HIGH+LOW)>=(DELAY(HIGH,1)+DELAY(LOW,1))?0:MAX(ABS(HIGH-DELAY(HIGH,1)),ABS(
 OW,1)))),12)/(SUM(((HIGH+LOW)>=(DELAY(HIGH,1)+DELAY(LOW,1))?0:MAX(ABS(HIGH-DELAY(HIGH,1)),ABS(L
 OW-DELAY(LOW,1)))),12)+SUM(((HIGH+LOW)<=(DELAY(HIGH,1)+DELAY(LOW,1))?0:MAX(ABS(HIGH-DELAY(HI
 GH,1)),ABS(LOW-DELAY(LOW,1)))),12))"""
-    t1 = MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))
-    t2 = (DELAY(HIGH, 1) + DELAY(LOW, 1))
-    t3 = (HIGH + LOW)
-    return SUM(IF(t3 >= t2, 0, t1), 12) / (SUM(IF(t3 >= t2, 0, t1), 12) + SUM(IF(t3 <= t2, 0, t1), 12))
+    return SUM(IF((HIGH + LOW) >= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+                  MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12) / (SUM(
+        IF((HIGH + LOW) >= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+           MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12) + SUM(
+        IF((HIGH + LOW) <= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+           MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12))
 
 
 def alpha_050(HIGH, LOW, **kwargs):
@@ -311,11 +313,18 @@ GH,1)),ABS(LOW-DELAY(LOW,1)))),12))-SUM(((HIGH+LOW)>=(DELAY(HIGH,1)+DELAY(LOW,1)
 GH-DELAY(HIGH,1)),ABS(LOW-DELAY(LOW,1)))),12)/(SUM(((HIGH+LOW)>=(DELAY(HIGH,1)+DELAY(LOW,1))?0:
 MAX(ABS(HIGH-DELAY(HIGH,1)),ABS(LOW-DELAY(LOW,1)))),12)+SUM(((HIGH+LOW)<=(DELAY(HIGH,1)+DELA
 Y(LOW,1))?0:MAX(ABS(HIGH-DELAY(HIGH,1)),ABS(LOW-DELAY(LOW,1)))),12))"""
-    t1 = MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))
-    t2 = (DELAY(HIGH, 1) + DELAY(LOW, 1))
-    t3 = (HIGH + LOW)
-    return (SUM(IF(t3 <= t2, 0, t1), 12) / (SUM(IF(t3 <= t2, 0, t1), 12) + SUM(IF(t3 >= t2, 0, t1), 12)) -
-            SUM(IF(t3 >= t2, 0, t1), 12) / (SUM(IF(t3 >= t2, 0, t1), 12) + SUM(IF(t3 <= t2, 0, t1), 12)))
+    return SUM(IF((HIGH + LOW) <= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+                  MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12) / (SUM(
+        IF((HIGH + LOW) <= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+           MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12) + SUM(
+        IF((HIGH + LOW) >= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+           MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12)) - SUM(
+        IF((HIGH + LOW) >= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+           MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12) / (SUM(
+        IF((HIGH + LOW) >= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+           MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12) + SUM(
+        IF((HIGH + LOW) <= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+           MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12))
 
 
 def alpha_051(HIGH, LOW, **kwargs):
@@ -324,10 +333,12 @@ SUM(((HIGH+LOW)<=(DELAY(HIGH,1)+DELAY(LOW,1))?0:MAX(ABS(HIGH-DELAY(HIGH,1)),ABS(
 OW,1)))),12)/(SUM(((HIGH+LOW)<=(DELAY(HIGH,1)+DELAY(LOW,1))?0:MAX(ABS(HIGH-DELAY(HIGH,1)),ABS(L
 OW-DELAY(LOW,1)))),12)+SUM(((HIGH+LOW)>=(DELAY(HIGH,1)+DELAY(LOW,1))?0:MAX(ABS(HIGH-DELAY(HI
 GH,1)),ABS(LOW-DELAY(LOW,1)))),12))"""
-    t1 = MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))
-    t2 = (DELAY(HIGH, 1) + DELAY(LOW, 1))
-    t3 = (HIGH + LOW)
-    return SUM(IF(t3 <= t2, 0, t1), 12) / (SUM(IF(t3 <= t2, 0, t1), 12) + SUM(IF(t3 >= t2, 0, t1), 12))
+    return SUM(IF((HIGH + LOW) <= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+                  MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12) / (SUM(
+        IF((HIGH + LOW) <= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+           MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12) + SUM(
+        IF((HIGH + LOW) >= (DELAY(HIGH, 1) + DELAY(LOW, 1)), 0,
+           MAX(ABS(HIGH - DELAY(HIGH, 1)), ABS(LOW - DELAY(LOW, 1)))), 12))
 
 
 def alpha_052(HIGH, LOW, CLOSE, **kwargs):
@@ -335,8 +346,8 @@ def alpha_052(HIGH, LOW, CLOSE, **kwargs):
 SUM(MAX(0,HIGH-DELAY((HIGH+LOW+CLOSE)/3,1)),26)/SUM(MAX(0,DELAY((HIGH+LOW+CLOSE)/3,1)-L),26)*
 100"""
     # L应当是LOW
-    t1 = DELAY((HIGH + LOW + CLOSE) / 3, 1)
-    return SUM(MAX(0, HIGH - t1), 26) / SUM(MAX(0, t1 - LOW), 26) * 100
+    return SUM(MAX(0, HIGH - DELAY((HIGH + LOW + CLOSE) / 3, 1)), 26) / SUM(
+        MAX(0, DELAY((HIGH + LOW + CLOSE) / 3, 1) - LOW), 26) * 100
 
 
 def alpha_053(CLOSE, **kwargs):
@@ -346,7 +357,6 @@ def alpha_053(CLOSE, **kwargs):
 
 def alpha_054(OPEN, CLOSE, **kwargs):
     """Alpha54 (-1 * RANK((STD(ABS(CLOSE - OPEN)) + (CLOSE - OPEN)) + CORR(CLOSE, OPEN,10)))"""
-    # TODO
     return (-1 * RANK((STD(ABS(CLOSE - OPEN)) + (CLOSE - OPEN)) + CORR(CLOSE, OPEN, 10)))
 
 
@@ -361,21 +371,14 @@ SE,1))/2+ABS(DELAY(CLOSE,1)-DELAY(OPEN,1))/4:ABS(HIGH-DELAY(LOW,1))+ABS(DELAY(CL
 EN,1))/4)))*MAX(ABS(HIGH-DELAY(CLOSE,1)),ABS(LOW-DELAY(CLOSE,1))),20)"""
     # TODO
     pass
-    # return SUM(16 * (CLOSE - DELAY(CLOSE, 1) + (CLOSE - OPEN) / 2 + DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / (
-    # (ABS(HIGH - DELAY(CLOSE, 1)) > ABS(LOW - DELAY(CLOSE, 1)) & ABS(HIGH - DELAY(CLOSE, 1)) > ABS(HIGH - DELAY(LOW, 1))
-    #  ?ABS(HIGH-DELAY(CLOSE, 1)) + ABS(LOW - DELAY(CLOSE, 1)) / 2 + ABS(DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / 4:(
-    #             ABS(LOW - DELAY(CLOSE, 1)) > ABS(HIGH - DELAY(LOW, 1)) & ABS(LOW - DELAY(CLOSE, 1)) > ABS(
-    #         HIGH - DELAY(CLOSE, 1))?ABS(LOW-DELAY(CLOSE, 1))+ABS(HIGH - DELAY(CLOSE, 1)) / 2 + ABS(
-    #     DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / 4: ABS(HIGH - DELAY(LOW, 1)) + ABS(
-    #     DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / 4)))*MAX(ABS(HIGH - DELAY(CLOSE, 1)), ABS(LOW - DELAY(CLOSE, 1))), 20)
 
 
 def alpha_056(OPEN, HIGH, LOW, VOLUME, **kwargs):
     """Alpha56
 (RANK((OPEN - TSMIN(OPEN, 12))) < RANK((RANK(CORR(SUM(((HIGH + LOW) / 2), 19),
 SUM(MEAN(VOLUME,40), 19), 13))^5)))"""
-    return LessThan(RANK((OPEN - TSMIN(OPEN, 12))),
-                    RANK((RANK(CORR(SUM(((HIGH + LOW) / 2), 19), SUM(MEAN(VOLUME, 40), 19), 13)) ** 5)))
+    return LessThan(RANK((OPEN - TSMIN(OPEN, 12))), RANK((RANK(CORR(SUM(((HIGH + LOW) / 2), 19),
+                                                                    SUM(MEAN(VOLUME, 40), 19), 13)) ** 5)))
 
 
 def alpha_057(HIGH, LOW, CLOSE, **kwargs):
@@ -392,8 +395,8 @@ def alpha_059(HIGH, LOW, CLOSE, **kwargs):
     """Alpha59
 SUM((CLOSE=DELAY(CLOSE,1)?0:CLOSE-(CLOSE>DELAY(CLOSE,1)?MIN(LOW,DELAY(CLOSE,1)):MAX(HIGH,D
 ELAY(CLOSE,1)))),20)"""
-    t1 = IF(CLOSE > DELAY(CLOSE, 1), MIN(LOW, DELAY(CLOSE, 1)), MAX(HIGH, DELAY(CLOSE, 1)))
-    return SUM(IF(CLOSE == DELAY(CLOSE, 1), 0, CLOSE - t1), 20)
+    return SUM(IF(CLOSE == DELAY(CLOSE, 1), 0,
+                  CLOSE - IF(CLOSE > DELAY(CLOSE, 1), MIN(LOW, DELAY(CLOSE, 1)), MAX(HIGH, DELAY(CLOSE, 1)))), 20)
 
 
 def alpha_060(HIGH, LOW, CLOSE, VOLUME, **kwargs):
@@ -406,7 +409,7 @@ def alpha_061(LOW, VOLUME, VWAP, **kwargs):
 (MAX(RANK(DECAYLINEAR(DELTA(VWAP, 1), 12)),
 RANK(DECAYLINEAR(RANK(CORR((LOW),MEAN(VOLUME,80), 8)), 17))) * -1)"""
     return (MAX(RANK(DECAYLINEAR(DELTA(VWAP, 1), 12)),
-                RANK(DECAYLINEAR(RANK(CORR(LOW, MEAN(VOLUME, 80), 8)), 17))) * -1)
+                RANK(DECAYLINEAR(RANK(CORR((LOW), MEAN(VOLUME, 80), 8)), 17))) * -1)
 
 
 def alpha_062(HIGH, VOLUME, **kwargs):
@@ -416,8 +419,7 @@ def alpha_062(HIGH, VOLUME, **kwargs):
 
 def alpha_063(CLOSE, **kwargs):
     """Alpha63 SMA(MAX(CLOSE-DELAY(CLOSE,1),0),6,1)/SMA(ABS(CLOSE-DELAY(CLOSE,1)),6,1)*100"""
-    t1 = CLOSE - DELAY(CLOSE, 1)
-    return SMA(MAX(t1, 0), 6, 1) / SMA(ABS(t1), 6, 1) * 100
+    return SMA(MAX(CLOSE - DELAY(CLOSE, 1), 0), 6, 1) / SMA(ABS(CLOSE - DELAY(CLOSE, 1)), 6, 1) * 100
 
 
 def alpha_064(CLOSE, VOLUME, VWAP, **kwargs):
@@ -440,8 +442,7 @@ def alpha_066(CLOSE, **kwargs):
 
 def alpha_067(CLOSE, **kwargs):
     """Alpha67 SMA(MAX(CLOSE-DELAY(CLOSE,1),0),24,1)/SMA(ABS(CLOSE-DELAY(CLOSE,1)),24,1)*100"""
-    t1 = CLOSE - DELAY(CLOSE, 1)
-    return SMA(MAX(t1, 0), 24, 1) / SMA(ABS(t1), 24, 1) * 100
+    return SMA(MAX(CLOSE - DELAY(CLOSE, 1), 0), 24, 1) / SMA(ABS(CLOSE - DELAY(CLOSE, 1)), 24, 1) * 100
 
 
 def alpha_068(HIGH, LOW, VOLUME, **kwargs):
@@ -452,9 +453,8 @@ def alpha_068(HIGH, LOW, VOLUME, **kwargs):
 def alpha_069(DTM, DBM, **kwargs):
     """Alpha69
 (SUM(DTM,20)>SUM(DBM,20)？(SUM(DTM,20)-SUM(DBM,20))/SUM(DTM,20)：(SUM(DTM,20)=SUM(DBM,20)？ 0：(SUM(DTM,20)-SUM(DBM,20))/SUM(DBM,20)))"""
-    t1 = SUM(DTM, 20)
-    t2 = SUM(DBM, 20)
-    return IF(t1 > t2, (t1 - t2) / t1, IF(t1 == t2, 0, (t1 - t2) / t2))
+    return IF(SUM(DTM, 20) > SUM(DBM, 20), (SUM(DTM, 20) - SUM(DBM, 20)) / SUM(DTM, 20),
+              IF(SUM(DTM, 20) == SUM(DBM, 20), 0, (SUM(DTM, 20) - SUM(DBM, 20)) / SUM(DBM, 20)))
 
 
 def alpha_070(AMOUNT, **kwargs):
@@ -493,14 +493,13 @@ def alpha_075(OPEN, CLOSE, BANCHMARKINDEXOPEN, BANCHMARKINDEXCLOSE, **kwargs):
 COUNT(CLOSE>OPEN &
 BANCHMARKINDEXCLOSE<BANCHMARKINDEXOPEN,50)/COUNT(BANCHMARKINDEXCLOSE<BANCHMARKIN
 DEXOPEN,50)"""
-    t1 = BANCHMARKINDEXCLOSE < BANCHMARKINDEXOPEN
-    return COUNT((CLOSE > OPEN) & t1, 50) / COUNT(t1, 50)
+    return COUNT((CLOSE > OPEN) & (BANCHMARKINDEXCLOSE < BANCHMARKINDEXOPEN), 50) / COUNT(
+        BANCHMARKINDEXCLOSE < BANCHMARKINDEXOPEN, 50)
 
 
 def alpha_076(CLOSE, VOLUME, **kwargs):
     """Alpha76 STD(ABS((CLOSE/DELAY(CLOSE,1)-1))/VOLUME,20)/MEAN(ABS((CLOSE/DELAY(CLOSE,1)-1))/VOLUME,20)"""
-    t1 = ABS((CLOSE / DELAY(CLOSE, 1) - 1)) / VOLUME
-    return STD(t1, 20) / MEAN(t1, 20)
+    return STD(ABS((CLOSE / DELAY(CLOSE, 1) - 1)) / VOLUME, 20) / MEAN(ABS((CLOSE / DELAY(CLOSE, 1) - 1)) / VOLUME, 20)
 
 
 def alpha_077(HIGH, LOW, VOLUME, VWAP, **kwargs):
@@ -515,14 +514,13 @@ def alpha_078(HIGH, LOW, CLOSE, **kwargs):
     """Alpha78
 ((HIGH+LOW+CLOSE)/3-MA((HIGH+LOW+CLOSE)/3,12))/(0.015*MEAN(ABS(CLOSE-MEAN((HIGH+LOW+CLOS
 E)/3,12)),12))"""
-    t1 = (HIGH + LOW + CLOSE) / 3
-    return (t1 - MA(t1, 12)) / (0.015 * MEAN(ABS(CLOSE - MEAN(t1, 12)), 12))
+    return ((HIGH + LOW + CLOSE) / 3 - MA((HIGH + LOW + CLOSE) / 3, 12)) / (
+            0.015 * MEAN(ABS(CLOSE - MEAN((HIGH + LOW + CLOSE) / 3, 12)), 12))
 
 
 def alpha_079(CLOSE, **kwargs):
     """Alpha79 SMA(MAX(CLOSE-DELAY(CLOSE,1),0),12,1)/SMA(ABS(CLOSE-DELAY(CLOSE,1)),12,1)*100"""
-    t1 = CLOSE - DELAY(CLOSE, 1)
-    return SMA(MAX(t1, 0), 12, 1) / SMA(ABS(t1), 12, 1) * 100
+    return SMA(MAX(CLOSE - DELAY(CLOSE, 1), 0), 12, 1) / SMA(ABS(CLOSE - DELAY(CLOSE, 1)), 12, 1) * 100
 
 
 def alpha_080(VOLUME, **kwargs):
@@ -560,19 +558,18 @@ def alpha_086(CLOSE, **kwargs):
 ((0.25 < (((DELAY(CLOSE, 20) - DELAY(CLOSE, 10)) / 10) - ((DELAY(CLOSE, 10) - CLOSE) / 10))) ? (-1 * 1) :
 (((((DELAY(CLOSE, 20) - DELAY(CLOSE, 10)) / 10) - ((DELAY(CLOSE, 10) - CLOSE) / 10)) < 0) ? 1 : ((-1 * 1) *
 (CLOSE - DELAY(CLOSE, 1)))))"""
-    t1 = DELAY(CLOSE, 20)
-    t2 = DELAY(CLOSE, 10)
-    t3 = DELAY(CLOSE, 1)
-    t4 = (((t1 - t2) / 10) - ((t2 - CLOSE) / 10))
-    return IF((0.25 < t4), -1, IF((t4 < 0), 1, (-1 * (CLOSE - t3))))
+    return IF((0.25 < (((DELAY(CLOSE, 20) - DELAY(CLOSE, 10)) / 10) - ((DELAY(CLOSE, 10) - CLOSE) / 10))), (-1 * 1),
+              IF(((((DELAY(CLOSE, 20) - DELAY(CLOSE, 10)) / 10) - ((DELAY(CLOSE, 10) - CLOSE) / 10)) < 0), 1,
+                 ((-1 * 1) *
+                  (CLOSE - DELAY(CLOSE, 1)))))
 
 
 def alpha_087(OPEN, HIGH, LOW, VWAP, **kwargs):
     """Alpha87
 ((RANK(DECAYLINEAR(DELTA(VWAP, 4), 7)) + TSRANK(DECAYLINEAR(((((LOW * 0.9) + (LOW * 0.1)) - VWAP) /
 (OPEN - ((HIGH + LOW) / 2))), 11), 7)) * -1)"""
-    return ((RANK(DECAYLINEAR(DELTA(VWAP, 4), 7)) +
-             TSRANK(DECAYLINEAR(((LOW - VWAP) / (OPEN - ((HIGH + LOW) / 2))), 11), 7)) * -1)
+    return ((RANK(DECAYLINEAR(DELTA(VWAP, 4), 7)) + TSRANK(DECAYLINEAR(((((LOW * 0.9) + (LOW * 0.1)) - VWAP) /
+                                                                        (OPEN - ((HIGH + LOW) / 2))), 11), 7)) * -1)
 
 
 def alpha_088(CLOSE, **kwargs):
@@ -582,8 +579,7 @@ def alpha_088(CLOSE, **kwargs):
 
 def alpha_089(CLOSE, **kwargs):
     """Alpha89 2*(SMA(CLOSE,13,2)-SMA(CLOSE,27,2)-SMA(SMA(CLOSE,13,2)-SMA(CLOSE,27,2),10,2))"""
-    t1 = SMA(CLOSE, 13, 2) - SMA(CLOSE, 27, 2)
-    return 2 * (t1 - SMA(t1, 10, 2))
+    return 2 * (SMA(CLOSE, 13, 2) - SMA(CLOSE, 27, 2) - SMA(SMA(CLOSE, 13, 2) - SMA(CLOSE, 27, 2), 10, 2))
 
 
 def alpha_090(VOLUME, VWAP, **kwargs):
@@ -633,8 +629,10 @@ def alpha_098(CLOSE, **kwargs):
     """Alpha98
 ((((DELTA((SUM(CLOSE, 100) / 100), 100) / DELAY(CLOSE, 100)) < 0.05) || ((DELTA((SUM(CLOSE, 100) / 100), 100) /
 DELAY(CLOSE, 100)) == 0.05)) ? (-1 * (CLOSE - TSMIN(CLOSE, 100))) : (-1 * DELTA(CLOSE, 3)))"""
-    t1 = DELTA((SUM(CLOSE, 100) / 100), 100)
-    return IF(((t1 / DELAY(CLOSE, 100)) <= 0.05), (-1 * (CLOSE - TSMIN(CLOSE, 100))), (-1 * DELTA(CLOSE, 3)))
+    return IF(
+        (((DELTA((SUM(CLOSE, 100) / 100), 100) / DELAY(CLOSE, 100)) < 0.05) | ((DELTA((SUM(CLOSE, 100) / 100), 100) /
+                                                                                DELAY(CLOSE, 100)) == 0.05)),
+        (-1 * (CLOSE - TSMIN(CLOSE, 100))), (-1 * DELTA(CLOSE, 3)))
 
 
 def alpha_099(CLOSE, VOLUME, **kwargs):
@@ -651,8 +649,8 @@ def alpha_101(HIGH, CLOSE, VOLUME, VWAP, **kwargs):
     """Alpha101
 ((RANK(CORR(CLOSE, SUM(MEAN(VOLUME,30), 37), 15)) < RANK(CORR(RANK(((HIGH * 0.1) + (VWAP * 0.9))),
 RANK(VOLUME), 11))) * -1)"""
-    return (LessThan(RANK(CORR(CLOSE, SUM(MEAN(VOLUME, 30), 37), 15)),
-                     RANK(CORR(RANK(((HIGH * 0.1) + (VWAP * 0.9))), RANK(VOLUME), 11))) * -1)
+    return (LessThan(RANK(CORR(CLOSE, SUM(MEAN(VOLUME, 30), 37), 15)), RANK(CORR(RANK(((HIGH * 0.1) + (VWAP * 0.9))),
+                                                                                 RANK(VOLUME), 11))) * -1)
 
 
 def alpha_102(VOLUME, **kwargs):
@@ -682,10 +680,7 @@ def alpha_106(CLOSE, **kwargs):
 
 def alpha_107(OPEN, HIGH, LOW, CLOSE, **kwargs):
     """Alpha107 (((-1 * RANK((OPEN - DELAY(HIGH, 1)))) * RANK((OPEN - DELAY(CLOSE, 1)))) * RANK((OPEN - DELAY(LOW, 1))))"""
-    return (((-1 *
-              RANK((OPEN - DELAY(HIGH, 1)))) *
-             RANK((OPEN - DELAY(CLOSE, 1)))) *
-            RANK((OPEN - DELAY(LOW, 1))))
+    return (((-1 * RANK((OPEN - DELAY(HIGH, 1)))) * RANK((OPEN - DELAY(CLOSE, 1)))) * RANK((OPEN - DELAY(LOW, 1))))
 
 
 def alpha_108(HIGH, VOLUME, VWAP, **kwargs):
@@ -707,9 +702,8 @@ def alpha_111(HIGH, LOW, CLOSE, VOLUME, **kwargs):
     """Alpha111
 SMA(VOL*((CLOSE-LOW)-(HIGH-CLOSE))/(HIGH-LOW),11,2)-SMA(VOL*((CLOSE-LOW)-(HIGH-CLOSE))/(HIGH-L
 OW),4,2)"""
-    t1 = VOLUME * ((CLOSE - LOW) - (HIGH - CLOSE)) / (HIGH - LOW)
-    return (SMA(t1, 11, 2) -
-            SMA(t1, 4, 2))
+    return SMA(VOLUME * ((CLOSE - LOW) - (HIGH - CLOSE)) / (HIGH - LOW), 11, 2) - SMA(
+        VOLUME * ((CLOSE - LOW) - (HIGH - CLOSE)) / (HIGH - LOW), 4, 2)
 
 
 def alpha_112(CLOSE, **kwargs):
@@ -717,36 +711,36 @@ def alpha_112(CLOSE, **kwargs):
 (SUM((CLOSE-DELAY(CLOSE,1)>0?CLOSE-DELAY(CLOSE,1):0),12)-SUM((CLOSE-DELAY(CLOSE,1)<0?ABS(CLOS
 E-DELAY(CLOSE,1)):0),12))/(SUM((CLOSE-DELAY(CLOSE,1)>0?CLOSE-DELAY(CLOSE,1):0),12)+SUM((CLOSE-DE
 LAY(CLOSE,1)<0?ABS(CLOSE-DELAY(CLOSE,1)):0),12))*100"""
-    t1 = CLOSE - DELAY(CLOSE, 1)
-    t2 = SUM(IF(t1 > 0, t1, 0), 12)
-    t3 = SUM(IF(t1 < 0, ABS(t1), 0), 12)
-    return ((t2 - t3) /
-            (t2 + t3) * 100)
+    return (SUM(IF(CLOSE - DELAY(CLOSE, 1) > 0, CLOSE - DELAY(CLOSE, 1), 0), 12) - SUM(
+        IF(CLOSE - DELAY(CLOSE, 1) < 0, ABS(CLOSE - DELAY(CLOSE, 1)), 0), 12)) / (
+                   SUM(IF(CLOSE - DELAY(CLOSE, 1) > 0, CLOSE - DELAY(CLOSE, 1), 0), 12) + SUM(
+               IF(CLOSE - DELAY(CLOSE, 1) < 0, ABS(CLOSE - DELAY(CLOSE, 1)), 0), 12)) * 100
 
 
 def alpha_113(CLOSE, VOLUME, **kwargs):
     """Alpha113
 (-1 * ((RANK((SUM(DELAY(CLOSE, 5), 20) / 20)) * CORR(CLOSE, VOLUME, 2)) * RANK(CORR(SUM(CLOSE, 5),
 SUM(CLOSE, 20), 2))))"""
-    return (-1 * ((RANK((SUM(DELAY(CLOSE, 5), 20) / 20)) * CORR(CLOSE, VOLUME, 2)) *
-                  RANK(CORR(SUM(CLOSE, 5), SUM(CLOSE, 20), 2))))
+    return (-1 * ((RANK((SUM(DELAY(CLOSE, 5), 20) / 20)) * CORR(CLOSE, VOLUME, 2)) * RANK(
+        CORR(SUM(CLOSE, 5), SUM(CLOSE, 20), 2))))
 
 
 def alpha_114(HIGH, LOW, CLOSE, VOLUME, VWAP, **kwargs):
     """Alpha114
 ((RANK(DELAY(((HIGH - LOW) / (SUM(CLOSE, 5) / 5)), 2)) * RANK(RANK(VOLUME))) / (((HIGH - LOW) /
 (SUM(CLOSE, 5) / 5)) / (VWAP - CLOSE)))"""
-    t1 = ((HIGH - LOW) / (SUM(CLOSE, 5) / 5))
-    return ((RANK(DELAY(t1, 2)) * RANK(VOLUME)) /
-            (t1 / (VWAP - CLOSE)))
+    return ((RANK(DELAY(((HIGH - LOW) / (SUM(CLOSE, 5) / 5)), 2)) * RANK(RANK(VOLUME))) / (((HIGH - LOW) /
+                                                                                            (SUM(CLOSE, 5) / 5)) / (
+                                                                                                   VWAP - CLOSE)))
 
 
 def alpha_115(HIGH, LOW, CLOSE, VOLUME, **kwargs):
     """Alpha115
 (RANK(CORR(((HIGH * 0.9) + (CLOSE * 0.1)), MEAN(VOLUME,30), 10))^RANK(CORR(TSRANK(((HIGH + LOW) /
 2), 4), TSRANK(VOLUME, 10), 7)))"""
-    return (RANK(CORR(((HIGH * 0.9) + (CLOSE * 0.1)), MEAN(VOLUME, 30), 10)) **
-            RANK(CORR(TSRANK(((HIGH + LOW) / 2), 4), TSRANK(VOLUME, 10), 7)))
+    return (RANK(CORR(((HIGH * 0.9) + (CLOSE * 0.1)), MEAN(VOLUME, 30), 10)) ** RANK(CORR(TSRANK(((HIGH + LOW) /
+                                                                                                  2), 4),
+                                                                                          TSRANK(VOLUME, 10), 7)))
 
 
 def alpha_116(CLOSE, **kwargs):
@@ -788,16 +782,17 @@ def alpha_122(CLOSE, **kwargs):
     """Alpha122
 (SMA(SMA(SMA(LOG(CLOSE),13,2),13,2),13,2)-DELAY(SMA(SMA(SMA(LOG(CLOSE),13,2),13,2),13,2),1))/DELAY(SM
 A(SMA(SMA(LOG(CLOSE),13,2),13,2),13,2),1)"""
-    t1 = SMA(SMA(SMA(LOG(CLOSE), 13, 2), 13, 2), 13, 2)
-    return ((t1 - DELAY(t1, 1)) / DELAY(t1, 1))
+    return (SMA(SMA(SMA(LOG(CLOSE), 13, 2), 13, 2), 13, 2) - DELAY(SMA(SMA(SMA(LOG(CLOSE), 13, 2), 13, 2), 13, 2),
+                                                                   1)) / DELAY(
+        SMA(SMA(SMA(LOG(CLOSE), 13, 2), 13, 2), 13, 2), 1)
 
 
 def alpha_123(HIGH, LOW, VOLUME, **kwargs):
     """Alpha123
 ((RANK(CORR(SUM(((HIGH + LOW) / 2), 20), SUM(MEAN(VOLUME,60), 20), 9)) < RANK(CORR(LOW, VOLUME,
 6))) * -1)"""
-    return (LessThan(RANK(CORR(SUM(((HIGH + LOW) / 2), 20), SUM(MEAN(VOLUME, 60), 20), 9)),
-                     RANK(CORR(LOW, VOLUME, 6))) * -1)
+    return (LessThan(RANK(CORR(SUM(((HIGH + LOW) / 2), 20), SUM(MEAN(VOLUME, 60), 20), 9)), RANK(CORR(LOW, VOLUME,
+                                                                                                      6))) * -1)
 
 
 def alpha_124(CLOSE, VWAP, **kwargs):
@@ -809,8 +804,9 @@ def alpha_125(CLOSE, VOLUME, VWAP, **kwargs):
     """Alpha125
 (RANK(DECAYLINEAR(CORR((VWAP), MEAN(VOLUME,80),17), 20)) / RANK(DECAYLINEAR(DELTA(((CLOSE * 0.5)
 + (VWAP * 0.5)), 3), 16)))"""
-    return (RANK(DECAYLINEAR(CORR((VWAP), MEAN(VOLUME, 80), 17), 20)) /
-            RANK(DECAYLINEAR(DELTA(((CLOSE * 0.5) + (VWAP * 0.5)), 3), 16)))
+    return (RANK(DECAYLINEAR(CORR((VWAP), MEAN(VOLUME, 80), 17), 20)) / RANK(DECAYLINEAR(DELTA(((CLOSE * 0.5)
+                                                                                                + (VWAP * 0.5)), 3),
+                                                                                         16)))
 
 
 def alpha_126(HIGH, LOW, CLOSE, **kwargs):
@@ -828,15 +824,15 @@ def alpha_128(HIGH, LOW, CLOSE, VOLUME, **kwargs):
 100-(100/(1+SUM(((HIGH+LOW+CLOSE)/3>DELAY((HIGH+LOW+CLOSE)/3,1)?(HIGH+LOW+CLOSE)/3*VOLUM
 E:0),14)/SUM(((HIGH+LOW+CLOSE)/3<DELAY((HIGH+LOW+CLOSE)/3,1)?(HIGH+LOW+CLOSE)/3*VOLUME:0),
 14)))"""
-    t1 = (HIGH + LOW + CLOSE) / 3
-    return 100 - (100 / (1 + SUM(IF(t1 > DELAY(t1, 1), t1 * VOLUME, 0), 14) /
-                         SUM(IF(t1 < DELAY(t1, 1), t1 * VOLUME, 0), 14)))
+    return 100 - (100 / (1 + SUM(
+        IF((HIGH + LOW + CLOSE) / 3 > DELAY((HIGH + LOW + CLOSE) / 3, 1), (HIGH + LOW + CLOSE) / 3 * VOLUME, 0),
+        14) / SUM(
+        IF((HIGH + LOW + CLOSE) / 3 < DELAY((HIGH + LOW + CLOSE) / 3, 1), (HIGH + LOW + CLOSE) / 3 * VOLUME, 0), 14)))
 
 
 def alpha_129(CLOSE, **kwargs):
     """Alpha129 SUM((CLOSE-DELAY(CLOSE,1)<0?ABS(CLOSE-DELAY(CLOSE,1)):0),12)"""
-    t1 = CLOSE - DELAY(CLOSE, 1)
-    return SUM(IF(t1 < 0, ABS(t1), 0), 12)
+    return SUM(IF(CLOSE - DELAY(CLOSE, 1) < 0, ABS(CLOSE - DELAY(CLOSE, 1)), 0), 12)
 
 
 def alpha_130(HIGH, LOW, VOLUME, VWAP, **kwargs):
@@ -886,17 +882,15 @@ E,1))/2+ABS(DELAY(CLOSE,1)-DELAY(OPEN,1))/4:(ABS(LOW-DELAY(CLOSE,1))>ABS(HIGH-DE
 ABS(LOW-DELAY(CLOSE,1))>ABS(HIGH-DELAY(CLOSE,1))?ABS(LOW-DELAY(CLOSE,1))+ABS(HIGH-DELAY(CLO
 SE,1))/2+ABS(DELAY(CLOSE,1)-DELAY(OPEN,1))/4:ABS(HIGH-DELAY(LOW,1))+ABS(DELAY(CLOSE,1)-DELAY(OP
 EN,1))/4)))*MAX(ABS(HIGH-DELAY(CLOSE,1)),ABS(LOW-DELAY(CLOSE,1)))"""
-    t1 = ABS(HIGH - DELAY(CLOSE, 1))
-    t2 = ABS(LOW - DELAY(CLOSE, 1))
-    t3 = ABS(HIGH - DELAY(LOW, 1))
-    t4 = ABS(DELAY(CLOSE, 1) - DELAY(OPEN, 1))
-    t0 = (CLOSE - DELAY(CLOSE, 1) + (CLOSE - OPEN) / 2 + DELAY(CLOSE, 1) - DELAY(OPEN, 1))
-    return 16 * t0 / (
-        IF((t1 > t2) & (t1 > t3),
-           t1 + t2 / 2 + t4 / 4,
-           IF((t2 > t3) & (t2 > t1),
-              t2 + t1 / 2 + t4 / 4,
-              t3 + t4 / 4))) * MAX(t1, t2)
+    return 16 * (CLOSE - DELAY(CLOSE, 1) + (CLOSE - OPEN) / 2 + DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / (IF(
+        (ABS(HIGH - DELAY(CLOSE, 1)) > ABS(LOW - DELAY(CLOSE, 1))) & (ABS(HIGH - DELAY(CLOSE, 1)) > ABS(
+            HIGH - DELAY(LOW, 1))),
+        ABS(HIGH - DELAY(CLOSE, 1)) + ABS(LOW - DELAY(CLOSE, 1)) / 2 + ABS(DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / 4, IF(
+            (ABS(LOW - DELAY(CLOSE, 1)) > ABS(HIGH - DELAY(LOW, 1))) & (ABS(LOW - DELAY(CLOSE, 1)) > ABS(
+                HIGH - DELAY(CLOSE, 1))),
+            ABS(LOW - DELAY(CLOSE, 1)) + ABS(HIGH - DELAY(CLOSE, 1)) / 2 + ABS(DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / 4,
+            ABS(HIGH - DELAY(LOW, 1)) + ABS(DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / 4))) * MAX(ABS(HIGH - DELAY(CLOSE, 1)),
+                                                                                           ABS(LOW - DELAY(CLOSE, 1)))
 
 
 def alpha_138(LOW, VOLUME, VWAP, **kwargs):
@@ -922,19 +916,15 @@ TSRANK(DECAYLINEAR(CORR(TSRANK(CLOSE, 8), TSRANK(MEAN(VOLUME,60), 20), 8), 7), 3
 
 def alpha_141(HIGH, VOLUME, **kwargs):
     """Alpha141 (RANK(CORR(RANK(HIGH), RANK(MEAN(VOLUME,15)), 9))* -1)"""
-    return (RANK(CORR(RANK(HIGH),
-                      RANK(MEAN(VOLUME, 15)),
-                      9)
-                 ) * -1)
+    return (RANK(CORR(RANK(HIGH), RANK(MEAN(VOLUME, 15)), 9)) * -1)
 
 
 def alpha_142(CLOSE, VOLUME, **kwargs):
     """Alpha142
 (((-1 * RANK(TSRANK(CLOSE, 10))) * RANK(DELTA(DELTA(CLOSE, 1), 1))) * RANK(TSRANK((VOLUME
 /MEAN(VOLUME,20)), 5)))"""
-    return (((-1 * RANK(TSRANK(CLOSE, 10))) *
-             RANK(DELTA(DELTA(CLOSE, 1), 1))) *
-            RANK(TSRANK((VOLUME / MEAN(VOLUME, 20)), 5)))
+    return (((-1 * RANK(TSRANK(CLOSE, 10))) * RANK(DELTA(DELTA(CLOSE, 1), 1))) * RANK(TSRANK((VOLUME
+                                                                                              / MEAN(VOLUME, 20)), 5)))
 
 
 def alpha_143(CLOSE, **kwargs):
@@ -963,10 +953,12 @@ MEAN((CLOSE-DELAY(CLOSE,1))/DELAY(CLOSE,1)-SMA((CLOSE-DELAY(CLOSE,1))/DELAY(CLOS
 CLOSE-DELAY(CLOSE,1))/DELAY(CLOSE,1)-SMA((CLOSE-DELAY(CLOSE,1))/DELAY(CLOSE,1),61,2))/SMA(((CLOS
 E-DELAY(CLOSE,1))/DELAY(CLOSE,1)-((CLOSE-DELAY(CLOSE,1))/DELAY(CLOSE,1)-SMA((CLOSE-DELAY(CLOSE,
 1))/DELAY(CLOSE,1),61,2)))^2,60);"""
-    t1 = (CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1)
-    t2 = SMA((CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1), 61, 2)
-    t3 = t1 - t2
-    return MEAN(t3, 20) * t3 / SMA(t2 ** 2, 60)
+    return MEAN((CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1) - SMA((CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1), 61, 2),
+                20) * ((CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1) - SMA((CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1),
+                                                                         61, 2)) / SMA(((CLOSE - DELAY(CLOSE,
+                                                                                                       1)) / DELAY(
+        CLOSE, 1) - ((CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1) - SMA((CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1), 61,
+                                                                       2))) ** 2, 60)
 
 
 def alpha_147(CLOSE, **kwargs):
@@ -1001,9 +993,8 @@ def alpha_152(CLOSE, **kwargs):
     """Alpha152
 SMA(MEAN(DELAY(SMA(DELAY(CLOSE/DELAY(CLOSE,9),1),9,1),1),12)-MEAN(DELAY(SMA(DELAY(CLOSE/DELAY
 (CLOSE,9),1),9,1),1),26),9,1)"""
-    t1 = DELAY(SMA(DELAY(CLOSE / DELAY(CLOSE, 9), 1), 9, 1), 1)
-    return SMA(MEAN(t1, 12) -
-               MEAN(t1, 26), 9, 1)
+    return SMA(MEAN(DELAY(SMA(DELAY(CLOSE / DELAY(CLOSE, 9), 1), 9, 1), 1), 12) - MEAN(
+        DELAY(SMA(DELAY(CLOSE / DELAY(CLOSE, 9), 1), 9, 1), 1), 26), 9, 1)
 
 
 def alpha_153(CLOSE, **kwargs):
@@ -1018,17 +1009,16 @@ def alpha_154(VOLUME, VWAP, **kwargs):
 
 def alpha_155(VOLUME, **kwargs):
     """Alpha155 SMA(VOLUME,13,2)-SMA(VOLUME,27,2)-SMA(SMA(VOLUME,13,2)-SMA(VOLUME,27,2),10,2)"""
-    t1 = SMA(VOLUME, 13, 2) - SMA(VOLUME, 27, 2)
-    return t1 - SMA(t1, 10, 2)
+    return SMA(VOLUME, 13, 2) - SMA(VOLUME, 27, 2) - SMA(SMA(VOLUME, 13, 2) - SMA(VOLUME, 27, 2), 10, 2)
 
 
 def alpha_156(OPEN, LOW, VWAP, **kwargs):
     """Alpha156
 (MAX(RANK(DECAYLINEAR(DELTA(VWAP, 5), 3)), RANK(DECAYLINEAR(((DELTA(((OPEN * 0.15) + (LOW *0.85)),
 2) / ((OPEN * 0.15) + (LOW * 0.85))) * -1), 3))) * -1)"""
-    t1 = ((OPEN * 0.15) + (LOW * 0.85))
-    return (MAX(RANK(DECAYLINEAR(DELTA(VWAP, 5), 3)),
-                RANK(DECAYLINEAR(((DELTA(t1, 2) / t1) * -1), 3))) * -1)
+    return (MAX(RANK(DECAYLINEAR(DELTA(VWAP, 5), 3)), RANK(DECAYLINEAR(((DELTA(((OPEN * 0.15) + (LOW * 0.85)),
+                                                                               2) / ((OPEN * 0.15) + (
+            LOW * 0.85))) * -1), 3))) * -1)
 
 
 def alpha_157(CLOSE, RET, **kwargs):
@@ -1053,9 +1043,12 @@ ELAY(CLOSE,1)),24)*6*24)*100/(6*12+6*24+12*24)"""
     t1 = MIN(LOW, DELAY(CLOSE, 1))
     t2 = MAX(HIGH, DELAY(CLOSE, 1))
     t3 = t2 - t1
-    return ((CLOSE - SUM(t1, 6)) / SUM(t3, 6) * 12 * 24 +
-            (CLOSE - SUM(t1, 12)) / SUM(t3, 12) * 6 * 24 +
-            (CLOSE - SUM(t1, 24)) / SUM(t3, 24) * 6 * 24) * 100 / (6 * 12 + 6 * 24 + 12 * 24)
+    return ((CLOSE - SUM(MIN(LOW, DELAY(CLOSE, 1)), 6)) / SUM(MAX(HIGH, DELAY(CLOSE, 1)) - MIN(LOW, DELAY(CLOSE, 1)), 6)
+            * 12 * 24 + (CLOSE - SUM(MIN(LOW, DELAY(CLOSE, 1)), 12)) / SUM(
+                MAX(HIGH, DELAY(CLOSE, 1)) - MIN(LOW, DELAY(CLOSE, 1)), 12) * 6 * 24 + (
+                    CLOSE - SUM(MIN(LOW, DELAY(CLOSE, 1)), 24)) / SUM(
+                MAX(HIGH, DELAY(CLOSE, 1)) - MIN(LOW, DELAY(CLOSE, 1)), 24) * 6 * 24) * 100 / (
+                   6 * 12 + 6 * 24 + 12 * 24)
 
 
 def alpha_160(CLOSE, **kwargs):
@@ -1075,8 +1068,11 @@ def alpha_162(CLOSE, **kwargs):
 E-DELAY(CLOSE,1),0),12,1)/SMA(ABS(CLOSE-DELAY(CLOSE,1)),12,1)*100,12))/(MAX(SMA(MAX(CLOSE-DELAY(C
 LOSE,1),0),12,1)/SMA(ABS(CLOSE-DELAY(CLOSE,1)),12,1)*100,12)-MIN(SMA(MAX(CLOSE-DELAY(CLOSE,1),0),12,
 1)/SMA(ABS(CLOSE-DELAY(CLOSE,1)),12,1)*100,12))"""
-    t1 = SMA(MAX(CLOSE - DELAY(CLOSE, 1), 0), 12, 1) / SMA(ABS(CLOSE - DELAY(CLOSE, 1)), 12, 1) * 100
-    return (t1 - MIN(t1, 12)) / (MAX(t1, 12) - MIN(t1, 12))
+    return (SMA(MAX(CLOSE - DELAY(CLOSE, 1), 0), 12, 1) / SMA(ABS(CLOSE - DELAY(CLOSE, 1)), 12, 1) * 100 - MIN(
+        SMA(MAX(CLOSE - DELAY(CLOSE, 1), 0), 12, 1) / SMA(ABS(CLOSE - DELAY(CLOSE, 1)), 12, 1) * 100, 12)) / (
+                   MAX(SMA(MAX(CLOSE - DELAY(CLOSE, 1), 0), 12, 1) / SMA(ABS(CLOSE - DELAY(CLOSE, 1)), 12, 1) * 100,
+                       12) - MIN(
+               SMA(MAX(CLOSE - DELAY(CLOSE, 1), 0), 12, 1) / SMA(ABS(CLOSE - DELAY(CLOSE, 1)), 12, 1) * 100, 12))
 
 
 def alpha_163(HIGH, CLOSE, VOLUME, VWAP, RET, **kwargs):
@@ -1088,14 +1084,13 @@ def alpha_164(HIGH, LOW, CLOSE, **kwargs):
     """Alpha164
 SMA((((CLOSE>DELAY(CLOSE,1))?1/(CLOSE-DELAY(CLOSE,1)):1)-MIN(((CLOSE>DELAY(CLOSE,1))?1/(CLOSE-D
 ELAY(CLOSE,1)):1),12))/(HIGH-LOW)*100,13,2)"""
-    t1 = IF((CLOSE > DELAY(CLOSE, 1)), 1 / (CLOSE - DELAY(CLOSE, 1)), 1)
-    return SMA((t1 - MIN(t1, 12)) / (HIGH - LOW) * 100, 13, 2)
+    return SMA((IF((CLOSE > DELAY(CLOSE, 1)), 1 / (CLOSE - DELAY(CLOSE, 1)), 1) - MIN(
+        IF((CLOSE > DELAY(CLOSE, 1)), 1 / (CLOSE - DELAY(CLOSE, 1)), 1), 12)) / (HIGH - LOW) * 100, 13, 2)
 
 
 def alpha_165(CLOSE, **kwargs):
     """Alpha165 MAX(SUMAC(CLOSE-MEAN(CLOSE,48)))-MIN(SUMAC(CLOSE-MEAN(CLOSE,48)))/STD(CLOSE,48)"""
-    # return MAX(SUMAC(CLOSE - MEAN(CLOSE, 48))) - MIN(SUMAC(CLOSE - MEAN(CLOSE, 48))) / STD(CLOSE, 48)
-    pass
+    return MAX(SUMAC(CLOSE - MEAN(CLOSE, 48))) - MIN(SUMAC(CLOSE - MEAN(CLOSE, 48))) / STD(CLOSE, 48)
 
 
 def alpha_166(CLOSE, **kwargs):
@@ -1121,17 +1116,18 @@ def alpha_169(CLOSE, **kwargs):
     """Alpha169
 SMA(MEAN(DELAY(SMA(CLOSE-DELAY(CLOSE,1),9,1),1),12)-MEAN(DELAY(SMA(CLOSE-DELAY(CLOSE,1),9,1),1),
 26),10,1)"""
-    t1 = DELAY(SMA(CLOSE - DELAY(CLOSE, 1), 9, 1), 1)
-    return SMA(MEAN(t1, 12) -
-               MEAN(t1, 26), 10, 1)
+    return SMA(
+        MEAN(DELAY(SMA(CLOSE - DELAY(CLOSE, 1), 9, 1), 1), 12) - MEAN(DELAY(SMA(CLOSE - DELAY(CLOSE, 1), 9, 1), 1), 26),
+        10, 1)
 
 
 def alpha_170(HIGH, CLOSE, VOLUME, VWAP, **kwargs):
     """Alpha170
 ((((RANK((1 / CLOSE)) * VOLUME) / MEAN(VOLUME,20)) * ((HIGH * RANK((HIGH - CLOSE))) / (SUM(HIGH, 5) /
 5))) - RANK((VWAP - DELAY(VWAP, 5))))"""
-    return ((((RANK((1 / CLOSE)) * VOLUME) / MEAN(VOLUME, 20)) * (
-            (HIGH * RANK((HIGH - CLOSE))) / (SUM(HIGH, 5) / 5))) - RANK((VWAP - DELAY(VWAP, 5))))
+    return ((((RANK((1 / CLOSE)) * VOLUME) / MEAN(VOLUME, 20)) * ((HIGH * RANK((HIGH - CLOSE))) / (SUM(HIGH, 5) /
+                                                                                                   5))) - RANK(
+        (VWAP - DELAY(VWAP, 5))))
 
 
 def alpha_171(OPEN, HIGH, LOW, CLOSE, **kwargs):
@@ -1196,8 +1192,8 @@ def alpha_180(CLOSE, VOLUME, **kwargs):
     """Alpha180
 ((MEAN(VOLUME,20) < VOLUME) ? ((-1 * TSRANK(ABS(DELTA(CLOSE, 7)), 60)) * SIGN(DELTA(CLOSE, 7)) : (-1 *
 VOLUME)))"""
-    # TODO, 好像括号不对应，需要再检查
-    return IF((MEAN(VOLUME, 20) < VOLUME), (-1 * TSRANK(ABS(DELTA(CLOSE, 7)), 60)) * SIGN(DELTA(CLOSE, 7)),
+    return IF((MEAN(VOLUME, 20) < VOLUME),
+              (-1 * TSRANK(ABS(DELTA(CLOSE, 7)), 60)) * SIGN(DELTA(CLOSE, 7)),
               (-1 * VOLUME))
 
 
@@ -1214,9 +1210,10 @@ def alpha_182(OPEN, CLOSE, BANCHMARKINDEXCLOSE, BANCHMARKINDEXOPEN, **kwargs):
     """Alpha182
 COUNT((CLOSE>OPEN & BANCHMARKINDEXCLOSE>BANCHMARKINDEXOPEN)OR(CLOSE<OPEN &
 BANCHMARKINDEXCLOSE<BANCHMARKINDEXOPEN),20)/20"""
-    t1 = ((CLOSE > OPEN) & (BANCHMARKINDEXCLOSE > BANCHMARKINDEXOPEN))
-    t2 = ((CLOSE < OPEN) & (BANCHMARKINDEXCLOSE < BANCHMARKINDEXOPEN))
-    return COUNT(t1 | t2, 20) / 20
+    return COUNT(((CLOSE > OPEN) & (BANCHMARKINDEXCLOSE > BANCHMARKINDEXOPEN)) | ((CLOSE < OPEN) &
+                                                                                  (
+                                                                                          BANCHMARKINDEXCLOSE < BANCHMARKINDEXOPEN)),
+                 20) / 20
 
 
 def alpha_183(CLOSE, **kwargs):
