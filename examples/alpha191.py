@@ -30,6 +30,9 @@ if __name__ == '__main__':
         'VWAP': vwap.stack(),
         'DTM': high.stack(),
         'DBM': low.stack(),
+        'MKT': high.stack(),
+        'SMB': low.stack(),
+        'HML': close.stack(),
         'BANCHMARKINDEXOPEN': high.stack(),
         'BANCHMARKINDEXCLOSE': low.stack(),
     }
@@ -37,8 +40,8 @@ if __name__ == '__main__':
     df.index.names = ['date', 'asset']
     kwargs = df.to_dict(orient='series')
 
-    for i in range(166, 166 + 1):
-        if i in (27, 30, 55, 143, 149, 165, 166, 183):
+    for i in range(1, 191 + 1):
+        if i in (30, 143, 149, 165, 166, 183):
             continue
         name = f'alpha_{i:03d}'
         f1 = getattr(a, name, None)
@@ -46,8 +49,8 @@ if __name__ == '__main__':
         if f1 is None:
             continue
         print(name)
-        #r1 = f1(**kwargs)
+        r1 = f1(**kwargs)
         r2 = f2(**kwargs)
-        #assert_series_equal(r1, r2)
-        print(r2)
+        assert_series_equal(r1, r2)
+        # print(r2)
         # print(r2.unstack())

@@ -4,6 +4,7 @@
 
 from talib import LINEARREG_SLOPE as REGBETA
 from talib import SMA as MEAN
+from talib import SMA as WMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
 
 from .alpha import LessThan
 from .alpha import RANK
@@ -72,6 +73,7 @@ SMA = series_groupby_apply(SMA, by=BY_ASSET, dropna=False)
 REGBETA = series_groupby_apply(REGBETA, by=BY_ASSET, dropna=False)
 COUNT = series_groupby_apply(COUNT, by=BY_ASSET, dropna=False)
 MA = series_groupby_apply(MA, by=BY_ASSET, dropna=False)
+WMA = series_groupby_apply(WMA, by=BY_ASSET, dropna=False)
 
 # 时序，双输入
 CORR = dataframe_groupby_apply(CORR, by=BY_ASSET, dropna=True)

@@ -217,7 +217,8 @@ def alpha_035(OPEN, VOLUME, **kwargs):
 
 def alpha_036(VOLUME, VWAP, **kwargs):
     """Alpha36 RANK(SUM(CORR(RANK(VOLUME), RANK(VWAP)), 6), 2)"""
-    return RANK(SUM(CORR(RANK(VOLUME), RANK(VWAP)), 6), 2)
+    # 没有CORR的参数？
+    return RANK(SUM(CORR(RANK(VOLUME), RANK(VWAP), 6), 6), 2)
 
 
 def alpha_037(OPEN, RET, **kwargs):
@@ -360,7 +361,7 @@ def alpha_054(OPEN, CLOSE, **kwargs):
     return (-1 * RANK((STD(ABS(CLOSE - OPEN)) + (CLOSE - OPEN)) + CORR(CLOSE, OPEN, 10)))
 
 
-def alpha_055(OPEN, HIGH, LOW, CLOSE, VOLUME, **kwargs):
+def alpha_055(OPEN, HIGH, LOW, CLOSE, **kwargs):
     """Alpha55
 SUM(16*(CLOSE-DELAY(CLOSE,1)+(CLOSE-OPEN)/2+DELAY(CLOSE,1)-DELAY(OPEN,1))/((ABS(HIGH-DELAY(CL
 OSE,1))>ABS(LOW-DELAY(CLOSE,1)) &
@@ -369,8 +370,16 @@ E,1))/2+ABS(DELAY(CLOSE,1)-DELAY(OPEN,1))/4:(ABS(LOW-DELAY(CLOSE,1))>ABS(HIGH-DE
 ABS(LOW-DELAY(CLOSE,1))>ABS(HIGH-DELAY(CLOSE,1))?ABS(LOW-DELAY(CLOSE,1))+ABS(HIGH-DELAY(CLO
 SE,1))/2+ABS(DELAY(CLOSE,1)-DELAY(OPEN,1))/4:ABS(HIGH-DELAY(LOW,1))+ABS(DELAY(CLOSE,1)-DELAY(OP
 EN,1))/4)))*MAX(ABS(HIGH-DELAY(CLOSE,1)),ABS(LOW-DELAY(CLOSE,1))),20)"""
-    # TODO
-    pass
+    return SUM(16 * (CLOSE - DELAY(CLOSE, 1) + (CLOSE - OPEN) / 2 + DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / (IF(
+        (ABS(HIGH - DELAY(CLOSE, 1)) > ABS(LOW - DELAY(CLOSE, 1))) & (
+                ABS(HIGH - DELAY(CLOSE, 1)) > ABS(HIGH - DELAY(LOW, 1))),
+        ABS(HIGH - DELAY(CLOSE, 1)) + ABS(LOW - DELAY(CLOSE, 1)) / 2 + ABS(DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / 4, IF(
+            (ABS(LOW - DELAY(CLOSE, 1)) > ABS(HIGH - DELAY(LOW, 1))) & (
+                    ABS(LOW - DELAY(CLOSE, 1)) > ABS(HIGH - DELAY(CLOSE, 1))),
+            ABS(LOW - DELAY(CLOSE, 1)) + ABS(HIGH - DELAY(CLOSE, 1)) / 2 + ABS(DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / 4,
+            ABS(HIGH - DELAY(LOW, 1)) + ABS(DELAY(CLOSE, 1) - DELAY(OPEN, 1)) / 4))) * MAX(ABS(HIGH - DELAY(CLOSE, 1)),
+                                                                                           ABS(LOW - DELAY(CLOSE, 1))),
+               20)
 
 
 def alpha_056(OPEN, HIGH, LOW, VOLUME, **kwargs):
@@ -1244,13 +1253,12 @@ LD>HD)?LD:0,14)*100/SUM(TR,14)+SUM((HD>0 & HD>LD)?HD:0,14)*100/SUM(TR,14))*100,6
     LD = DELAY(LOW, 1) - LOW
     return (MEAN(ABS(SUM(IF(((LD > 0) & (LD > HD)), LD, 0), 14) * 100 / SUM(TR, 14) -
                      SUM(IF(((HD > 0) & (HD > LD)), HD, 0), 14) * 100 / SUM(TR, 14)) / (
-                         SUM(IF(((LD > 0) & (LD > HD)), LD, 0), 14) * 100 / SUM(
-                     TR, 14) + SUM(IF(((HD > 0) & (HD > LD)), HD, 0), 14) * 100 / SUM(TR, 14)) * 100, 6) +
-            DELAY(MEAN(ABS(SUM(IF(((LD > 0) & (LD > HD)), LD, 0), 14) * 100 / SUM(
-                TR, 14) - SUM(IF(((HD > 0) & (HD > LD)), HD, 0), 14) * 100 / SUM(TR, 14)) / (
-                               SUM(IF(((LD > 0) & (LD > HD)), LD, 0), 14) * 100 / SUM(TR,
-                                                                                      14) + SUM(
-                           IF(((HD > 0) & (HD > LD)), HD, 0), 14) * 100 / SUM(TR, 14)) * 100, 6), 6)) / 2
+                         SUM(IF(((LD > 0) & (LD > HD)), LD, 0), 14) * 100 / SUM(TR, 14) +
+                         SUM(IF(((HD > 0) & (HD > LD)), HD, 0), 14) * 100 / SUM(TR, 14)) * 100, 6) +
+            DELAY(MEAN(ABS(SUM(IF(((LD > 0) & (LD > HD)), LD, 0), 14) * 100 / SUM(TR, 14) -
+                           SUM(IF(((HD > 0) & (HD > LD)), HD, 0), 14) * 100 / SUM(TR, 14)) / (
+                               SUM(IF(((LD > 0) & (LD > HD)), LD, 0), 14) * 100 / SUM(TR, 14) +
+                               SUM(IF(((HD > 0) & (HD > LD)), HD, 0), 14) * 100 / SUM(TR, 14)) * 100, 6), 6)) / 2
 
 
 def alpha_187(OPEN, HIGH, **kwargs):
@@ -1275,12 +1283,17 @@ LOSE)-1-(CLOSE/DELAY(CLOSE,19))^(1/20)-1))^2,20,CLOSE/DELAY(CLOSE)-1<(CLOSE/DELA
 1))/((COUNT((CLOSE/DELAY(CLOSE)-1<(CLOSE/DELAY(CLOSE,19))^(1/20)-1),20))*(SUMIF((CLOSE/DELAY(CLOS
 E)-1-((CLOSE/DELAY(CLOSE,19))^(1/20)-1))^2,20,CLOSE/DELAY(CLOSE)-1>(CLOSE/DELAY(CLOSE,19))^(1/20)-1)))
 )"""
-    return LOG((COUNT(CLOSE / DELAY(CLOSE) - 1 > ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1), 20) - 1) * (
-        SUMIF(((CLOSE / DELAY(CLOSE) - 1 - (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2, 20,
-              CLOSE / DELAY(CLOSE) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) -
-              1)) / ((COUNT((CLOSE / DELAY(CLOSE) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1), 20)) * (
-        SUMIF((CLOSE / DELAY(CLOSE) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2, 20,
-              CLOSE / DELAY(CLOSE) - 1 > (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1))))
+    # 原表达式有问题，少括号，导致优先级错误，同时还多一个-1
+    return LOG((COUNT(CLOSE / DELAY(CLOSE) - 1 > (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1, 20)) * (
+              SUMIF((CLOSE / DELAY(CLOSE) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2,
+                    CLOSE / DELAY(CLOSE) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1,
+                    20
+                    )) / (
+              (COUNT(CLOSE / DELAY(CLOSE) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1, 20)) * (
+               SUMIF((CLOSE / DELAY(CLOSE) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2,
+                     CLOSE / DELAY(CLOSE) - 1 > (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1,
+                     20
+                     ))))
 
 
 def alpha_191(HIGH, LOW, CLOSE, VOLUME, **kwargs):
