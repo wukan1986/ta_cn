@@ -1,6 +1,9 @@
 import pandas as pd
+from pandas.testing import assert_frame_equal
+from pandas.testing import assert_series_equal
 
-import ta_cn.alpha101 as a101
+import ta_cn.alpha101 as a
+import ta_cn.tests.alpha101 as b
 
 if __name__ == '__main__':
     pd._testing._N = 500
@@ -50,9 +53,12 @@ if __name__ == '__main__':
         # if i not in (62,):
         #     continue
         name = f'alpha_{i:03d}'
-        f = getattr(a101, name, None)
-        if f is None:
+        f1 = getattr(a, name, None)
+        f2 = getattr(b, name, None)
+        if f1 is None:
             continue
         print(name)
-        r = f(**kwargs)
-        print(r.unstack())
+        r1 = f1(**kwargs)
+        # print(r1.unstack())
+        r2 = f2(**kwargs)
+        assert_series_equal(r1, r2)

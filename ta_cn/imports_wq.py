@@ -100,3 +100,7 @@ IndNeutralize = indneutralize
 Ts_ArgMax = ts_argmax
 Ts_ArgMin = ts_argmin
 LessThan = LessThan
+min = MIN
+max = MAX
+Sign = sign
+Log = log
