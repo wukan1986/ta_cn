@@ -41,7 +41,13 @@ pip install ta_cn -i https://mirrors.aliyun.com/pypi/simple --upgrade
 pip install ta_cn[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 ```
 
-## TA-Lib由一维向量扩展到二维矩阵
+## 常见使用方法
+1. 封装原生talib，输入二维矩阵
+2. 封装原生talib，输入二维矩阵，同时支持参数一维向量化
+3. 直接调用用包中定义的指标，如KDJ等
+4. 输入为复合索引时序，分组计算
+
+### TA-Lib二维矩阵
 使用了一些编程技巧，可以直接输入二维矩阵。需要注意的是：
 1. TA-Lib遇到空值后面结果全为NaN
 2. 停牌时，数据为NaN, 所以二维矩阵计算前需要特殊处理
@@ -80,14 +86,16 @@ print(r)
 
 还支持为不同列指定不同参数。例如：
 ```python
+import numpy as np
 import ta_cn.talib as ta
 
 ta.init(mode=2)
+arr = np.random.rand(10000000).reshape(-1, 50000)
 ta.SMA(arr, timeperiod=[10, 20, 30])
 
 ```
 
-## 使用ta_cn中定义的公式
+### 使用ta_cn中定义的公式
 ```python
 import numpy as np
 
@@ -113,7 +121,7 @@ x, y, z = MACD(c)
 print(z)
 ```
 
-## 输入DataFrame，输出是ndarray?
+### 输入DataFrame，输出是ndarray?
 只要通过np_to_pd，并传入index/columns两参数即可还原成DataFrame
 ```python
 import pandas as pd
@@ -193,6 +201,10 @@ print(r.unstack())
 
 ## 指标对比清单
 参考 [指标对比](指标对比.xlsx) 未完工，待补充
+
+## Alpha101/Alpha191
+本项目，试着用公式系统实现`Alpha101`、`Alpha191`，请参考examples文件下的测试示例。它最大的特点是尽量保持原公式的形式，
+少改动，防止乱中出错。然后再优化代码提高效率。
 
 ## 停牌处理2
 1. 板块指数，停牌了也要最近的行情进行计算，否则指数过小

@@ -1,10 +1,15 @@
 """
-通达信公式转alpha101
+通达信公式转alpha191
+
+国泰君安－基于短周期价量特征的多因子选股
 """
 
+# 都是单支股票的循环，直接调用更快
+from talib import CORREL as CORR
 from talib import LINEARREG_SLOPE as REGBETA
 from talib import SMA as MEAN
 from talib import SMA as WMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
+from talib import WMA as DECAYLINEAR
 
 from .alpha import LessThan
 from .alpha import RANK
@@ -27,8 +32,6 @@ from .reference import PRODUCT as PROD
 from .reference import REF as DELAY
 from .reference import SUM
 from .reference import SUMIF
-from .reference import WMA as DECAYLINEAR
-from .statistics import CORREL as CORR
 from .statistics import COVAR as COVIANCE
 from .statistics import STDP as STD  # 引入的是全体标准差
 from .utils import to_pd, series_groupby_apply, dataframe_groupby_apply
@@ -78,9 +81,11 @@ WMA = series_groupby_apply(WMA, by=BY_ASSET, dropna=False)
 # 时序，双输入
 CORR = dataframe_groupby_apply(CORR, by=BY_ASSET, dropna=True)
 COVIANCE = dataframe_groupby_apply(COVIANCE, by=BY_ASSET, dropna=True)
+# 注意，SUMIF参数的位置常用的方式不同
 SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET, dropna=False)
 
 # 截面
 RANK = series_groupby_apply(RANK, by=BY_DATE, dropna=False)
 
+# 防止被IDE删除
 LessThan = LessThan

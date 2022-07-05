@@ -129,7 +129,10 @@ def alpha_019(close, returns, **kwargs):
 
 def alpha_020(open, high, low, close, **kwargs):
     """Alpha#20: (((-1 * rank((open - delay(high, 1)))) * rank((open - delay(close, 1)))) * rank((open - delay(low, 1))))"""
-    return ((-1 * rank((open - delay(high, 1)))) * rank((open - delay(close, 1)))) * rank((open - delay(low, 1)))
+    t1 = (open - delay(high, 1))
+    t2 = (open - delay(close, 1))
+    t3 = (open - delay(low, 1))
+    return ((-1 * rank(t1)) * rank(t2)) * rank(t3)
 
 
 def alpha_021(close, volume, adv20, **kwargs):
@@ -178,7 +181,8 @@ def alpha_026(high, volume, **kwargs):
 
 def alpha_027(volume, vwap, **kwargs):
     """Alpha#27: ((0.5 < rank((sum(correlation(rank(volume), rank(vwap), 6), 2) / 2.0))) ? (-1 * 1) : 1)"""
-    return IF((0.5 < rank((sum(correlation(rank(volume), rank(vwap), 6), 2) / 2.0))), -1, 1)
+    t1 = correlation(rank(volume), rank(vwap), 6)
+    return IF((0.5 < rank((sum(t1, 2) / 2.0))), -1, 1)
 
 
 def alpha_028(high, low, close, adv20, **kwargs):
@@ -206,9 +210,10 @@ sign((delay(close, 2) - delay(close, 3)))))) * sum(volume, 5)) / sum(volume, 20)
 def alpha_031(low, close, adv20, **kwargs):
     """Alpha#31: ((rank(rank(rank(decay_linear((-1 * rank(rank(delta(close, 10)))), 10)))) + rank((-1 *
 delta(close, 3)))) + sign(scale(correlation(adv20, low, 12))))"""
-    return ((rank(rank(rank(decay_linear((-1 * rank(rank(delta(close, 10)))), 10)))) + rank((-1 *
-                                                                                             delta(close, 3)))) + sign(
-        scale(correlation(adv20, low, 12))))
+    t1 = decay_linear((-1 * rank((delta(close, 10)))), 10)
+    t2 = (-1 * delta(close, 3))
+    t3 = correlation(adv20, low, 12)
+    return ((rank(t1) + rank(t2)) + sign(scale(t3)))
 
 
 def alpha_032(close, vwap, **kwargs):
@@ -225,7 +230,9 @@ def alpha_033(open, close, **kwargs):
 
 def alpha_034(close, returns, **kwargs):
     """Alpha#34: rank(((1 - rank((stddev(returns, 2) / stddev(returns, 5)))) + (1 - rank(delta(close, 1)))))"""
-    return rank(((1 - rank((stddev(returns, 2) / stddev(returns, 5)))) + (1 - rank(delta(close, 1)))))
+    t1 = (stddev(returns, 2) / stddev(returns, 5))
+    t2 = delta(close, 1)
+    return rank(((1 - rank(t1)) + (1 - rank(t2))))
 
 
 def alpha_035(high, low, close, volume, returns, **kwargs):
@@ -240,11 +247,16 @@ def alpha_036(open, close, volume, returns, vwap, adv20, **kwargs):
     """Alpha#36: (((((2.21 * rank(correlation((close - open), delay(volume, 1), 15))) + (0.7 * rank((open
 - close)))) + (0.73 * rank(Ts_Rank(delay((-1 * returns), 6), 5)))) + rank(abs(correlation(vwap,
 adv20, 6)))) + (0.6 * rank((((sum(close, 200) / 200) - open) * (close - open)))))"""
-    return (((((2.21 * rank(correlation((close - open), delay(volume, 1), 15))) + (0.7 * rank((open
-                                                                                               - close)))) + (
-                      0.73 * rank(Ts_Rank(delay((-1 * returns), 6), 5)))) + rank(abs(correlation(vwap,
-                                                                                                 adv20, 6)))) + (
-                    0.6 * rank((((sum(close, 200) / 200) - open) * (close - open)))))
+    t1 = correlation((close - open), delay(volume, 1), 15)
+    t2 = (open - close)
+    t3 = Ts_Rank(delay((-1 * returns), 6), 5)
+    t4 = abs(correlation(vwap, adv20, 6))
+    t5 = (((sum(close, 200) / 200) - open) * (close - open))
+    return (((((2.21 * rank(t1)) +
+               (0.7 * rank(t2))) +
+              (0.73 * rank(t3))) +
+             rank(t4)) +
+            (0.6 * rank(t5)))
 
 
 def alpha_037(open, close, **kwargs):
@@ -291,7 +303,8 @@ def alpha_042(close, vwap, **kwargs):
 def alpha_043(close, volume, adv20, **kwargs):
     """Alpha#43: (ts_rank((volume / adv20), 20) * ts_rank((-1 * delta(close, 7)), 8))"""
     t1 = -1 * delta(close, 7)
-    return ts_rank(volume / adv20, 20) * ts_rank(t1, 8)
+    t2 = volume / adv20
+    return ts_rank(t2, 20) * ts_rank(t1, 8)
 
 
 def alpha_044(high, volume, **kwargs):
@@ -604,9 +617,7 @@ def alpha_078(low, volume, vwap, adv40, **kwargs):
     """Alpha#78: (rank(correlation(sum(((low * 0.352233) + (vwap * (1 - 0.352233))), 19.7428),
 sum(adv40, 19.7428), 6.83313))^rank(correlation(rank(vwap), rank(volume), 5.77492)))"""
     t1 = (low * 0.352233) + (vwap * (1 - 0.352233))
-    t2 = correlation(sum(t1, 19.7428),
-                     sum(adv40, 19.7428),
-                     6.83313)
+    t2 = correlation(sum(t1, 19.7428), sum(adv40, 19.7428), 6.83313)
     t3 = correlation(rank(vwap), rank(volume), 5.77492)
     return rank(t2) ** rank(t3)
 

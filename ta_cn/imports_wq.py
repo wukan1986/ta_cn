@@ -1,11 +1,21 @@
 """
 通达信公式转alpha101
+
+101 Formulaic Alphas
+文档质量一般
+1. 部分函数即有全小写，又有大小写混合
+2. 很多参数应当是整数，但输入是小数，不得不做修正
 """
 from functools import wraps
 
+# 都是单支股票的循环，直接调用更快
+from talib import CORREL as correlation
+from talib import WMA as decay_linear
+
 from .alpha import LessThan
-from .alpha import RANK as rank, demean
+from .alpha import RANK as rank
 from .alpha import TS_RANK as ts_rank
+from .alpha import demean
 from .alpha import scale
 from .alpha import signedpower as SignedPower
 from .logical import IF
@@ -21,8 +31,6 @@ from .reference import LLVBARS as ts_argmin
 from .reference import PRODUCT as product
 from .reference import REF as delay
 from .reference import SUM as sum
-from .reference import WMA as decay_linear
-from .statistics import CORREL as correlation
 from .statistics import COVAR as covariance
 from .statistics import STDP as stddev  # 引入的是全体标准差
 from .utils import to_pd, series_groupby_apply, dataframe_groupby_apply
