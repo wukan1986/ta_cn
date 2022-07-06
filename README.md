@@ -14,7 +14,7 @@
 
 直到看到了`MyTT`这个项目才意识到，指标命名参考股票软件的公式才是最方便直接的，可以直接到各股软中复制公式。遇到性能问题再针对性转换即可。
 
-## 本人为何不直接用`MyTT`，而是重复超轮子呢？
+## 本人为何不直接用`MyTT`，而是重复造轮子呢？
 1. 大部分公式只支持单条数据，遇到几千支股票的DataFrame，循环太慢
 2. `TA-Lib`与国内指标不同，区别在哪，没有对比。错过了很好的教学机会
 3. 为了行数短牺牲了可读性
@@ -42,56 +42,73 @@ pip install ta_cn[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 ```
 
 ## 常见使用方法
+1. 转发原生talib，输入一维向量
+    - 优点: 本库提供了跳过空值的功能
+    - 缺点: 不要在大量循环中调用，因为跳过空值的功能每调用一次就要预分配内存
 1. 封装原生talib，输入二维矩阵
+    - 优点：适用于单核计算大量数据。只分配一次内存
 2. 封装原生talib，输入二维矩阵，同时支持参数一维向量化
+    - 优点：可为不同股票指定不同参数，可用于按天遍历计算指标
 3. 直接调用用包中定义的指标，如KDJ等
+    - 优点：符合中国习惯的技术指标
+    - 缺点：指标数目前比较少。一般没有跳过空值功能
 4. 输入为复合索引时序，分组计算
-
-### TA-Lib二维矩阵
-使用了一些编程技巧，可以直接输入二维矩阵。需要注意的是：
+    - 优点：使用简单，可进行指标嵌套
+    - 缺点：速度会慢一些
+    
+## 跳过空值
 1. TA-Lib遇到空值后面结果全为NaN
-2. 停牌时，数据为NaN, 所以二维矩阵计算前需要特殊处理
-3. 本人提供的方案是将数据压到最尾部，计算，然后还原
-
+2. 跳过NaN后，导致数据长度不够，部分函数可能报错
+3. 方案一：将所有数据进行移动，时序指标移动到最后，横截面指标移动到最右。
+    - 优点：原指标不需要改动，只要提前处理数据。处理速度也快
+    - 缺点：时序指标与横截面指标不能混合使用，得分别处理
+4. 方案二：预先初始化空白区，计算指标时屏蔽NaN,算完后回填
+    - 优点：外部调用简单，不需要对数据提前处理
+    - 缺点：由于有大量的是否跳过NaN的处理，所以速度慢
+    
+### 常见示例
 ```python
 import numpy as np
+
+# 新版talib,只要替换引用，并添加一句init即可
+import ta_cn.talib as ta
+from ta_cn.utils import pushna, pullna
 
 # 原版talib,不支持二维数据
 # import talib as ta
 
-# 新版talib,只要替换引用即可直接支持二维数据
-import ta_cn.talib as ta
-from ta_cn.utils import pushna, pullna
-
 # 准备数据
-h = np.random.rand(10000000).reshape(-1, 50000) + 10
-l = np.random.rand(10000000).reshape(-1, 50000)
-c = np.random.rand(10000000).reshape(-1, 50000)
+h = np.random.rand(1000000).reshape(-1, 5000) + 10
+l = np.random.rand(1000000).reshape(-1, 5000)
+c = np.random.rand(1000000).reshape(-1, 5000)
+# 指定模式，否则对talib封装的所有函数都不存在
+ta.init(mode=1, skipna=False)
 
 # 几个调用函数演示
-r = ta.ATR(h, l, c, 10)
+r = ta.ATR(h, l, c, timeperiod=10)
 print(r)
 x, y, z = ta.BBANDS(c, timeperiod=10, nbdevup=2, nbdevdn=2)
 print(z)
 
 # 将少量值设置为空，用来模拟停牌
-c[c < 0.05] = np.nan
+c[c < 0.4] = np.nan
 
-# 跳过停牌进行计算，再还原的演示
+# 提前处理数据，跳过停牌进行计算，再还原的演示
+# 嵌套指标时，全为时序指标使用down,或全为截面使用right。混合时此方法不要轻易使用
 arr, row, col = pushna(c, direction='down')
-rr = ta.SMA(real=arr, timeperiod=10)
+rr = ta.SMA(arr, timeperiod=10)
 r = pullna(rr, row, col)
 print(r)
-```
 
-还支持为不同列指定不同参数。例如：
-```python
-import numpy as np
-import ta_cn.talib as ta
+# 使用skip_na在内部跳过停牌
+ta.init(mode=1, skipna=True)
+r = ta.SMA(c, timeperiod=10)
+print(r)
 
-ta.init(mode=2)
-arr = np.random.rand(10000000).reshape(-1, 50000)
-ta.SMA(arr, timeperiod=[10, 20, 30])
+# 使用多参数
+ta.init(mode=2, skipna=True)
+r = ta.SMA(c, timeperiod=[10, 20])
+print(r)
 
 ```
 
@@ -155,6 +172,8 @@ import ta_cn.talib as ta
 from ta_cn.alpha import RANK, demean
 from ta_cn.utils import dataframe_groupby_apply, series_groupby_apply
 
+ta.init(mode=1, skipna=False)
+
 pd._testing._N = 500
 pd._testing._K = 30
 
@@ -195,8 +214,6 @@ print(r.unstack())
 r = indneutralize(df['close'], group=df['group'])
 
 print(r.unstack())
-
-
 ```
 
 ## 指标对比清单

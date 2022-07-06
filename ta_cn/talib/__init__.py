@@ -17,15 +17,61 @@ import numpy as np
 import talib as _talib
 from talib import abstract as _abstract
 
-from ta_cn.utils import pd_to_np, is_np_pd
+from ..maths import ALL_NOTNA, ANY_NAN
+from ..utils import pd_to_np, is_np_pd
 
 
-def tafunc_nditer_0(tafunc, args, kwargs, output_names):
+def _get_first(arg, kwargs):
+    if len(arg) > 0:
+        real = arg[0]
+    else:
+        real = list(kwargs.values())[0]
+    return real
+
+
+def tafunc_nditer_0(tafunc, args, kwargs, output_names, skipna):
     """直接调用talib"""
-    return tafunc(*args, **kwargs)
+    # 不跳过空值，直接调用函数
+    if not skipna:
+        return tafunc(*args, **kwargs)
+
+    # 跳过空值，需要先生成缓冲区，还要对参数分组
+    args_input = [pd_to_np(v) for v in args if is_np_pd(v)]  # 位置非数字参数
+    args_param = [pd_to_np(v) for v in args if not is_np_pd(v)]  # 位置数字参数
+    kwargs_input = {k: pd_to_np(v) for k, v in kwargs.items() if is_np_pd(v)}  # 命名非数字参数
+    kwargs_param = {k: pd_to_np(v) for k, v in kwargs.items() if not is_np_pd(v)}  # 命名数字参数
+
+    # 取一个非数字，得用于得到形状
+    real = _get_first(args_input, kwargs_input)
+
+    # 输出缓存
+    outputs = [np.full_like(real, fill_value=np.nan) for _ in output_names]
+
+    notna = ALL_NOTNA(*args_input, *kwargs_input.values())
+    args_input = [v[notna] for v in args_input]
+    kwargs_input = {k: v[notna] for k, v in kwargs_input.items()}
+
+    real = _get_first(args_input, kwargs_input)
+    if len(real) == 0:
+        # 全NaN，不再计算，直接返回
+        pass
+    else:
+        # 计算并封装
+        ta_out = tafunc(*args_input, *args_param, **kwargs_input, **kwargs_param)
+        if not isinstance(ta_out, tuple):
+            ta_out = tuple([ta_out])
+
+        # 转存数据
+        for _i, _o in zip(outputs, ta_out):
+            _i[notna] = _o
+
+    # 输出
+    if len(outputs) == 1:
+        return outputs[0]
+    return outputs
 
 
-def tafunc_nditer_1(tafunc, args, kwargs, output_names):
+def tafunc_nditer_1(tafunc, args, kwargs, output_names, skipna):
     """内部按列迭代函数，参数完全仿照talib
 
     Parameters
@@ -52,27 +98,28 @@ def tafunc_nditer_1(tafunc, args, kwargs, output_names):
     kwargs_param = {k: pd_to_np(v) for k, v in kwargs.items() if not is_np_pd(v)}  # 命名数字参数
 
     # 取一个非数字，得用于得到形状
-    if len(args_input) > 0:
-        real = args_input[0]
-    else:
-        real = list(kwargs_input.values())[0]
+    real = _get_first(args_input, kwargs_input)
 
     if real.ndim == 1:
-        # 一维，直接计算并返回
-        return tafunc(*args_input, *args_param, **kwargs_input, **kwargs_param)
+        return tafunc_nditer_0(tafunc, args, kwargs, output_names, skipna)
 
     # =====以下是二维======
 
     # 输出缓存
-    outputs = [np.empty_like(real) for _ in output_names]
+    outputs = [np.full_like(real, fill_value=np.nan) for _ in output_names]
+
     # 输入源
     inputs = [*args_input, *kwargs_input.values()]
+    if skipna:
+        notna = ALL_NOTNA(*inputs)
+    else:
+        notna = np.ones_like(real, dtype=bool)
 
     # 只有一行输入时需要特别处理
-    with np.nditer(inputs + outputs,
+    with np.nditer(inputs + [notna] + outputs,
                    flags=['external_loop'] if real.shape[0] > 1 else None,
                    order='F',
-                   op_flags=[['readonly']] * len(inputs) + [['writeonly']] * len(outputs)) as it:
+                   op_flags=[['readonly']] * (len(inputs) + 1) + [['writeonly']] * len(outputs)) as it:
 
         for i, in_out in enumerate(it):
             if real.shape[0] == 1:
@@ -80,9 +127,26 @@ def tafunc_nditer_1(tafunc, args, kwargs, output_names):
                 in_out = [v.reshape(1) for v in in_out]
 
             _in = in_out[:len(inputs)]  # 分离输入
-            _out = in_out[len(inputs):]  # 分离输出
+            _notna = in_out[len(inputs)]
+            _out = in_out[-len(outputs):]  # 分离输出
             args_in = in_out[:len(args_input)]  # 分离位置输入
             kwargs_in = {k: v for k, v in zip(kwargs_input.keys(), _in[len(args_input):])}  # 分离命名输入
+
+            if skipna:
+                args_in = [v[_notna] for v in args_in]
+                kwargs_in = {k: v[_notna] for k, v in kwargs_in.items()}
+
+                # 全空，需要跳过
+                real = _get_first(args_in, kwargs_in)
+                if len(real) == 0:
+                    continue
+            else:
+                _notna = slice(None)
+
+                # 全空，需要跳过，只对首个输入做了处理
+                real = _get_first(args_in, kwargs_in)
+                if np.all(np.isnan(real)):
+                    continue
 
             # 计算并封装
             ta_out = tafunc(*args_in, *args_param, **kwargs_in, **kwargs_param)
@@ -91,7 +155,7 @@ def tafunc_nditer_1(tafunc, args, kwargs, output_names):
 
             # 转存数据
             for _i, _o in zip(_out, ta_out):
-                _i[...] = _o
+                _i[_notna] = _o
 
     # 输出
     if len(outputs) == 1:
@@ -99,7 +163,7 @@ def tafunc_nditer_1(tafunc, args, kwargs, output_names):
     return outputs
 
 
-def tafunc_nditer_2(tafunc, args, kwargs, output_names):
+def tafunc_nditer_2(tafunc, args, kwargs, output_names, skipna):
     """内部按列迭代函数，支持timeperiod等命名参数向量化
 
     Parameters
@@ -134,29 +198,47 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names):
     real = args[0]
 
     if real.ndim == 1:
-        # 一维，直接计算并返回
-        return tafunc(*args, **kwargs)
+        return tafunc_nditer_0(tafunc, args, kwargs, output_names, skipna)
 
     # =====以下是二维======
+    inputs = [*args]
 
     # 输出缓存
-    outputs = [np.empty_like(real) for _ in output_names]
+    outputs = [np.full_like(real, fill_value=np.nan) for _ in output_names]
+    if skipna:
+        notna = ALL_NOTNA(*inputs)
+    else:
+        notna = np.ones_like(real, dtype=bool)
+
     kwargs = {k: num_to_np(v, real[0]) for k, v in kwargs.items()}
 
     # 只有一行输入时需要特别处理
-    with np.nditer(list(args) + outputs,
+    with np.nditer(inputs + [notna] + outputs,
                    flags=['external_loop'] if real.shape[0] > 1 else None,
                    order='F',
-                   op_flags=[['readonly']] * len(args) + [['writeonly']] * len(outputs)) as it:
+                   op_flags=[['readonly']] * (len(inputs) + 1) + [['writeonly']] * len(outputs)) as it:
         for i, in_out in enumerate(it):
             if real.shape[0] == 1:
                 # 需要将0维array改成1维，否则talib报错
                 in_out = [v.reshape(1) for v in in_out]
 
-            _in = in_out[:-len(outputs)]  # 分离输入
+            _in = in_out[:len(inputs)]  # 分离输入
+            _notna = in_out[len(inputs)]
             _out = in_out[-len(outputs):]  # 分离输出
             # 切片得到每列的参数
             _kw = {k: v[i] for k, v in kwargs.items()}
+
+            if skipna:
+                _in = [v[_notna] for v in _in]
+
+                # 全NaN，跳过
+                if len(_in[0]) == 0:
+                    continue
+            else:
+                _notna = slice(None)
+                # 所有输入数据都判断一下
+                if np.all(ANY_NAN(*_in)):
+                    continue
 
             # 计算并封装
             ta_out = tafunc(*_in, **_kw)
@@ -164,7 +246,7 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names):
                 ta_out = tuple([ta_out])
 
             for _i, _o in zip(_out, ta_out):
-                _i[...] = _o
+                _i[_notna] = _o
 
     # 输出
     if len(outputs) == 1:
@@ -172,29 +254,32 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names):
     return outputs
 
 
-def ta_decorator(func, mode, output_names):
+def ta_decorator(func, mode, output_names, skipnan):
     # 设置对应处理函数
     ff = {0: tafunc_nditer_0, 1: tafunc_nditer_1, 2: tafunc_nditer_2}.get(mode)
 
     @wraps(func)
     def decorated(*args, **kwargs):
-        return ff(func, args, kwargs, output_names)
+        return ff(func, args, kwargs, output_names, skipnan)
 
     return decorated
 
 
-def init(mode=1):
+def init(mode=1, skipna=False):
     """初始化环境
 
     Parameters
     ----------
-    mode:
+    mode: int
         0: 直接转向原版talib。只支持一维向量
         1: 输入数据支持二维矩阵。用法与原talib完全一样
         3. 输入参数支持一维向量。数据使用位置，周期等使用命名。否则报错
+    skipna: bool
+        是否跳过空值。跳过空值功能会导致计算变慢。
+        - 确信数据不会中途出现空值建议设置成False, 加快计算（如pushna后的数据）
 
     """
-    print(f'ta_cn 应用模式，当前为: {mode}')
+    print(f'ta_cn mode: {mode}, skipna: {skipna}')
     if mode == 0:
         print(f'\t0. 一维转发模式。直接转发的talib，因封装了一层，还失去了IDE智能提示，推荐直接使用原版talib')
     if mode == 1:
@@ -208,11 +293,8 @@ def init(mode=1):
         output_names = _abstract.Function(func_name)._Function__info['output_names']
 
         # 创建函数
-        globals()[func_name] = ta_decorator(_ta_func, mode, output_names)
+        globals()[func_name] = ta_decorator(_ta_func, mode, output_names, skipna)
 
-
-# 默认使用二维矩阵模式
-init(mode=1)
 
 # =============================================
 

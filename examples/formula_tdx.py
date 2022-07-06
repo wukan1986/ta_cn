@@ -4,11 +4,13 @@ import numpy as np
 # 可导入ta_cn中的公式，只加这一句即导入多个文件中的函数
 from ta_cn.imports import *
 # 准备数据
-from ta_cn.talib import set_compatibility_enable, set_compatibility
+from ta_cn.talib import init, set_compatibility_enable, set_compatibility
 
 h = np.random.rand(10000000).reshape(-1, 50000) + 10
 l = np.random.rand(10000000).reshape(-1, 50000)
 c = np.random.rand(10000000).reshape(-1, 50000)
+
+init(mode=1, skipna=False)
 
 r = ATR_CN(h, l, c, timeperiod=10)
 print(r)
