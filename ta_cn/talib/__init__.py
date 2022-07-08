@@ -17,8 +17,7 @@ import numpy as np
 import talib as _talib
 from talib import abstract as _abstract
 
-from ..maths import ALL_NOTNA, ANY_NAN
-from ..utils import pd_to_np, is_np_pd
+from ..utils import pd_to_np, is_np_pd, ANY_NAN, ALL_NOTNA
 
 
 def _get_first(arg, kwargs):

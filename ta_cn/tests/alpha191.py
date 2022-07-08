@@ -121,7 +121,7 @@ def alpha_020(CLOSE, **kwargs):
 
 def alpha_021(CLOSE, **kwargs):
     """Alpha21 REGBETA(MEAN(CLOSE,6),SEQUENCE(6))"""
-    return REGBETA(MEAN(CLOSE, 6), 6)
+    return REGSLOPE(MEAN(CLOSE, 6), 6)
 
 
 def alpha_022(CLOSE, **kwargs):
@@ -181,7 +181,7 @@ def alpha_029(CLOSE, VOLUME, **kwargs):
 
 def alpha_030(CLOSE, MKT, SMB, HML, **kwargs):
     """Alpha30 WMA((REGRESI(CLOSE/DELAY(CLOSE)-1,MKT,SMB,HML，60))^2,20)"""
-    return WMA((REGRESI(CLOSE / DELAY(CLOSE) - 1, MKT, SMB, HML, 60)) ** 2, 20)
+    return WMA((REGRESI(CLOSE / DELAY(CLOSE) - 1, MKT, SMB, HML, timeperiod=60)) ** 2, 20)
 
 
 def alpha_031(CLOSE, **kwargs):
@@ -754,7 +754,7 @@ def alpha_115(HIGH, LOW, CLOSE, VOLUME, **kwargs):
 
 def alpha_116(CLOSE, **kwargs):
     """Alpha116 REGBETA(CLOSE,SEQUENCE,20)"""
-    return REGBETA(CLOSE, 20)
+    return REGSLOPE(CLOSE, 20)
 
 
 def alpha_117(HIGH, LOW, CLOSE, VOLUME, RET, **kwargs):
@@ -938,8 +938,9 @@ def alpha_142(CLOSE, VOLUME, **kwargs):
 
 def alpha_143(CLOSE, **kwargs):
     """Alpha143 CLOSE>DELAY(CLOSE,1)?(CLOSE-DELAY(CLOSE,1))/DELAY(CLOSE,1)*SELF:SELF"""
-    pass
-    # return CLOSE > DELAY(CLOSE, 1)?(CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1) * SELF: SELF
+    # 到底要不要-1?
+    t2 = IF(CLOSE > DELAY(CLOSE, 1), (CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1), 1.)
+    return CUMPROD(t2)
 
 
 def alpha_144(CLOSE, AMOUNT, **kwargs):
@@ -972,7 +973,7 @@ E-DELAY(CLOSE,1))/DELAY(CLOSE,1)-((CLOSE-DELAY(CLOSE,1))/DELAY(CLOSE,1)-SMA((CLO
 
 def alpha_147(CLOSE, **kwargs):
     """Alpha147 REGBETA(MEAN(CLOSE,12),SEQUENCE(12))"""
-    return REGBETA(MEAN(CLOSE, 12), 12)
+    return REGSLOPE(MEAN(CLOSE, 12), 12)
 
 
 def alpha_148(OPEN, VOLUME, **kwargs):
@@ -980,12 +981,15 @@ def alpha_148(OPEN, VOLUME, **kwargs):
     return (LessThan(RANK(CORR((OPEN), SUM(MEAN(VOLUME, 60), 9), 6)), RANK((OPEN - TSMIN(OPEN, 14)))) * -1)
 
 
-def alpha_149(OPEN, HIGH, LOW, CLOSE, **kwargs):
+def alpha_149(CLOSE, BANCHMARKINDEXCLOSE, **kwargs):
     """Alpha149
 REGBETA(FILTER(CLOSE/DELAY(CLOSE,1)-1,BANCHMARKINDEXCLOSE<DELAY(BANCHMARKINDEXCLOSE,1)
 ),FILTER(BANCHMARKINDEXCLOSE/DELAY(BANCHMARKINDEXCLOSE,1)-1,BANCHMARKINDEXCLOSE<DELA
 Y(BANCHMARKINDEXCLOSE,1)),252)"""
-    pass
+    return REGBETA(FILTER(CLOSE / DELAY(CLOSE, 1) - 1,
+                          BANCHMARKINDEXCLOSE < DELAY(BANCHMARKINDEXCLOSE, 1)),
+                   FILTER(BANCHMARKINDEXCLOSE / DELAY(BANCHMARKINDEXCLOSE, 1) - 1,
+                          BANCHMARKINDEXCLOSE < DELAY(BANCHMARKINDEXCLOSE, 1)), 252)
 
 
 def alpha_150(HIGH, LOW, CLOSE, VOLUME, **kwargs):
@@ -1049,9 +1053,6 @@ def alpha_159(HIGH, LOW, CLOSE, **kwargs):
 *12*24+(CLOSE-SUM(MIN(LOW,DELAY(CLOSE,1)),12))/SUM(MAX(HGIH,DELAY(CLOSE,1))-MIN(LOW,DELAY(CL
 OSE,1)),12)*6*24+(CLOSE-SUM(MIN(LOW,DELAY(CLOSE,1)),24))/SUM(MAX(HGIH,DELAY(CLOSE,1))-MIN(LOW,D
 ELAY(CLOSE,1)),24)*6*24)*100/(6*12+6*24+12*24)"""
-    t1 = MIN(LOW, DELAY(CLOSE, 1))
-    t2 = MAX(HIGH, DELAY(CLOSE, 1))
-    t3 = t2 - t1
     return ((CLOSE - SUM(MIN(LOW, DELAY(CLOSE, 1)), 6)) / SUM(MAX(HIGH, DELAY(CLOSE, 1)) - MIN(LOW, DELAY(CLOSE, 1)), 6)
             * 12 * 24 + (CLOSE - SUM(MIN(LOW, DELAY(CLOSE, 1)), 12)) / SUM(
                 MAX(HIGH, DELAY(CLOSE, 1)) - MIN(LOW, DELAY(CLOSE, 1)), 12) * 6 * 24 + (
@@ -1107,8 +1108,10 @@ def alpha_166(CLOSE, **kwargs):
 -20* （ 20-1 ）
 ^1.5*SUM(CLOSE/DELAY(CLOSE,1)-1-MEAN(CLOSE/DELAY(CLOSE,1)-1,20),20)/((20-1)*(20-2)(SUM((CLOSE/DELA
 Y(CLOSE,1),20)^2,20))^1.5)"""
+    # TypeError: unsupported operand type(s) for ** or pow(): 'tuple' and 'int'
+    # 表达式错了
     return -20 * (20 - 1) ** 1.5 * SUM(CLOSE / DELAY(CLOSE, 1) - 1 - MEAN(CLOSE / DELAY(CLOSE, 1) - 1, 20), 20) / (
-            (20 - 1) * (20 - 2) * (SUM((CLOSE / DELAY(CLOSE, 1), 20) ** 2, 20)) ** 1.5)
+            (20 - 1) * (20 - 2) * (SUM((CLOSE / DELAY(CLOSE, 1)) ** 2, 20)) ** 1.5)
 
 
 def alpha_167(CLOSE, **kwargs):
@@ -1227,8 +1230,7 @@ BANCHMARKINDEXCLOSE<BANCHMARKINDEXOPEN),20)/20"""
 
 def alpha_183(CLOSE, **kwargs):
     """Alpha183 MAX(SUMAC(CLOSE-MEAN(CLOSE,24)))-MIN(SUMAC(CLOSE-MEAN(CLOSE,24)))/STD(CLOSE,24)"""
-    pass
-    # return MAX(SUMAC(CLOSE-MEAN(CLOSE,24)))-MIN(SUMAC(CLOSE-MEAN(CLOSE,24)))/STD(CLOSE,24)
+    return MAX(SUMAC(CLOSE - MEAN(CLOSE, 24))) - MIN(SUMAC(CLOSE - MEAN(CLOSE, 24))) / STD(CLOSE, 24)
 
 
 def alpha_184(OPEN, CLOSE, **kwargs):
@@ -1285,15 +1287,15 @@ E)-1-((CLOSE/DELAY(CLOSE,19))^(1/20)-1))^2,20,CLOSE/DELAY(CLOSE)-1>(CLOSE/DELAY(
 )"""
     # 原表达式有问题，少括号，导致优先级错误，同时还多一个-1
     return LOG((COUNT(CLOSE / DELAY(CLOSE) - 1 > (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1, 20)) * (
-              SUMIF((CLOSE / DELAY(CLOSE) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2,
-                    CLOSE / DELAY(CLOSE) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1,
-                    20
-                    )) / (
-              (COUNT(CLOSE / DELAY(CLOSE) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1, 20)) * (
-               SUMIF((CLOSE / DELAY(CLOSE) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2,
-                     CLOSE / DELAY(CLOSE) - 1 > (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1,
-                     20
-                     ))))
+        SUMIF((CLOSE / DELAY(CLOSE) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2,
+              CLOSE / DELAY(CLOSE) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1,
+              20
+              )) / (
+                       (COUNT(CLOSE / DELAY(CLOSE) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1, 20)) * (
+                   SUMIF((CLOSE / DELAY(CLOSE) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2,
+                         CLOSE / DELAY(CLOSE) - 1 > (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1,
+                         20
+                         ))))
 
 
 def alpha_191(HIGH, LOW, CLOSE, VOLUME, **kwargs):

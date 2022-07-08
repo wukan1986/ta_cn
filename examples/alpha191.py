@@ -41,7 +41,8 @@ if __name__ == '__main__':
     kwargs = df.to_dict(orient='series')
 
     for i in range(1, 191 + 1):
-        if i in (30, 143, 149, 165, 166, 183):
+        # 165 183 是MAX 与 SUMAC 问题
+        if i in (165, 183):
             continue
         name = f'alpha_{i:03d}'
         f1 = getattr(a, name, None)

@@ -3,10 +3,11 @@
 
 国泰君安－基于短周期价量特征的多因子选股
 """
-
+import numpy as np
+import pandas as pd
 # 都是单支股票的循环，直接调用更快
 from talib import CORREL as CORR
-from talib import LINEARREG_SLOPE as REGBETA
+from talib import LINEARREG_SLOPE as REGSLOPE
 from talib import SMA as MEAN
 from talib import SMA as WMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
 from talib import WMA as DECAYLINEAR
@@ -32,6 +33,8 @@ from .reference import PRODUCT as PROD
 from .reference import REF as DELAY
 from .reference import SUM
 from .reference import SUMIF
+from .regress import SLOPE_YX_NB as REGBETA
+from .regress import ts_multiple_regress
 from .statistics import COVAR as COVIANCE
 from .statistics import STDP as STD  # 引入的是全体标准差
 from .utils import to_pd, series_groupby_apply, dataframe_groupby_apply
@@ -42,6 +45,21 @@ from .utils import to_pd, series_groupby_apply, dataframe_groupby_apply
 3. 逐元素指标用装饰器返回pandas
 4. 按行和按列分组，都使用装饰器
 """
+
+
+def FILTER(A, condition):
+    return np.where(condition, A, 0)
+
+
+def CUMPROD(A):
+    return np.cumprod(A)
+
+
+def REGRESI(y, *args, timeperiod=60):
+    x = pd.concat(args, axis=1)
+    coef, resi = ts_multiple_regress(y, x, timeperiod=timeperiod, add_constant=True)
+    return resi
+
 
 # 逐元素, 输出由numpy转pandas
 IF = to_pd(IF)
@@ -73,16 +91,21 @@ DECAYLINEAR = series_groupby_apply(DECAYLINEAR, by=BY_ASSET, dropna=False)
 PROD = series_groupby_apply(PROD, by=BY_ASSET, dropna=False)
 MEAN = series_groupby_apply(MEAN, by=BY_ASSET, dropna=False)
 SMA = series_groupby_apply(SMA, by=BY_ASSET, dropna=False)
-REGBETA = series_groupby_apply(REGBETA, by=BY_ASSET, dropna=False)
 COUNT = series_groupby_apply(COUNT, by=BY_ASSET, dropna=False)
 MA = series_groupby_apply(MA, by=BY_ASSET, dropna=False)
 WMA = series_groupby_apply(WMA, by=BY_ASSET, dropna=False)
+REGSLOPE = series_groupby_apply(REGSLOPE, by=BY_ASSET, dropna=False)
+CUMPROD = series_groupby_apply(CUMPROD, by=BY_ASSET, dropna=False)
 
 # 时序，双输入
 CORR = dataframe_groupby_apply(CORR, by=BY_ASSET, dropna=True)
 COVIANCE = dataframe_groupby_apply(COVIANCE, by=BY_ASSET, dropna=True)
+REGBETA = dataframe_groupby_apply(REGBETA, by=BY_ASSET, dropna=False)
+
 # 注意，SUMIF参数的位置常用的方式不同
 SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET, dropna=False)
+FILTER = dataframe_groupby_apply(FILTER, by=BY_ASSET, dropna=False)
+REGRESI = dataframe_groupby_apply(REGRESI, by=BY_ASSET, dropna=False)
 
 # 截面
 RANK = series_groupby_apply(RANK, by=BY_DATE, dropna=False)

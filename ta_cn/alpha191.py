@@ -132,7 +132,7 @@ def alpha_020(CLOSE, **kwargs):
 
 def alpha_021(CLOSE, **kwargs):
     """Alpha21 REGBETA(MEAN(CLOSE,6),SEQUENCE(6))"""
-    return REGBETA(MEAN(CLOSE, 6), 6)
+    return REGSLOPE(MEAN(CLOSE, 6), 6)
 
 
 def alpha_022(CLOSE, **kwargs):
@@ -200,7 +200,7 @@ def alpha_029(CLOSE, VOLUME, **kwargs):
 
 def alpha_030(CLOSE, MKT, SMB, HML, **kwargs):
     """Alpha30 WMA((REGRESI(CLOSE/DELAY(CLOSE)-1,MKT,SMB,HML，60))^2,20)"""
-    return WMA((REGRESI(CLOSE / DELAY(CLOSE) - 1, MKT, SMB, HML, 60)) ** 2, 20)
+    return WMA((REGRESI(CLOSE / DELAY(CLOSE) - 1, MKT, SMB, HML, timeperiod=60)) ** 2, 20)
 
 
 def alpha_031(CLOSE, **kwargs):
@@ -845,7 +845,7 @@ def alpha_115(HIGH, LOW, CLOSE, VOLUME, **kwargs):
 
 def alpha_116(CLOSE, **kwargs):
     """Alpha116 REGBETA(CLOSE,SEQUENCE,20)"""
-    return REGBETA(CLOSE, 20)
+    return REGSLOPE(CLOSE, 20)
 
 
 def alpha_117(HIGH, LOW, CLOSE, VOLUME, RET, **kwargs):
@@ -1053,8 +1053,9 @@ def alpha_142(CLOSE, VOLUME, **kwargs):
 
 def alpha_143(CLOSE, **kwargs):
     """Alpha143 CLOSE>DELAY(CLOSE,1)?(CLOSE-DELAY(CLOSE,1))/DELAY(CLOSE,1)*SELF:SELF"""
-    pass
-    # return CLOSE > DELAY(CLOSE, 1)?(CLOSE - DELAY(CLOSE, 1)) / DELAY(CLOSE, 1) * SELF: SELF
+    t1 = DELAY(CLOSE, 1)
+    t2 = IF(CLOSE > t1, CLOSE / t1 - 1., 1.)
+    return CUMPROD(t2)
 
 
 def alpha_144(CLOSE, AMOUNT, **kwargs):
@@ -1088,7 +1089,7 @@ E-DELAY(CLOSE,1))/DELAY(CLOSE,1)-((CLOSE-DELAY(CLOSE,1))/DELAY(CLOSE,1)-SMA((CLO
 
 def alpha_147(CLOSE, **kwargs):
     """Alpha147 REGBETA(MEAN(CLOSE,12),SEQUENCE(12))"""
-    return REGBETA(MEAN(CLOSE, 12), 12)
+    return REGSLOPE(MEAN(CLOSE, 12), 12)
 
 
 def alpha_148(OPEN, VOLUME, **kwargs):
@@ -1099,12 +1100,17 @@ def alpha_148(OPEN, VOLUME, **kwargs):
                      RANK(t2)) * -1)
 
 
-def alpha_149(OPEN, HIGH, LOW, CLOSE, **kwargs):
+def alpha_149(CLOSE, BANCHMARKINDEXCLOSE, **kwargs):
     """Alpha149
 REGBETA(FILTER(CLOSE/DELAY(CLOSE,1)-1,BANCHMARKINDEXCLOSE<DELAY(BANCHMARKINDEXCLOSE,1)
 ),FILTER(BANCHMARKINDEXCLOSE/DELAY(BANCHMARKINDEXCLOSE,1)-1,BANCHMARKINDEXCLOSE<DELA
 Y(BANCHMARKINDEXCLOSE,1)),252)"""
-    pass
+    t1 = DELAY(CLOSE, 1)
+    t2 = DELAY(BANCHMARKINDEXCLOSE, 1)
+    return REGBETA(FILTER(CLOSE / t1 - 1,
+                          BANCHMARKINDEXCLOSE < t2),
+                   FILTER(BANCHMARKINDEXCLOSE / t2 - 1,
+                          BANCHMARKINDEXCLOSE < t2), 252)
 
 
 def alpha_150(HIGH, LOW, CLOSE, VOLUME, **kwargs):
@@ -1230,12 +1236,13 @@ def alpha_165(CLOSE, **kwargs):
 
 def alpha_166(CLOSE, **kwargs):
     """Alpha166
--20* （ 20-1 ）
+-20*(20-1)
 ^1.5*SUM(CLOSE/DELAY(CLOSE,1)-1-MEAN(CLOSE/DELAY(CLOSE,1)-1,20),20)/((20-1)*(20-2)(SUM((CLOSE/DELA
-Y(CLOSE,1),20)^2,20))^1.5)"""
+Y(CLOSE,1),20)^2,20))^1.5)
+"""
     t1 = CLOSE / DELAY(CLOSE, 1)
     return -20 * (20 - 1) ** 1.5 * SUM(t1 - 1 - MEAN(t1 - 1, 20), 20) / (
-            (20 - 1) * (20 - 2) * (SUM((t1, 20) ** 2, 20)) ** 1.5)
+            (20 - 1) * (20 - 2) * (SUM(t1 ** 2, 20)) ** 1.5)
 
 
 def alpha_167(CLOSE, **kwargs):

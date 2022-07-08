@@ -196,13 +196,6 @@ def _product_nb(a):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
-def _slope_nb(y, x, m_x):
-    """slope线性回归斜率"""
-    m_y = _np.mean(y)
-    return _np.sum((x - m_x) * (y - m_y)) / _np.sum((x - m_x) ** 2)
-
-
-@numba.jit(nopython=True, cache=True, nogil=True)
 def _last_nb(arr, n, m):
     """LAST(X,A,B)，A>B，表示从前A日到前B日一致满足X条件"""
     return _np.all(arr[:n - m])

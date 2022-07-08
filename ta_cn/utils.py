@@ -1,6 +1,7 @@
-from functools import wraps
+from functools import wraps, reduce
 from typing import Union
 
+import numpy as _np
 import numpy as np
 import pandas as pd
 
@@ -13,7 +14,7 @@ def to_pd(func):
         if len(args) > 0:
             real = args[0]
         else:
-            real = kwargs.values()[0]
+            real = list(kwargs.values())[0]
         return np_to_pd(func(*args, **kwargs),
                         index=getattr(real, 'index', None),
                         columns=getattr(real, 'columns', None))
@@ -336,6 +337,16 @@ def fill_zeros_with_last(arr):
     prev[arr == 0] = 0
     prev = np.maximum.accumulate(prev)
     return arr[prev]
+
+
+def ANY_NAN(*args):
+    """多输入，同位置只要出现过nan就标记成True"""
+    return reduce(lambda x, y: _np.logical_or(x, _np.isnan(y)), [False] + list(args))
+
+
+def ALL_NOTNA(*args):
+    """多输入，同位置没有出现过nan,标记成True"""
+    return reduce(lambda x, y: _np.logical_and(x, ~_np.isnan(y)), [True] + list(args))
 
 
 if __name__ == '__main__':

@@ -76,16 +76,6 @@ def MUL(*args):
     return reduce(_np.multiply, args)
 
 
-def ANY_NAN(*args):
-    """多输入，同位置只要出现过nan就标记成True"""
-    return reduce(lambda x, y: _np.logical_or(x, _np.isnan(y)), [False] + list(args))
-
-
-def ALL_NOTNA(*args):
-    """多输入，同位置没有出现过nan,标记成True"""
-    return reduce(lambda x, y: _np.logical_and(x, ~_np.isnan(y)), [True] + list(args))
-
-
 def DIV(*args):
     """连除
 
