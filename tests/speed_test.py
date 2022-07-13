@@ -1,10 +1,10 @@
 import time
 
 import bottleneck as bn
+import numpy as np
 import pandas as pd
 import polars as pl
 import talib
-from pandas._testing import assert_series_equal
 
 import ta_cn.talib as ta2d
 
@@ -56,37 +56,10 @@ def f6(df, ldf):
 
 
 if __name__ == '__main__':
-    pd._testing._N = 1000
-    pd._testing._K = 30
+    c = np.random.rand(1000000).reshape(-1, 5000)
+    c = pd.DataFrame(c).stack()
 
-    open_ = pd._testing.makeTimeDataFrame() + 5
-    high = pd._testing.makeTimeDataFrame() + 10
-    low = pd._testing.makeTimeDataFrame() + 5
-    close = pd._testing.makeTimeDataFrame() + 5
-    volume = pd._testing.makeTimeDataFrame() * 10 + 100
-    vwap = pd._testing.makeTimeDataFrame()
-    adv20 = pd._testing.makeTimeDataFrame()
-    returns = pd._testing.makeTimeDataFrame()
-    cap = pd._testing.makeTimeDataFrame() * 100 + 100
-    group = close.copy() * 100 // 1 % 5
-
-    df = {
-        'OPEN': open_.stack(),
-        'HIGH': high.stack(),
-        'LOW': low.stack(),
-        'CLOSE': close.stack(),
-        'RET': returns.stack(),
-        'VOLUME': volume.stack(),
-        'AMOUNT': volume.stack() * 100,
-        'VWAP': vwap.stack(),
-        'DTM': high.stack(),
-        'DBM': low.stack(),
-        'MKT': high.stack(),
-        'SMB': low.stack(),
-        'HML': close.stack(),
-        'BANCHMARKINDEXOPEN': high.stack(),
-        'BANCHMARKINDEXCLOSE': low.stack(),
-    }
+    df = {i: c for i in range(100)}
     df = pd.DataFrame(df)
     df.index.names = ['date', 'asset']
     df1 = pl.from_pandas(df.reset_index())
@@ -97,16 +70,9 @@ if __name__ == '__main__':
         t1 = time.time()
         print(f.__name__, t1 - t0)
 
-# f1 0.060014963150024414
-# f2 0.07854080200195312
-# f3 0.05702543258666992
-# f4 0.06399655342102051
-# f5 0.07001638412475586
-# f6 0.25406837463378906
-
-# f1 0.007016181945800781
-# f2 0.00998830795288086
-# f3 0.012003898620605469
-# f4 0.015001296997070312
-# f5 0.015004396438598633
-# f6 0.04201769828796387
+# f1 1.5436947345733643
+# f2 3.0246715545654297
+# f3 6.506034851074219
+# f4 10.475429773330688
+# f5 10.043684959411621
+# f6 29.300340175628662
