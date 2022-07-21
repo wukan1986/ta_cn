@@ -40,15 +40,6 @@ def scale(real, a=1):
     return real / b * a
 
 
-def demean(x):
-    """行业中性化
-
-    RuntimeWarning: Mean of empty slice
-    nanmean在全nan时报此警告。这个警告还不好屏蔽
-    """
-    return x - _np.nanmean(x)
-
-
 def LessThan(x, y):
     # ValueError: Can only compare identically-labeled Series objects
     return x - y < 0

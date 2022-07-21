@@ -49,7 +49,7 @@ pip install ta_cn[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
     - 优点：适用于单核计算大量数据。只分配一次内存
 2. 封装原生talib，输入二维矩阵，同时支持参数一维向量化
     - 优点：可为不同股票指定不同参数，可用于按天遍历计算指标
-3. 直接调用用包中定义的指标，如KDJ等
+3. 直接调用包中定义的指标，如KDJ等
     - 优点：符合中国习惯的技术指标
     - 缺点：指标数目前比较少。一般没有跳过空值功能
 4. 输入为复合索引时序，分组计算
@@ -169,7 +169,8 @@ print(d.iloc[-5:])
 import pandas as pd
 
 import ta_cn.talib as ta
-from ta_cn.alpha import RANK, demean
+from ta_cn.alpha import RANK
+from ta_cn.preprocess import demean
 from ta_cn.utils import dataframe_groupby_apply, series_groupby_apply
 
 ta.init(mode=1, skipna=False)

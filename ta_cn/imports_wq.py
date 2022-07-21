@@ -15,7 +15,6 @@ from talib import WMA as decay_linear
 from .alpha import LessThan
 from .alpha import RANK as rank
 from .alpha import TS_RANK as ts_rank
-from .alpha import demean
 from .alpha import scale
 from .alpha import signedpower as SignedPower
 from .logical import IF
@@ -23,6 +22,7 @@ from .maths import LN as log  # 引入的是自然对数
 from .maths import MAX
 from .maths import MIN
 from .maths import SGN as sign
+from .preprocess import demean
 from .reference import DIFF as delta
 from .reference import HHV as ts_max
 from .reference import HHVBARS as ts_argmax

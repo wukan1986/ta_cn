@@ -11,14 +11,14 @@ from .utils import pd_to_np
 
 @numba.jit(nopython=True, cache=True, nogil=True)
 def _slope_nb(y, x, m_x):
-    """slope线性回归斜率"""
+    """slope线性回归斜率。由于x固定，所以提前在外部计算，加快速度"""
     m_y = _np.mean(y)
     return _np.sum((x - m_x) * (y - m_y)) / _np.sum((x - m_x) ** 2)
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
 def _slope_yx_nb(y, x):
-    """slope线性回归斜率"""
+    """slope线性回归斜率。y与x是一直变化的"""
     m_x = _np.mean(x)
     m_y = _np.mean(y)
     return _np.sum((x - m_x) * (y - m_y)) / _np.sum((x - m_x) ** 2)
@@ -57,7 +57,7 @@ def SLOPE(real, timeperiod=14):
 
 
 def SLOPE_NB(real, timeperiod=14):
-    """numba版，输出结果也一样"""
+    """numba版，输出结果与LINEARREG_SLOPE一样"""
     x = _np.arange(timeperiod)
     m_x = _np.mean(x)
     return numpy_rolling_apply([pd_to_np(real)], timeperiod, _rolling_func_1_nb, _slope_nb, x, m_x)
@@ -70,7 +70,9 @@ def SLOPE_YX_NB(real0, real1, timeperiod=30):
 
 
 def ts_simple_regress(y, x, window=10):
-    """滚动一元线性回归。比SLOPE_YX_NB快一些
+    """滚动一元线性回归。
+
+    由于利用了bottleneck的滚动功能，比SLOPE_YX_NB快一些，但精度有少量差异，后期需再验证
 
     Parameters
     ----------
@@ -106,14 +108,25 @@ def ts_simple_regress(y, x, window=10):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
-def _ols_nb(y, x):
-    # m = np.dot((np.dot(np.linalg.inv(np.dot(x.T, x)), x.T)), y)
-    # residual = y - x.dot(m)
+def _ts_ols_nb(y, x):
+    """使用可逆矩阵计算多元回归。
+
+    由于sliding_window_view后的形状再enumerate后比较特殊，所以原公式的转置进行了调整
+    """
     return _np.dot((_np.dot(_np.linalg.inv(_np.dot(x, x.T)), x)), y)
 
 
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _cs_ols_nb(y, x):
+    """使用可逆矩阵计算多元回归。
+
+    标准的多元回归
+    """
+    return _np.dot((_np.dot(_np.linalg.inv(_np.dot(x.T, x)), x.T)), y)
+
+
 def yx_rolling_apply(y, x, window, func1, func2, *args):
-    """滚动应用方法 处理两个"""
+    """滚动应用方法。目前用于计算时序上的滚动回归"""
     out = _np.empty_like(x)
     try:
         # 可能出现类似int无法设置nan的情况
@@ -133,6 +146,7 @@ warnings.filterwarnings("ignore", category=numba.NumbaPerformanceWarning)
 #   out[i + timeperiod - 1] = func(yy, xx, *args)
 @numba.jit(nopython=True, cache=True, nogil=True)
 def _rolling_func_yx_nb(y, x, out, timeperiod, func, *args):
+    """滚动多元"""
     if x.ndim == 3:
         for i, (yy, xx) in enumerate(zip(y, x)):
             out[i + timeperiod - 1] = func(yy, xx, *args)
@@ -141,12 +155,49 @@ def _rolling_func_yx_nb(y, x, out, timeperiod, func, *args):
 
 
 def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
-    """多元线性回归"""
+    """时序上滚动多元线性回归
+
+    Parameters
+    ----------
+    y: 1d array
+        因变量。一维
+    x: 2d array
+        自变量。二维。一列为一个特征
+    timeperiod:int
+        周期
+    add_constant: bool
+        是否添加常量
+
+    Returns
+    -------
+    coef:
+        系数。与x形状类似，每个特性占一例。时序变化，所以每天都有一行
+    residual:
+        残差。与y形状类似，由实际y-预测y而得到
+
+    """
     _y = pd_to_np(y)
     _x = pd_to_np(x)
     if add_constant:
         tmp = _np.ones(shape=(_x.shape[0], _x.shape[1] + 1))
         tmp[:, 1:] = _x
         _x = tmp
-    coef = yx_rolling_apply(_y, _x, timeperiod, _rolling_func_yx_nb, _ols_nb)
-    return coef, _y - _np.sum(_x * coef, axis=1)
+    coef = yx_rolling_apply(_y, _x, timeperiod, _rolling_func_yx_nb, _ts_ols_nb)
+    residual = _y - _np.sum(_x * coef, axis=1)
+    return coef, residual
+
+
+def multiple_regress(y, x, add_constant=True):
+    """横截面上的多元回归。主要用于中性化多元回归场景
+
+    需要先按日期进行groupby，然后再应用回归函数
+    """
+    _y = pd_to_np(y)
+    _x = pd_to_np(x)
+    if add_constant:
+        tmp = _np.ones(shape=(_x.shape[0], _x.shape[1] + 1))
+        tmp[:, 1:] = _x
+        _x = tmp
+    coef = _cs_ols_nb(_y, _x)
+    residual = _y - _np.sum(_x * coef, axis=1)
+    return coef, residual
