@@ -1,5 +1,5 @@
 """
-以下是在宽表上的动态参数的示例
+以下是在宽表上的动态复权和动态参数的示例
 """
 import numpy as np
 
@@ -28,14 +28,30 @@ p2[:180] = 15
 p2[:110] = 20
 p2[:70] = 10
 
+# 后复权因子
+f = np.empty_like(c)
+f[:] = 1.5
+f[:180] = 1.3
+f[:110] = 1.2
+f[:60] = 1.1
+
 # 输出
 up = np.empty_like(c)
 down = np.empty_like(c)
 
 
-def func(open_, high, low, close,
+def func(open_, high, low, close, factor,
          period1, period2):
     """分块计算指标"""
+
+    # 后复权转前复权
+    f = factor / factor[-1]
+    open_ *= f
+    high *= f
+    low *= f
+    close *= f
+
+    # 计算指标
     ma = ta.SMA(close, timeperiod=period1)
     atr = ta.ATR(high, low, close, timeperiod=period2)
 
@@ -45,10 +61,12 @@ def func(open_, high, low, close,
 
 def loop(func,
          input_args,
+         slicer,
          periods,
          output_args,
          is_backtest=True,
-         pre_load=0):
+         pre_load=0,
+         ):
     """按天进行循环
 
     Parameters
@@ -57,8 +75,10 @@ def loop(func,
         计算函数
     input_args: list
         输入矩阵列表
+    slicer: list
+        切片器
     periods: list
-        周期矩阵。不一定只做周期，也可用于复权因子
+        周期矩阵
     output_args: list
         输出矩阵列表
     is_backtest: bool
@@ -69,7 +89,7 @@ def loop(func,
          调整值，可以加载更多数据
     """
 
-    def same_period(ps, i):
+    def same_slice(ps, i):
         for p in ps:
             if not np.all(p[i] == p[i + 1]):
                 return False
@@ -88,7 +108,7 @@ def loop(func,
         # 2. 实盘时，每天都是最后一天
         if is_backtest and i < len(real) - 1:
             # 1. 数据最后，没有明天，不得跳过，必须计算一次
-            if same_period(periods, i):
+            if same_slice(slicer, i):
                 # 2. 与明天的参数一样，跳过
                 continue
 
@@ -113,7 +133,8 @@ def loop(func,
 
 
 loop(func,
-     [o, h, l, c],
+     [o, h, l, c, f],
+     [p1, p2, f],
      [p1, p2],
      [up, down],
      is_backtest=True)

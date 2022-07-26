@@ -12,6 +12,8 @@ ta2d.init(mode=1, skipna=False)
 
 pl.Config.set_tbl_rows(50)
 
+print(pl.__version__)
+
 
 def f1(df, ldf):
     # 最快，因为同资产一起处理的，调用底层库次数少

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 import ta_cn.talib as ta
-from ta_cn.statistics import SLOPE
+from ta_cn.regress import SLOPE
 
 if __name__ == '__main__':
     # 准备数据
