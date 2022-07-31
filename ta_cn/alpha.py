@@ -43,3 +43,11 @@ def scale(real, a=1):
 def LessThan(x, y):
     # ValueError: Can only compare identically-labeled Series objects
     return x - y < 0
+
+
+def split_adjust(real):
+    """将后复权因子转成前复权"""
+    if isinstance(real, _np.ndarray):
+        return real / real[-1]
+    else:
+        return real / real.iloc[-1]
