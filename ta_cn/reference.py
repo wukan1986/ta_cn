@@ -77,7 +77,7 @@ def SUM(real, timeperiod: int = 5):
 
 
 def SUMIF(real, condition, timeperiod):
-    """注意，condition位置"""
+    """!!!注意，condition位置"""
     return _bn.move_sum(real * condition, window=timeperiod, axis=0)
 
 

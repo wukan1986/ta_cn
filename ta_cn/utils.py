@@ -21,14 +21,17 @@ def to_pd(func):
     return decorated
 
 
-def series_groupby_apply(func, by, dropna):
+def series_groupby_apply(func, by, dropna, to_args=[], to_kwargs=[]):
     """普通指标转换成按分组处理的指标。只支持单参数
 
     Parameters
     ----------
     func
     by
-    dropna
+    dropna:
+        慎用。丢弃后可能长度变小，与其它数据计算时长度不对
+    to_args
+    to_kwargs
 
     Notes
     -----
@@ -40,12 +43,17 @@ def series_groupby_apply(func, by, dropna):
     def decorated(s: pd.Series, *args, **kwargs):
         if dropna:
             s = s.dropna()
-        return s.groupby(by=by, group_keys=False).apply(to_pd(func), *args, **kwargs)
+
+        # 参数位置调整，实现命命参数简化
+        _args = [kwargs[v] for v in to_args]
+        _kwargs = {k: args[i] for i, k in enumerate(to_kwargs)}
+
+        return s.groupby(by=by, group_keys=False).apply(to_pd(func), *_args, **_kwargs)
 
     return decorated
 
 
-def dataframe_groupby_apply(func, by, dropna):
+def dataframe_groupby_apply(func, by, dropna, to_df=[], to_kwargs={}):
     """普通指标转换成按分组处理的指标。支持多输入
 
     Parameters
@@ -53,6 +61,9 @@ def dataframe_groupby_apply(func, by, dropna):
     func
     by
     dropna
+        慎用。丢弃后可能长度变小，与其它数据计算时长度不对
+    to_df
+    to_kwargs
 
     Notes
     -----
@@ -60,26 +71,23 @@ def dataframe_groupby_apply(func, by, dropna):
 
     """
 
+    def get(i, k, args, kwargs):
+        if i == k:
+            return args[i]
+        if isinstance(k, str):
+            v = kwargs.get(k, None)
+            if v is None:
+                return args[i]
+            return v
+
     @wraps(func)
     def decorated(*args, **kwargs):
-        df = args[0]
-        if isinstance(df, pd.DataFrame):
-            # 用一个DataFrame实现多参数
-            kwargs.update(df.to_dict(orient='series'))
-            args = list(args)[1:]
-
-        args_input = [v for v in args if is_np_pd(v)]  # 位置非数字参数
-        args_param = [v for v in args if not is_np_pd(v)]  # 位置数字参数
-        kwargs_input = {k: v for k, v in kwargs.items() if is_np_pd(v)}  # 命名非数字参数
-        kwargs_param = {k: v for k, v in kwargs.items() if not is_np_pd(v)}  # 命名数字参数
-
-        df1 = pd.DataFrame(kwargs_input)
-        df2 = pd.DataFrame({k: v for k, v in enumerate(args_input)})
-        df = pd.concat([df1, df2], axis=1)
+        df = pd.DataFrame({k: get(i, k, args, kwargs) for i, k in enumerate(to_df)})
+        _kwargs = {k: args[i] for i, k in to_kwargs.items()}
 
         if dropna:
             df = df.dropna()
-        return df.groupby(by=by, group_keys=False).apply(to_pd(dataframe_split(func)), *args_param, **kwargs_param)
+        return df.groupby(by=by, group_keys=False).apply(to_pd(dataframe_split(func)), **_kwargs)
 
     return decorated
 

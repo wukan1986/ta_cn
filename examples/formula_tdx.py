@@ -10,7 +10,7 @@ h = np.random.rand(10000000).reshape(-1, 50000) + 10
 l = np.random.rand(10000000).reshape(-1, 50000)
 c = np.random.rand(10000000).reshape(-1, 50000)
 
-init(mode=1, skipna=False)
+init(mode=2, skipna=False)
 
 r = ATR_CN(h, l, c, timeperiod=10)
 print(r)

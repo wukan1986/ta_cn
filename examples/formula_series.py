@@ -5,7 +5,7 @@ from ta_cn.alpha import RANK
 from ta_cn.preprocess import demean
 from ta_cn.utils import dataframe_groupby_apply, series_groupby_apply
 
-ta.init(mode=1, skipna=False)
+ta.init(mode=1, skipna=True)
 
 pd._testing._N = 500
 pd._testing._K = 30
@@ -28,15 +28,15 @@ df.index.names = ['date', 'asset']
 kwargs = df.to_dict(orient='series')
 
 # 套上装饰器，实现组内计算
-SMA = series_groupby_apply(ta.SMA, by='asset', dropna=True)
-ATR = dataframe_groupby_apply(ta.ATR, by='asset', dropna=True)
+SMA = series_groupby_apply(ta.SMA, by='asset', dropna=True, to_args=[], to_kwargs=['timeperiod'])
+ATR = dataframe_groupby_apply(ta.ATR, by='asset', dropna=True, to_df=[0, 1, 2], to_kwargs={3: 'timeperiod'})
 # 横截面
 RANK = series_groupby_apply(RANK, by='date', dropna=True)
 # 行业中性化
-indneutralize = dataframe_groupby_apply(demean, by=['date', 'group'], dropna=False)
+indneutralize = dataframe_groupby_apply(demean, by=['date', 'group'], dropna=False, to_df=[0, 'group'], to_kwargs={})
 
 # 单输入
-r = SMA(df['close'], timeperiod=10)
+r = SMA(df['close'], 10)
 print(r.unstack())
 # 多输入
 r = ATR(df['high'], df['low'], df['close'], 10)

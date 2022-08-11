@@ -45,16 +45,14 @@ pip install ta_cn[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 1. 转发原生talib，输入一维向量
     - 优点: 本库提供了跳过空值的功能
     - 缺点: 不要在大量循环中调用，因为跳过空值的功能每调用一次就要预分配内存
-1. 封装原生talib，输入二维矩阵
-    - 优点：适用于单核计算大量数据。只分配一次内存
 2. 封装原生talib，输入二维矩阵，同时支持参数一维向量化
-    - 优点：可为不同股票指定不同参数，可用于按天遍历计算指标
+    - 优点：可为不同股票指定不同参数，可用于按天遍历计算指标。只分配一次内存
 3. 直接调用包中定义的指标，如KDJ等
     - 优点：符合中国习惯的技术指标
     - 缺点：指标数目前比较少。一般没有跳过空值功能
 4. 输入为复合索引时序，分组计算
     - 优点：使用简单，可进行指标嵌套
-    - 缺点：速度会慢一些
+    - 缺点：速度会慢一些。准备工作偏复杂
     
 ## 跳过空值
 1. TA-Lib遇到空值后面结果全为NaN
@@ -173,7 +171,7 @@ from ta_cn.alpha import RANK
 from ta_cn.preprocess import demean
 from ta_cn.utils import dataframe_groupby_apply, series_groupby_apply
 
-ta.init(mode=1, skipna=False)
+ta.init(mode=1, skipna=True)
 
 pd._testing._N = 500
 pd._testing._K = 30
@@ -196,15 +194,15 @@ df.index.names = ['date', 'asset']
 kwargs = df.to_dict(orient='series')
 
 # 套上装饰器，实现组内计算
-SMA = series_groupby_apply(ta.SMA, by='asset', dropna=True)
-ATR = dataframe_groupby_apply(ta.ATR, by='asset', dropna=True)
+SMA = series_groupby_apply(ta.SMA, by='asset', dropna=True, to_args=[], to_kwargs=['timeperiod'])
+ATR = dataframe_groupby_apply(ta.ATR, by='asset', dropna=True, to_df=[0, 1, 2], to_kwargs={3: 'timeperiod'})
 # 横截面
 RANK = series_groupby_apply(RANK, by='date', dropna=True)
 # 行业中性化
-indneutralize = dataframe_groupby_apply(demean, by=['date', 'group'], dropna=False)
+indneutralize = dataframe_groupby_apply(demean, by=['date', 'group'], dropna=False, to_df=[0, 'group'], to_kwargs={})
 
 # 单输入
-r = SMA(df['close'], timeperiod=10)
+r = SMA(df['close'], 10)
 print(r.unstack())
 # 多输入
 r = ATR(df['high'], df['low'], df['close'], 10)
@@ -215,6 +213,7 @@ print(r.unstack())
 r = indneutralize(df['close'], group=df['group'])
 
 print(r.unstack())
+
 ```
 
 ## 指标对比清单

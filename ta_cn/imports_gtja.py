@@ -5,12 +5,17 @@
 """
 import numpy as np
 import pandas as pd
+
+import ta_cn.talib as ta
+
+ta.init(mode=1, skipna=True)
+
 # 都是单支股票的循环，直接调用更快
-from talib import CORREL as CORR
-from talib import LINEARREG_SLOPE as REGSLOPE
-from talib import SMA as MEAN
-from talib import SMA as WMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
-from talib import WMA as DECAYLINEAR
+from ta_cn.talib import CORREL as CORR
+from ta_cn.talib import LINEARREG_SLOPE as REGSLOPE
+from ta_cn.talib import SMA as MEAN
+from ta_cn.talib import SMA as WMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
+from ta_cn.talib import WMA as DECAYLINEAR
 
 from .alpha import LessThan
 from .alpha import RANK
@@ -76,39 +81,41 @@ BY_DATE = 'date'
 # 横截面上进行行业中性化
 BY_GROUP = ['date', 'group']
 
-# 时序
-STD = series_groupby_apply(STD, by=BY_ASSET, dropna=False)
-HIGHDAY = series_groupby_apply(HIGHDAY, by=BY_ASSET, dropna=False)
-LOWDAY = series_groupby_apply(LOWDAY, by=BY_ASSET, dropna=False)
-DELTA = series_groupby_apply(DELTA, by=BY_ASSET, dropna=False)
-TSRANK = series_groupby_apply(TSRANK, by=BY_ASSET, dropna=False)
-DELAY = series_groupby_apply(DELAY, by=BY_ASSET, dropna=False)
-TSMAX = series_groupby_apply(TSMAX, by=BY_ASSET, dropna=False)
-TSMIN = series_groupby_apply(TSMIN, by=BY_ASSET, dropna=False)
-SUM = series_groupby_apply(SUM, by=BY_ASSET, dropna=False)
+dropna = False
 
-DECAYLINEAR = series_groupby_apply(DECAYLINEAR, by=BY_ASSET, dropna=False)
-PROD = series_groupby_apply(PROD, by=BY_ASSET, dropna=False)
-MEAN = series_groupby_apply(MEAN, by=BY_ASSET, dropna=False)
-SMA = series_groupby_apply(SMA, by=BY_ASSET, dropna=False)
-COUNT = series_groupby_apply(COUNT, by=BY_ASSET, dropna=False)
-MA = series_groupby_apply(MA, by=BY_ASSET, dropna=False)
-WMA = series_groupby_apply(WMA, by=BY_ASSET, dropna=False)
-REGSLOPE = series_groupby_apply(REGSLOPE, by=BY_ASSET, dropna=False)
-CUMPROD = series_groupby_apply(CUMPROD, by=BY_ASSET, dropna=False)
+# 时序
+STD = series_groupby_apply(STD, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+HIGHDAY = series_groupby_apply(HIGHDAY, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+LOWDAY = series_groupby_apply(LOWDAY, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+DELTA = series_groupby_apply(DELTA, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+TSRANK = series_groupby_apply(TSRANK, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+DELAY = series_groupby_apply(DELAY, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+TSMAX = series_groupby_apply(TSMAX, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+TSMIN = series_groupby_apply(TSMIN, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+SUM = series_groupby_apply(SUM, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+
+DECAYLINEAR = series_groupby_apply(DECAYLINEAR, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+PROD = series_groupby_apply(PROD, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+MEAN = series_groupby_apply(MEAN, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=[])
+SMA = series_groupby_apply(SMA, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+COUNT = series_groupby_apply(COUNT, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+MA = series_groupby_apply(MA, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+WMA = series_groupby_apply(WMA, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+REGSLOPE = series_groupby_apply(REGSLOPE, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+CUMPROD = series_groupby_apply(CUMPROD, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=[])
 
 # 时序，双输入
-CORR = dataframe_groupby_apply(CORR, by=BY_ASSET, dropna=True)
-COVIANCE = dataframe_groupby_apply(COVIANCE, by=BY_ASSET, dropna=True)
-REGBETA = dataframe_groupby_apply(REGBETA, by=BY_ASSET, dropna=False)
+CORR = dataframe_groupby_apply(CORR, by=BY_ASSET, dropna=True, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
+COVIANCE = dataframe_groupby_apply(COVIANCE, by=BY_ASSET, dropna=True, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
+REGBETA = dataframe_groupby_apply(REGBETA, by=BY_ASSET, dropna=dropna, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
 
 # 注意，SUMIF参数的位置常用的方式不同
-SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET, dropna=False)
-FILTER = dataframe_groupby_apply(FILTER, by=BY_ASSET, dropna=False)
-REGRESI = dataframe_groupby_apply(REGRESI, by=BY_ASSET, dropna=False)
+SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET, dropna=dropna, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
+FILTER = dataframe_groupby_apply(FILTER, by=BY_ASSET, dropna=dropna, to_df=[0, 1], to_kwargs={})
+REGRESI = dataframe_groupby_apply(REGRESI, by=BY_ASSET, dropna=dropna, to_df=[0, 1, 2, 3], to_kwargs={4: 'timeperiod'})
 
 # 截面
-RANK = series_groupby_apply(RANK, by=BY_DATE, dropna=False)
+RANK = series_groupby_apply(RANK, by=BY_DATE, dropna=dropna)
 
 # 防止被IDE删除
 LessThan = LessThan

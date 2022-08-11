@@ -181,7 +181,7 @@ def alpha_029(CLOSE, VOLUME, **kwargs):
 
 def alpha_030(CLOSE, MKT, SMB, HML, **kwargs):
     """Alpha30 WMA((REGRESI(CLOSE/DELAY(CLOSE)-1,MKT,SMB,HML，60))^2,20)"""
-    return WMA((REGRESI(CLOSE / DELAY(CLOSE) - 1, MKT, SMB, HML, timeperiod=60)) ** 2, 20)
+    return WMA((REGRESI(CLOSE / DELAY(CLOSE, 1) - 1, MKT, SMB, HML, 60)) ** 2, 20)
 
 
 def alpha_031(CLOSE, **kwargs):
@@ -358,7 +358,7 @@ def alpha_053(CLOSE, **kwargs):
 
 def alpha_054(OPEN, CLOSE, **kwargs):
     """Alpha54 (-1 * RANK((STD(ABS(CLOSE - OPEN)) + (CLOSE - OPEN)) + CORR(CLOSE, OPEN,10)))"""
-    return (-1 * RANK((STD(ABS(CLOSE - OPEN)) + (CLOSE - OPEN)) + CORR(CLOSE, OPEN, 10)))
+    return (-1 * RANK((STD(ABS(CLOSE - OPEN), 5) + (CLOSE - OPEN)) + CORR(CLOSE, OPEN, 10)))
 
 
 def alpha_055(OPEN, HIGH, LOW, CLOSE, **kwargs):
@@ -1215,7 +1215,7 @@ SUM(((CLOSE/DELAY(CLOSE,1)-1)-MEAN((CLOSE/DELAY(CLOSE,1)-1),20))-(BANCHMARKINDEX
 ANCHMARKINDEXCLOSE,20))^2,20)/SUM((BANCHMARKINDEXCLOSE-MEAN(BANCHMARKINDEXCLOSE,20))^3)"""
     return SUM(((CLOSE / DELAY(CLOSE, 1) - 1) - MEAN((CLOSE / DELAY(CLOSE, 1) - 1), 20)) - (
             BANCHMARKINDEXCLOSE - MEAN(BANCHMARKINDEXCLOSE, 20)) ** 2, 20) / SUM(
-        (BANCHMARKINDEXCLOSE - MEAN(BANCHMARKINDEXCLOSE, 20)) ** 3)
+        (BANCHMARKINDEXCLOSE - MEAN(BANCHMARKINDEXCLOSE, 20)) ** 3, 20)
 
 
 def alpha_182(OPEN, CLOSE, BANCHMARKINDEXCLOSE, BANCHMARKINDEXOPEN, **kwargs):
@@ -1286,14 +1286,14 @@ LOSE)-1-(CLOSE/DELAY(CLOSE,19))^(1/20)-1))^2,20,CLOSE/DELAY(CLOSE)-1<(CLOSE/DELA
 E)-1-((CLOSE/DELAY(CLOSE,19))^(1/20)-1))^2,20,CLOSE/DELAY(CLOSE)-1>(CLOSE/DELAY(CLOSE,19))^(1/20)-1)))
 )"""
     # 原表达式有问题，少括号，导致优先级错误，同时还多一个-1
-    return LOG((COUNT(CLOSE / DELAY(CLOSE) - 1 > (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1, 20)) * (
-        SUMIF((CLOSE / DELAY(CLOSE) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2,
-              CLOSE / DELAY(CLOSE) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1,
+    return LOG((COUNT(CLOSE / DELAY(CLOSE,1) - 1 > (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1, 20)) * (
+        SUMIF((CLOSE / DELAY(CLOSE,1) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2,
+              CLOSE / DELAY(CLOSE,1) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1,
               20
               )) / (
-                       (COUNT(CLOSE / DELAY(CLOSE) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1, 20)) * (
-                   SUMIF((CLOSE / DELAY(CLOSE) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2,
-                         CLOSE / DELAY(CLOSE) - 1 > (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1,
+                       (COUNT(CLOSE / DELAY(CLOSE,1) - 1 < (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1, 20)) * (
+                   SUMIF((CLOSE / DELAY(CLOSE,1) - 1 - ((CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1)) ** 2,
+                         CLOSE / DELAY(CLOSE,1) - 1 > (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1,
                          20
                          ))))
 

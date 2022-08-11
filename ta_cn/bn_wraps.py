@@ -1,7 +1,7 @@
 from functools import wraps
 
-import bottleneck as _bn
 import numpy as np
+from bottleneck import *
 
 
 def bn_move_window(func):
@@ -16,13 +16,13 @@ def bn_move_window(func):
     return decorated
 
 
-move_argmax = bn_move_window(_bn.move_argmax)
-move_argmin = bn_move_window(_bn.move_argmin)
-move_max = bn_move_window(_bn.move_max)
-move_mean = bn_move_window(_bn.move_mean)
-move_median = bn_move_window(_bn.move_median)
-move_min = bn_move_window(_bn.move_min)
-move_rank = bn_move_window(_bn.move_rank)
-move_std = bn_move_window(_bn.move_std)
-move_sum = bn_move_window(_bn.move_sum)
-move_var = bn_move_window(_bn.move_var)
+move_argmax = bn_move_window(move_argmax)
+move_argmin = bn_move_window(move_argmin)
+move_max = bn_move_window(move_max)
+move_mean = bn_move_window(move_mean)
+move_median = bn_move_window(move_median)
+move_min = bn_move_window(move_min)
+move_rank = bn_move_window(move_rank)
+move_std = bn_move_window(move_std)
+move_sum = bn_move_window(move_sum)
+move_var = bn_move_window(move_var)

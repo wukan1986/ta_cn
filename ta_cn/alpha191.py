@@ -69,7 +69,7 @@ def alpha_009(HIGH, LOW, VOLUME, **kwargs):
 
 def alpha_010(CLOSE, RET, **kwargs):
     """Alpha10 (RANK(MAX(((RET < 0) ? STD(RET, 20) : CLOSE)^2),5))"""
-    """!!!此处怀疑原版的MAX是错的，修正成TSMAX"""
+    """Alpha#1: (rank(Ts_ArgMax(SignedPower(((returns < 0) ? stddev(returns, 20) : close), 2.), 5)) - 0.5)"""
     t1 = IF((RET < 0), STD(RET, 20), CLOSE)
     return (RANK(TSMAX(t1 ** 2, 5)))
 
@@ -201,7 +201,7 @@ def alpha_029(CLOSE, VOLUME, **kwargs):
 
 def alpha_030(CLOSE, MKT, SMB, HML, **kwargs):
     """Alpha30 WMA((REGRESI(CLOSE/DELAY(CLOSE)-1,MKT,SMB,HML，60))^2,20)"""
-    return WMA((REGRESI(CLOSE / DELAY(CLOSE) - 1, MKT, SMB, HML, timeperiod=60)) ** 2, 20)
+    return WMA((REGRESI(CLOSE / DELAY(CLOSE, 1) - 1, MKT, SMB, HML, 60)) ** 2, 20)
 
 
 def alpha_031(CLOSE, **kwargs):
@@ -392,7 +392,8 @@ def alpha_053(CLOSE, **kwargs):
 
 def alpha_054(OPEN, CLOSE, **kwargs):
     """Alpha54 (-1 * RANK((STD(ABS(CLOSE - OPEN)) + (CLOSE - OPEN)) + CORR(CLOSE, OPEN,10)))"""
-    t1 = (STD(ABS(CLOSE - OPEN)) + (CLOSE - OPEN))
+    """Alpha#18: (-1 * rank(((stddev(abs((close - open)), 5) + (close - open)) + correlation(close, open, 10))))"""
+    t1 = (STD(ABS(CLOSE - OPEN), 5) + (CLOSE - OPEN))
     t2 = CORR(CLOSE, OPEN, 10)
     return (-1 * RANK(t1 + t2))
 
@@ -1353,9 +1354,10 @@ def alpha_181(CLOSE, BANCHMARKINDEXCLOSE, **kwargs):
     """Alpha181
 SUM(((CLOSE/DELAY(CLOSE,1)-1)-MEAN((CLOSE/DELAY(CLOSE,1)-1),20))-(BANCHMARKINDEXCLOSE-MEAN(B
 ANCHMARKINDEXCLOSE,20))^2,20)/SUM((BANCHMARKINDEXCLOSE-MEAN(BANCHMARKINDEXCLOSE,20))^3)"""
+    """!!!又补了一个参数20"""
     t1 = (CLOSE / DELAY(CLOSE, 1) - 1)
     t2 = (BANCHMARKINDEXCLOSE - MEAN(BANCHMARKINDEXCLOSE, 20))
-    return SUM((t1 - MEAN(t1, 20)) - (t2) ** 2, 20) / SUM(t2 ** 3)
+    return SUM((t1 - MEAN(t1, 20)) - (t2) ** 2, 20) / SUM(t2 ** 3, 20)
 
 
 def alpha_182(OPEN, CLOSE, BANCHMARKINDEXCLOSE, BANCHMARKINDEXOPEN, **kwargs):
@@ -1430,7 +1432,7 @@ LOSE)-1-(CLOSE/DELAY(CLOSE,19))^(1/20)-1))^2,20,CLOSE/DELAY(CLOSE)-1<(CLOSE/DELA
 1))/((COUNT((CLOSE/DELAY(CLOSE)-1<(CLOSE/DELAY(CLOSE,19))^(1/20)-1),20))*(SUMIF((CLOSE/DELAY(CLOS
 E)-1-((CLOSE/DELAY(CLOSE,19))^(1/20)-1))^2,20,CLOSE/DELAY(CLOSE)-1>(CLOSE/DELAY(CLOSE,19))^(1/20)-1)))
 )"""
-    t1 = CLOSE / DELAY(CLOSE) - 1
+    t1 = CLOSE / DELAY(CLOSE, 1) - 1
     t2 = (CLOSE / DELAY(CLOSE, 19)) ** (1 / 20) - 1
     t3 = (t1 - t2) ** 2
     t4 = t1 > t2
