@@ -1,7 +1,6 @@
 from functools import wraps, reduce
 from typing import Union
 
-import numpy as _np
 import numpy as np
 import pandas as pd
 
@@ -341,12 +340,12 @@ def fill_zeros_with_last(arr):
 
 def ANY_NAN(*args):
     """多输入，同位置只要出现过nan就标记成True"""
-    return reduce(lambda x, y: _np.logical_or(x, _np.isnan(y)), [False] + list(args))
+    return reduce(lambda x, y: np.logical_or(x, np.isnan(y)), [False] + list(args))
 
 
 def ALL_NOTNA(*args):
     """多输入，同位置没有出现过nan,标记成True"""
-    return reduce(lambda x, y: _np.logical_and(x, ~_np.isnan(y)), [True] + list(args))
+    return reduce(lambda x, y: np.logical_and(x, ~np.isnan(y)), [True] + list(args))
 
 
 if __name__ == '__main__':

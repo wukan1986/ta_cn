@@ -1,6 +1,6 @@
 import warnings
 
-import bottleneck as _bn
+from .bn_wraps import _bn
 import numba
 import numpy as _np
 

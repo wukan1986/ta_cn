@@ -1,6 +1,6 @@
-import bottleneck as _bn
 import numpy as _np
 
+from .bn_wraps import _bn
 from .utils import pd_to_np
 
 

@@ -1,7 +1,7 @@
 """
 
 """
-import bottleneck as _bn
+from .bn_wraps import _bn
 import numpy as _np
 
 
@@ -10,13 +10,13 @@ def signedpower(real, n):
     return _np.sign(real) * (abs(real) ** n)
 
 
-def TS_RANK(real, timeperiod=10):
+def TS_RANK(real, timeperiod: int = 10):
     """滚动rank"""
     t1 = _bn.move_rank(real, window=timeperiod, axis=0)
     return (t1 + 1.) / 2.
 
 
-def RANK(real, pct=True):
+def RANK(real, pct: bool = True):
     """横截面rank"""
     if real.ndim == 2:
         t1 = _bn.nanrankdata(real, axis=1)
