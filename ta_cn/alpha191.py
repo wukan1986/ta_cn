@@ -69,8 +69,9 @@ def alpha_009(HIGH, LOW, VOLUME, **kwargs):
 
 def alpha_010(CLOSE, RET, **kwargs):
     """Alpha10 (RANK(MAX(((RET < 0) ? STD(RET, 20) : CLOSE)^2),5))"""
+    """!!!此处怀疑原版的MAX是错的，修正成TSMAX"""
     t1 = IF((RET < 0), STD(RET, 20), CLOSE)
-    return (RANK(MAX(t1 ** 2), 5))
+    return (RANK(TSMAX(t1 ** 2), 5))
 
 
 def alpha_011(HIGH, LOW, CLOSE, VOLUME, **kwargs):
