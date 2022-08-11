@@ -1,8 +1,9 @@
 """
 
 """
-from .bn_wraps import _bn
 import numpy as _np
+
+import ta_cn.bn_wraps as _bn
 
 
 def signedpower(real, n):

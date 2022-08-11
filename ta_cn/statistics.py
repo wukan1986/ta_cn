@@ -1,5 +1,4 @@
-from .bn_wraps import _bn
-
+import ta_cn.bn_wraps as _bn
 import ta_cn.talib as _ta2d
 from .nb import numpy_rolling_apply, _rolling_func_1_nb, _avedev_nb, _rolling_func_2_nb, _cov_nb
 from .utils import pd_to_np

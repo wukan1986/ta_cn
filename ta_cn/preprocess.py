@@ -1,6 +1,6 @@
 import numpy as _np
 
-from .bn_wraps import _bn
+import ta_cn.bn_wraps as _bn
 from .utils import pd_to_np
 
 

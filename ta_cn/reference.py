@@ -1,7 +1,7 @@
 import numpy as _np
 
+import ta_cn.bn_wraps as _bn
 import ta_cn.talib as _ta2d
-from .bn_wraps import _bn
 from .maths import MAX, ABS
 from .nb import _filter_nb, _bars_last_nb, _bars_last_count_nb, numpy_rolling_apply, _bars_since_n_nb, \
     _rolling_func_1_nb, _product_nb

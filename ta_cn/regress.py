@@ -1,6 +1,6 @@
 import warnings
 
-from .bn_wraps import _bn
+import ta_cn.bn_wraps as _bn
 import numba
 import numpy as _np
 
