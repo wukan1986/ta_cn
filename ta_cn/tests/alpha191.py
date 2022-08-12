@@ -825,7 +825,7 @@ def alpha_126(HIGH, LOW, CLOSE, **kwargs):
 
 def alpha_127(CLOSE, **kwargs):
     """Alpha127 (MEAN((100*(CLOSE-MAX(CLOSE,12))/(MAX(CLOSE,12)))^2))^(1/2)"""
-    return (MEAN((100 * (CLOSE - MAX(CLOSE, 12)) / (MAX(CLOSE, 12))) ** 2)) ** (1 / 2)
+    return (MEAN((100 * (CLOSE - TSMAX(CLOSE, 12)) / (TSMAX(CLOSE, 12))) ** 2, 12)) ** (1 / 2)
 
 
 def alpha_128(HIGH, LOW, CLOSE, VOLUME, **kwargs):

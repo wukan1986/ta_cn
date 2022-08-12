@@ -2,7 +2,7 @@ import numpy as np
 
 # 新版talib,只要替换引用，并添加一句init即可
 import ta_cn.talib as ta
-from ta_cn.utils import pushna, pullna
+from ta_cn.utils_wide import pushna, pullna
 
 # 原版talib,不支持二维数据
 # import talib as ta

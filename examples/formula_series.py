@@ -3,7 +3,7 @@ import pandas as pd
 import ta_cn.talib as ta
 from ta_cn.alpha import RANK
 from ta_cn.preprocess import demean
-from ta_cn.utils import dataframe_groupby_apply, series_groupby_apply
+from ta_cn.utils_long import series_groupby_apply, dataframe_groupby_apply
 
 ta.init(mode=1, skipna=True)
 

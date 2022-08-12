@@ -10,97 +10,10 @@ def to_pd(func):
 
     @wraps(func)
     def decorated(*args, **kwargs):
-        if len(args) > 0:
-            real = args[0]
-        else:
-            real = list(kwargs.values())[0]
+        real = args[0]
         return np_to_pd(func(*args, **kwargs),
                         index=getattr(real, 'index', None),
                         columns=getattr(real, 'columns', None))
-
-    return decorated
-
-
-def series_groupby_apply(func, by, dropna, to_args=[], to_kwargs=[]):
-    """普通指标转换成按分组处理的指标。只支持单参数
-
-    Parameters
-    ----------
-    func
-    by
-    dropna:
-        慎用。丢弃后可能长度变小，与其它数据计算时长度不对
-    to_args
-    to_kwargs
-
-    Notes
-    -----
-    只能处理Series
-
-    """
-
-    @wraps(func)
-    def decorated(s: pd.Series, *args, **kwargs):
-        if dropna:
-            s = s.dropna()
-
-        # 参数位置调整，实现命命参数简化
-        _args = [kwargs[v] for v in to_args]
-        _kwargs = {k: args[i] for i, k in enumerate(to_kwargs)}
-
-        return s.groupby(by=by, group_keys=False).apply(to_pd(func), *_args, **_kwargs)
-
-    return decorated
-
-
-def dataframe_groupby_apply(func, by, dropna, to_df=[], to_kwargs={}):
-    """普通指标转换成按分组处理的指标。支持多输入
-
-    Parameters
-    ----------
-    func
-    by
-    dropna
-        慎用。丢弃后可能长度变小，与其它数据计算时长度不对
-    to_df
-    to_kwargs
-
-    Notes
-    -----
-    即能处理DataFrame，又能处理Series,但考虑到效率，单输入时使用series_groupby_apply
-
-    """
-
-    def get(i, k, args, kwargs):
-        if i == k:
-            return args[i]
-        if isinstance(k, str):
-            v = kwargs.get(k, None)
-            if v is None:
-                return args[i]
-            return v
-
-    @wraps(func)
-    def decorated(*args, **kwargs):
-        df = pd.DataFrame({k: get(i, k, args, kwargs) for i, k in enumerate(to_df)})
-        _kwargs = {k: args[i] for i, k in to_kwargs.items()}
-
-        if dropna:
-            df = df.dropna()
-        return df.groupby(by=by, group_keys=False).apply(to_pd(dataframe_split(func)), **_kwargs)
-
-    return decorated
-
-
-def dataframe_split(func):
-    """将第一个DataFrame分拆传到指定函数"""
-
-    @wraps(func)
-    def decorated(df: pd.DataFrame, *args, **kwargs):
-        ss = df.to_dict(orient='series')
-        args_input = [v for k, v in ss.items() if isinstance(k, int)]
-        kwargs_input = {k: v for k, v in ss.items() if not isinstance(k, int)}
-        return func(*args_input, *args, **kwargs_input, **kwargs)
 
     return decorated
 
@@ -236,68 +149,6 @@ def fillna(arr, direction='down'):
     return out
 
 
-def pushna(arr, direction='down'):
-    """将非空数据按方向移动
-
-    Parameters
-    ----------
-    arr: np.darray
-    direction: str
-        up, down, left, right
-
-    Returns
-    -------
-    arr
-        重排后的数据
-    row
-        行索引。将用于还原
-    col
-        列索引。将用于还原
-
-    References
-    ----------
-    https://stackoverflow.com/questions/32062157/move-non-empty-cells-to-the-left-in-pandas-dataframe
-    https://stackoverflow.com/questions/39361839/move-non-empty-cells-to-left-in-grouped-columns-pandas
-
-    """
-    if direction == 'down':
-        row = (~np.isnan(arr)).argsort(axis=0, kind='stable')
-        col = np.arange(arr.shape[1])[None]
-    if direction == 'up':
-        row = np.isnan(arr).argsort(axis=0, kind='stable')
-        col = np.arange(arr.shape[1])[None]
-    if direction == 'left':
-        col = np.isnan(arr).argsort(axis=1, kind='stable')
-        row = np.arange(arr.shape[0])[:, None]
-    if direction == 'right':
-        col = (~np.isnan(arr)).argsort(axis=1, kind='stable')
-        row = np.arange(arr.shape[0])[:, None]
-
-    return arr[row, col], row, col
-
-
-def pullna(arr, row, col):
-    """pushna的还原
-
-    Parameters
-    ----------
-    arr: np.array
-    row
-        行索引
-    col
-        列索引
-
-    Examples
-    --------
-    >>> a, row, col = pushna(df)
-    >>> print(pullna(a, row, col))
-
-    """
-    tmp = np.empty_like(arr)
-    tmp[row, col] = arr
-    return tmp
-
-
 def zero_runs(a):
     """查找0的边界
 
@@ -354,19 +205,3 @@ def ANY_NAN(*args):
 def ALL_NOTNA(*args):
     """多输入，同位置没有出现过nan,标记成True"""
     return reduce(lambda x, y: np.logical_and(x, ~np.isnan(y)), [True] + list(args))
-
-
-if __name__ == '__main__':
-    arr = np.array([[5, np.nan, np.nan, 7, 2],
-                    [3, np.nan, 1, 8, np.nan],
-                    [np.nan, 9, 6, np.nan, np.nan],
-                    [2, np.nan, 6, 2, np.nan], ])
-    print(fillna(arr, direction='down'))
-    print(fillna(arr, direction='up'))
-    print(fillna(arr, direction='left'))
-    print(fillna(arr, direction='right'))
-
-    print(pushna(arr, direction='down'))
-    print(pushna(arr, direction='up'))
-    print(pushna(arr, direction='left'))
-    print(pushna(arr, direction='right'))

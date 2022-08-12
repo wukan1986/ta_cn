@@ -31,7 +31,9 @@ def ATR_CN(high, low, close, timeperiod=14):
     def func(high, low, close, timeperiod):
         return _ta1d.SMA(_ta1d.TRANGE(high, low, close), timeperiod)
 
-    return _ta2d.tafunc_nditer_1(func, [high, low, close], {'timeperiod': timeperiod}, ['real'])
+    return _ta2d.tafunc_nditer_1(func, [high, low, close], {'timeperiod': timeperiod},
+                                 ['high', 'low', 'close'],
+                                 ['real'])
 
 
 def MACD_CN(real: _pd.DataFrame, fastperiod=12, slowperiod=26, signalperiod=9):

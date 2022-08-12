@@ -42,7 +42,8 @@ from .regress import SLOPE_YX_NB as REGBETA
 from .regress import ts_multiple_regress
 from .statistics import COVAR as COVIANCE
 from .statistics import STDP as STD  # 引入的是全体标准差
-from .utils import to_pd, series_groupby_apply, dataframe_groupby_apply
+from .utils import to_pd
+from .utils_long import series_groupby_apply, dataframe_groupby_apply
 
 """
 1. 将通达信公式改名成World Quant中对应公式
@@ -84,25 +85,25 @@ BY_GROUP = ['date', 'group']
 dropna = False
 
 # 时序
-STD = series_groupby_apply(STD, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-HIGHDAY = series_groupby_apply(HIGHDAY, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-LOWDAY = series_groupby_apply(LOWDAY, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-DELTA = series_groupby_apply(DELTA, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-TSRANK = series_groupby_apply(TSRANK, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-DELAY = series_groupby_apply(DELAY, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-TSMAX = series_groupby_apply(TSMAX, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-TSMIN = series_groupby_apply(TSMIN, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-SUM = series_groupby_apply(SUM, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
+STD = series_groupby_apply(STD, by=BY_ASSET, to_kwargs=['timeperiod'])
+HIGHDAY = series_groupby_apply(HIGHDAY, by=BY_ASSET, to_kwargs=['timeperiod'])
+LOWDAY = series_groupby_apply(LOWDAY, by=BY_ASSET, to_kwargs=['timeperiod'])
+DELTA = series_groupby_apply(DELTA, by=BY_ASSET, to_kwargs=['timeperiod'])
+TSRANK = series_groupby_apply(TSRANK, by=BY_ASSET, to_kwargs=['timeperiod'])
+DELAY = series_groupby_apply(DELAY, by=BY_ASSET, to_kwargs=['timeperiod'])
+TSMAX = series_groupby_apply(TSMAX, by=BY_ASSET, to_kwargs=['timeperiod'])
+TSMIN = series_groupby_apply(TSMIN, by=BY_ASSET, to_kwargs=['timeperiod'])
+SUM = series_groupby_apply(SUM, by=BY_ASSET, to_kwargs=['timeperiod'])
 
-DECAYLINEAR = series_groupby_apply(DECAYLINEAR, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-PROD = series_groupby_apply(PROD, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-MEAN = series_groupby_apply(MEAN, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=[])
-SMA = series_groupby_apply(SMA, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-COUNT = series_groupby_apply(COUNT, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-MA = series_groupby_apply(MA, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-WMA = series_groupby_apply(WMA, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-REGSLOPE = series_groupby_apply(REGSLOPE, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=['timeperiod'])
-CUMPROD = series_groupby_apply(CUMPROD, by=BY_ASSET, dropna=dropna, to_args=[], to_kwargs=[])
+DECAYLINEAR = series_groupby_apply(DECAYLINEAR, by=BY_ASSET, to_kwargs=['timeperiod'])
+PROD = series_groupby_apply(PROD, by=BY_ASSET, to_kwargs=['timeperiod'])
+MEAN = series_groupby_apply(MEAN, by=BY_ASSET, to_kwargs=['timeperiod'])
+SMA = series_groupby_apply(SMA, by=BY_ASSET, to_kwargs=['timeperiod'])
+COUNT = series_groupby_apply(COUNT, by=BY_ASSET, to_kwargs=['timeperiod'])
+MA = series_groupby_apply(MA, by=BY_ASSET, to_kwargs=['timeperiod'])
+WMA = series_groupby_apply(WMA, by=BY_ASSET, to_kwargs=['timeperiod'])
+REGSLOPE = series_groupby_apply(REGSLOPE, by=BY_ASSET, to_kwargs=['timeperiod'])
+CUMPROD = series_groupby_apply(CUMPROD, by=BY_ASSET, to_kwargs=[])
 
 # 时序，双输入
 CORR = dataframe_groupby_apply(CORR, by=BY_ASSET, dropna=True, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
@@ -115,7 +116,7 @@ FILTER = dataframe_groupby_apply(FILTER, by=BY_ASSET, dropna=dropna, to_df=[0, 1
 REGRESI = dataframe_groupby_apply(REGRESI, by=BY_ASSET, dropna=dropna, to_df=[0, 1, 2, 3], to_kwargs={4: 'timeperiod'})
 
 # 截面
-RANK = series_groupby_apply(RANK, by=BY_DATE, dropna=dropna)
+RANK = series_groupby_apply(RANK, by=BY_DATE)
 
 # 防止被IDE删除
 LessThan = LessThan

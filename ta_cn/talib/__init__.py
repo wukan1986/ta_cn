@@ -11,17 +11,20 @@ Examples
 >>> import ta_cn.talib as ta
 
 """
-from functools import wraps
+from functools import wraps, reduce
 
 import numpy as np
 import talib as _talib
 from talib import abstract as _abstract
 
-from ..utils import ANY_NAN, ALL_NOTNA
 
-
-def tafunc_nditer_1(tafunc, args, kwargs, output_names, skipna):
+def tafunc_nditer_1(tafunc, args, kwargs, input_names, output_names, skipna):
     """直接调用talib"""
+
+    def ALL_NOTNA(*args):
+        """多输入，同位置没有出现过nan,标记成True"""
+        return reduce(lambda x, y: np.logical_and(x, ~np.isnan(y)), [True] + list(args))
+
     # 不跳过空值，直接调用函数
     if not skipna:
         return tafunc(*args, **kwargs)
@@ -29,32 +32,28 @@ def tafunc_nditer_1(tafunc, args, kwargs, output_names, skipna):
     # 取一个非数字，得用于得到形状
     real = args[0]
 
-    # 输出缓存
+    output_num = len(output_names)
+
     outputs = [np.full_like(real, fill_value=np.nan) for _ in output_names]
 
     _notna = ALL_NOTNA(*args)
-    for i in range(1):
-        _in = [v[_notna] for v in args]
+    # 只有不连续的nan才需要做切片 https://www.cnpython.com/qa/352363
+    # TODO: https://stackoverflow.com/questions/41721674/find-consecutive-repeated-nan-in-a-numpy-array/41722059#41722059
+    _in = [v[_notna] for v in args]
 
-        # 全NaN，跳过
-        if len(_in[0]) == 0:
-            continue
-
-        # 计算并封装
+    if len(_in[0]) > 0:
         ta_out = tafunc(*_in, **kwargs)
-        if not isinstance(ta_out, tuple):
-            ta_out = tuple([ta_out])
+        if output_num == 1:
+            ta_out = [ta_out]
 
         for _i, _o in zip(outputs, ta_out):
             _i[_notna] = _o
 
     # 输出
-    if len(outputs) == 1:
-        return outputs[0]
-    return outputs
+    return outputs[0] if output_num == 1 else tuple(outputs)
 
 
-def tafunc_nditer_2(tafunc, args, kwargs, output_names, skipna):
+def tafunc_nditer_2(tafunc, args, kwargs, input_names, output_names, skipna):
     """内部按列迭代函数，支持timeperiod等命名参数向量化
 
     Parameters
@@ -67,6 +66,8 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names, skipna):
         命名参数
     output_names: list
         tafunc输出参数名
+    skipna:
+        如想跳过空值，需将数据堆叠到首或尾，实现连续计算
 
     Returns
     -------
@@ -86,50 +87,40 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names, skipna):
         # 单一值，填充成唯一值
         return np.full_like(like, fill_value=x)
 
+    def last_isna(x):
+        # 只检查最后一行
+        return np.any([y[-1] != y[-1] for y in x])
+
     real = args[0]
 
     if real.ndim == 1:
-        return tafunc_nditer_1(tafunc, args, kwargs, output_names, skipna)
+        return tafunc_nditer_1(tafunc, args, kwargs, input_names, output_names, skipna)
 
     # =====以下是二维======
     inputs = [*args]
 
     # 输出缓存
     outputs = [np.full_like(real, fill_value=np.nan) for _ in output_names]
-    if skipna:
-        notna = ALL_NOTNA(*args)
-    else:
-        notna = np.ones_like(real, dtype=bool)
-
     kwargs = {k: num_to_np(v, real[0]) for k, v in kwargs.items()}
 
     # 只有一行输入时需要特别处理
-    with np.nditer(inputs + [notna] + outputs,
+    with np.nditer(inputs + outputs,
                    flags=['external_loop'] if real.shape[0] > 1 else None,
                    order='F',
-                   op_flags=[['readonly']] * (len(inputs) + 1) + [['writeonly']] * len(outputs)) as it:
+                   op_flags=[['readonly']] * len(inputs) + [['writeonly']] * len(outputs)) as it:
         for i, in_out in enumerate(it):
             if real.shape[0] == 1:
                 # 需要将0维array改成1维，否则talib报错
                 in_out = [v.reshape(1) for v in in_out]
 
             _in = in_out[:len(inputs)]  # 分离输入
-            _notna = in_out[len(inputs)]
+            # 最后一行出现了空
+            if last_isna(_in):
+                continue
             _out = in_out[-len(outputs):]  # 分离输出
+
             # 切片得到每列的参数
             _kw = {k: v[i] for k, v in kwargs.items()}
-
-            if skipna:
-                _in = [v[_notna] for v in _in]
-
-                # 全NaN，跳过
-                if len(_in[0]) == 0:
-                    continue
-            else:
-                _notna = slice(None)
-                # 所有输入数据都判断一下
-                if np.all(ANY_NAN(*_in)):
-                    continue
 
             # 计算并封装
             ta_out = tafunc(*_in, **_kw)
@@ -137,7 +128,7 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names, skipna):
                 ta_out = tuple([ta_out])
 
             for _i, _o in zip(_out, ta_out):
-                _i[_notna] = _o
+                _i[...] = _o
 
     # 输出
     if len(outputs) == 1:
@@ -145,13 +136,13 @@ def tafunc_nditer_2(tafunc, args, kwargs, output_names, skipna):
     return outputs
 
 
-def ta_decorator(func, mode, output_names, skipnan):
+def ta_decorator(func, mode, input_names, output_names, skipnan):
     # 设置对应处理函数
     ff = {1: tafunc_nditer_1, 2: tafunc_nditer_2}.get(mode)
 
     @wraps(func)
     def decorated(*args, **kwargs):
-        return ff(func, args, kwargs, output_names, skipnan)
+        return ff(func, args, kwargs, input_names, output_names, skipnan)
 
     return decorated
 
@@ -179,10 +170,12 @@ def init(mode=1, skipna=False):
     for i, func_name in enumerate(_talib.get_functions()):
         """talib遍历"""
         _ta_func = getattr(_talib, func_name)
-        output_names = _abstract.Function(func_name)._Function__info['output_names']
+        info = _abstract.Function(func_name)._Function__info
+        output_names = info['output_names']
+        input_names = info['input_names']
 
         # 创建函数
-        globals()[func_name] = ta_decorator(_ta_func, mode, output_names, skipna)
+        globals()[func_name] = ta_decorator(_ta_func, mode, input_names, output_names, skipna)
 
 
 # =============================================
