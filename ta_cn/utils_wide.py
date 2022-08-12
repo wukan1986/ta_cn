@@ -94,15 +94,13 @@ def pullna(arr, row, col):
     return tmp
 
 
-class WRes:
+class WRes(np.ndarray):
     """宽表计算中间体，用于进行输入的堆叠，输出的还原"""
-
-    def __init__(self, arr, row, col, direction):
-        self.arr = arr
-        self.row = row
-        self.col = col
-        self.direction = direction
-        self._raw = None
+    arr = None
+    row = None
+    col = None
+    direction = None
+    _raw = None
 
     def raw(self):
         if self._raw is None:
@@ -110,8 +108,14 @@ class WRes:
         return self._raw
 
     @classmethod
+    def from_args(cls, arr, row, col, direction):
+        c = cls(shape=(1,))
+        c.arr, c.row, c.col, c.direction = arr, row, col, direction
+        return c
+
+    @classmethod
     def from_array(cls, arr, direction):
-        return cls(*pushna(pd_to_np(arr), direction), direction)
+        return cls.from_args(*pushna(pd_to_np(arr), direction), direction)
 
     @classmethod
     def from_obj(cls, obj, direction):
@@ -126,45 +130,130 @@ class WRes:
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
-            return WRes(self.arr * other, self.row, self.col, self.direction)
+            return self.from_args(self.arr * other, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() * other.raw(), self.direction)
         else:
             return self.from_array(self.raw() * other, self.direction)
 
     def __rmul__(self, other):
         if isinstance(other, (int, float)):
-            return WRes(other * self.arr, self.row, self.col, self.direction)
+            return self.from_args(other * self.arr, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(other.raw() * self.raw(), self.direction)
         else:
             return self.from_array(other * self.raw(), self.direction)
 
     def __gt__(self, other):
         if isinstance(other, (int, float)):
-            return WRes(self.arr > other, self.row, self.col, self.direction)
+            return self.from_args(self.arr > other, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() > other.raw(), self.direction)
         else:
             return self.from_array(self.raw() > other, self.direction)
 
     def __lt__(self, other):
         if isinstance(other, (int, float)):
-            return WRes(self.arr < other, self.row, self.col, self.direction)
+            return self.from_args(self.arr < other, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() < other.raw(), self.direction)
         else:
             return self.from_array(self.raw() < other, self.direction)
 
+    def __ge__(self, other):
+        if isinstance(other, (int, float)):
+            return self.from_args(self.arr >= other, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() >= other.raw(), self.direction)
+        else:
+            return self.from_array(self.raw() >= other, self.direction)
+
+    def __le__(self, other):
+        if isinstance(other, (int, float)):
+            return self.from_args(self.arr <= other, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() <= other.raw(), self.direction)
+        else:
+            return self.from_array(self.raw() <= other, self.direction)
+
     def __eq__(self, other):
         if isinstance(other, (int, float)):
-            return WRes(self.arr == other, self.row, self.col, self.direction)
+            return self.from_args(self.arr == other, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() == other.raw(), self.direction)
         else:
             return self.from_array(self.raw() == other, self.direction)
 
+    def __add__(self, other):
+        if isinstance(other, (int, float)):
+            return self.from_args(self.arr + other, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() + other.raw(), self.direction)
+        else:
+            return self.from_array(self.raw() + other, self.direction)
+
+    def __radd__(self, other):
+        if isinstance(other, (int, float)):
+            return self.from_args(other + self.arr, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(other.raw() + self.raw(), self.direction)
+        else:
+            return self.from_array(other + self.raw(), self.direction)
+
     def __sub__(self, other):
         if isinstance(other, (int, float)):
-            return WRes(self.arr - other, self.row, self.col, self.direction)
+            return self.from_args(self.arr - other, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() - other.raw(), self.direction)
         else:
             return self.from_array(self.raw() - other, self.direction)
 
     def __rsub__(self, other):
         if isinstance(other, (int, float)):
-            return WRes(other - self.arr, self.row, self.col, self.direction)
+            return self.from_args(other - self.arr, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(other.raw() - self.raw(), self.direction)
         else:
             return self.from_array(other - self.raw(), self.direction)
+
+    def __truediv__(self, other):
+        if isinstance(other, (int, float)):
+            return self.from_args(self.arr / other, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() / other.raw(), self.direction)
+        else:
+            return self.from_array(self.raw() / other, self.direction)
+
+    def __rtruediv__(self, other):
+        if isinstance(other, (int, float)):
+            return self.from_args(other / self.arr, self.row, self.col, self.direction)
+        if isinstance(other, WRes):
+            return self.from_array(other.raw() / self.raw(), self.direction)
+        else:
+            return self.from_array(other / self.raw(), self.direction)
+
+    def __pow__(self, power, modulo=None):
+        if isinstance(power, (int, float)):
+            return self.from_args(self.arr ** power, self.row, self.col, self.direction)
+        if isinstance(power, WRes):
+            return self.from_array(self.raw() ** power.raw(), self.direction)
+        else:
+            return self.from_array(self.raw() ** power, self.direction)
+
+    def __neg__(self):
+        return self.from_args(-self.arr, self.row, self.col, self.direction)
+
+    def __and__(self, other):
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() & other.raw(), self.direction)
+        else:
+            return self.from_array(self.raw() & other, self.direction)
+
+    def __or__(self, other):
+        if isinstance(other, WRes):
+            return self.from_array(self.raw() | other.raw(), self.direction)
+        else:
+            return self.from_array(self.raw() | other, self.direction)
 
 
 def wide_wraps(func, direction, input_num=1, output_num=1, to_kwargs={}):
@@ -196,7 +285,7 @@ def wide_wraps(func, direction, input_num=1, output_num=1, to_kwargs={}):
 
         # 输出
         if output_num == 1:
-            return WRes(outputs, arg0.row, arg0.col, direction)
+            return WRes.from_args(outputs, arg0.row, arg0.col, direction)
         else:
             return [WRes(v, arg0.row, arg0.col, direction) for v in outputs]
 
