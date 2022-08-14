@@ -1,5 +1,5 @@
 """alpha191的实现"""
-from .imports_gtja_w import *
+from ta_cn.imports.gtja_wide import *
 
 
 def alpha_001(OPEN, CLOSE, VOLUME, **kwargs):

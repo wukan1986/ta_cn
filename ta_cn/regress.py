@@ -2,6 +2,7 @@ import warnings
 
 import numba
 import numpy as _np
+import pandas as _pd
 
 import ta_cn.bn_wraps as _bn
 from ta_cn import talib as ta
@@ -214,3 +215,12 @@ def multiple_regress(y, x, add_constant=True):
     coef = _cs_ols_nb(_y, _x)
     residual = _y - _np.sum(_x * coef, axis=1)
     return coef, residual
+
+
+def REGRESI(y, *args, timeperiod=60):
+    if isinstance(y, _pd.Series):
+        x = _pd.concat(args, axis=1)
+    else:
+        x = _np.concatenate(args, axis=1)
+    coef, resi = ts_multiple_regress(y, x, timeperiod=timeperiod, add_constant=True)
+    return resi

@@ -8,7 +8,7 @@ import pandas as pd
 from ta_cn.utils import to_pd
 
 
-def series_groupby_apply(func, by, to_kwargs=[]):
+def series_groupby_apply(func, by='asset', to_kwargs=['timeperiod']):
     """普通指标转换成按分组处理的指标。只支持单参数
 
     Parameters
@@ -44,13 +44,14 @@ def series_groupby_apply(func, by, to_kwargs=[]):
     return decorated
 
 
-def dataframe_groupby_apply(func, by, dropna=True, to_df=[], to_kwargs={}):
+def dataframe_groupby_apply(func, by='asset', to_kwargs={2: 'timeperiod'}, to_df=[0, 1], dropna=True):
     """普通指标转换成按分组处理的指标。支持多输入
 
     Parameters
     ----------
     func
     by
+    dropna
     to_df
     to_kwargs
 

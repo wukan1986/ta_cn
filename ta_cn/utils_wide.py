@@ -94,7 +94,7 @@ def pullna(arr, row, col):
     return tmp
 
 
-class WRes(np.ndarray):
+class WArr(np.ndarray):
     """宽表计算中间体，用于进行输入的堆叠，输出的还原"""
     arr = None
     row = None
@@ -131,7 +131,7 @@ class WRes(np.ndarray):
     def __mul__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(self.arr * other, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() * other.raw(), self.direction)
         else:
             return self.from_array(self.raw() * other, self.direction)
@@ -139,7 +139,7 @@ class WRes(np.ndarray):
     def __rmul__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(other * self.arr, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(other.raw() * self.raw(), self.direction)
         else:
             return self.from_array(other * self.raw(), self.direction)
@@ -147,7 +147,7 @@ class WRes(np.ndarray):
     def __gt__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(self.arr > other, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() > other.raw(), self.direction)
         else:
             return self.from_array(self.raw() > other, self.direction)
@@ -155,7 +155,7 @@ class WRes(np.ndarray):
     def __lt__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(self.arr < other, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() < other.raw(), self.direction)
         else:
             return self.from_array(self.raw() < other, self.direction)
@@ -163,7 +163,7 @@ class WRes(np.ndarray):
     def __ge__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(self.arr >= other, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() >= other.raw(), self.direction)
         else:
             return self.from_array(self.raw() >= other, self.direction)
@@ -171,7 +171,7 @@ class WRes(np.ndarray):
     def __le__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(self.arr <= other, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() <= other.raw(), self.direction)
         else:
             return self.from_array(self.raw() <= other, self.direction)
@@ -179,7 +179,7 @@ class WRes(np.ndarray):
     def __eq__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(self.arr == other, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() == other.raw(), self.direction)
         else:
             return self.from_array(self.raw() == other, self.direction)
@@ -187,7 +187,7 @@ class WRes(np.ndarray):
     def __add__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(self.arr + other, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() + other.raw(), self.direction)
         else:
             return self.from_array(self.raw() + other, self.direction)
@@ -195,7 +195,7 @@ class WRes(np.ndarray):
     def __radd__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(other + self.arr, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(other.raw() + self.raw(), self.direction)
         else:
             return self.from_array(other + self.raw(), self.direction)
@@ -203,7 +203,7 @@ class WRes(np.ndarray):
     def __sub__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(self.arr - other, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() - other.raw(), self.direction)
         else:
             return self.from_array(self.raw() - other, self.direction)
@@ -211,7 +211,7 @@ class WRes(np.ndarray):
     def __rsub__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(other - self.arr, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(other.raw() - self.raw(), self.direction)
         else:
             return self.from_array(other - self.raw(), self.direction)
@@ -219,7 +219,7 @@ class WRes(np.ndarray):
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(self.arr / other, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() / other.raw(), self.direction)
         else:
             return self.from_array(self.raw() / other, self.direction)
@@ -227,7 +227,7 @@ class WRes(np.ndarray):
     def __rtruediv__(self, other):
         if isinstance(other, (int, float)):
             return self.from_args(other / self.arr, self.row, self.col, self.direction)
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(other.raw() / self.raw(), self.direction)
         else:
             return self.from_array(other / self.raw(), self.direction)
@@ -235,7 +235,7 @@ class WRes(np.ndarray):
     def __pow__(self, power, modulo=None):
         if isinstance(power, (int, float)):
             return self.from_args(self.arr ** power, self.row, self.col, self.direction)
-        if isinstance(power, WRes):
+        if isinstance(power, WArr):
             return self.from_array(self.raw() ** power.raw(), self.direction)
         else:
             return self.from_array(self.raw() ** power, self.direction)
@@ -244,19 +244,19 @@ class WRes(np.ndarray):
         return self.from_args(-self.arr, self.row, self.col, self.direction)
 
     def __and__(self, other):
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() & other.raw(), self.direction)
         else:
             return self.from_array(self.raw() & other, self.direction)
 
     def __or__(self, other):
-        if isinstance(other, WRes):
+        if isinstance(other, WArr):
             return self.from_array(self.raw() | other.raw(), self.direction)
         else:
             return self.from_array(self.raw() | other, self.direction)
 
 
-def wide_wraps(func, direction, input_num=1, output_num=1, to_kwargs={}):
+def wide_wraps(func, direction='down', input_num=1, output_num=1, to_kwargs={1: 'timeperiod'}):
     """将二维函数包装成可堆叠函数
 
     Parameters
@@ -274,7 +274,7 @@ def wide_wraps(func, direction, input_num=1, output_num=1, to_kwargs={}):
     @wraps(func)
     def decorated(*args, **kwargs):
         _kwargs = {k: args[i] for i, k in to_kwargs.items()}
-        _args = [WRes.from_obj(v, direction) for i, v in enumerate(args) if i not in to_kwargs]
+        _args = [WArr.from_obj(v, direction) for i, v in enumerate(args) if i not in to_kwargs]
         arg0 = _args[0]
 
         # 输入+计算
@@ -285,8 +285,8 @@ def wide_wraps(func, direction, input_num=1, output_num=1, to_kwargs={}):
 
         # 输出
         if output_num == 1:
-            return WRes.from_args(outputs, arg0.row, arg0.col, direction)
+            return WArr.from_args(outputs, arg0.row, arg0.col, direction)
         else:
-            return [WRes(v, arg0.row, arg0.col, direction) for v in outputs]
+            return [WArr(v, arg0.row, arg0.col, direction) for v in outputs]
 
     return decorated

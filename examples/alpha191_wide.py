@@ -3,8 +3,7 @@ from pandas._testing import assert_series_equal, assert_numpy_array_equal
 
 import ta_cn.alpha191_w as a
 import ta_cn.alpha191 as b
-from ta_cn.utils import np_to_pd
-from ta_cn.utils_wide import WRes
+from ta_cn.utils_wide import WArr
 
 if __name__ == '__main__':
     pd._testing._N = 500
@@ -39,7 +38,7 @@ if __name__ == '__main__':
         'BANCHMARKINDEXCLOSE': low,
     }
 
-    kwargs_w = {k: WRes.from_array(v, direction='down') for k, v in df.items()}
+    kwargs_w = {k: WArr.from_array(v, direction='down') for k, v in df.items()}
 
     kwargs_l = {k: v.stack() for k, v in df.items()}
     kwargs_l = pd.DataFrame(kwargs_l)
@@ -48,7 +47,6 @@ if __name__ == '__main__':
 
     for i in range(1, 191 + 1):
         # 165 183 是MAX 与 SUMAC 问题
-        # TODO: 76 这个没过
         if i in (165, 183, 30):
             continue
         name = f'alpha_{i:03d}'

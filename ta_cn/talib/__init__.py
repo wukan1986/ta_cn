@@ -147,7 +147,7 @@ def ta_decorator(func, mode, input_names, output_names, skipnan):
     return decorated
 
 
-def init(mode=1, skipna=False):
+def init(mode=1, skipna=False, to_globals=False):
     """初始化环境
 
     Parameters
@@ -157,7 +157,9 @@ def init(mode=1, skipna=False):
         2. 输入参数支持一维向量。数据使用位置，周期等使用命名。否则报错
     skipna: bool
         是否跳过空值。跳过空值功能会导致计算变慢。
-        - 确信数据不会中途出现空值建议设置成False, 加快计算（如pushna后的数据）
+        - 确信数据不会中途出现空值建议设置成False, 加快计算
+    to_globals: bool
+        注册到包中
 
     """
     assert mode in (1, 2)
@@ -181,7 +183,10 @@ def init(mode=1, skipna=False):
         input_names = info['input_names']
 
         # 创建函数
-        setattr(lib, func_name, ta_decorator(_ta_func, mode, input_names, output_names, skipna))
+        f = ta_decorator(_ta_func, mode, input_names, output_names, skipna)
+        setattr(lib, func_name, f)
+        if to_globals:
+            globals()[func_name] = f
 
     return lib
 
