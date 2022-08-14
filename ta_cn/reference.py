@@ -1,11 +1,14 @@
 import numpy as _np
 
 import ta_cn.bn_wraps as _bn
-import ta_cn.talib as _ta2d
+import ta_cn.talib as ta
 from .maths import MAX, ABS
 from .nb import _filter_nb, _bars_last_nb, _bars_last_count_nb, numpy_rolling_apply, _bars_since_n_nb, \
     _rolling_func_1_nb, _product_nb
 from .utils import pd_to_np
+
+_ta1d = ta.init(mode=1, skipna=False)
+_ta2d = ta.init(mode=2, skipna=False)
 
 
 def CONST(real):
@@ -18,33 +21,52 @@ def COUNT(real, timeperiod):
     return SUM(real, timeperiod)
 
 
-def DIFF(real, timeperiod: int = 1):
-    """差分"""
+def DIFF(real, timeperiod: int):
+    """差分
+
+    DIFF(real, timeperiod: int = 1)
+    """
     return real - REF(real, timeperiod)
 
 
-def HHV(real, timeperiod: int = 5):
-    """求timeperiod周期内real最高值"""
+def HHV(real, timeperiod: int):
+    """求timeperiod周期内real最高值
+
+    HHV(real, timeperiod: int = 5)
+
+    """
     return _bn.move_max(real, window=timeperiod, axis=0)
 
 
-def HHVBARS(real, timeperiod: int = 5):
-    """求timeperiod周期内real最高值到当前周期数"""
+def HHVBARS(real, timeperiod: int):
+    """求timeperiod周期内real最高值到当前周期数
+
+    HHVBARS(real, timeperiod: int = 5)
+    """
     return _bn.move_argmax(real, window=timeperiod, axis=0)
 
 
-def LLV(real, timeperiod: int = 5):
-    """求timeperiod周期内real最低值"""
+def LLV(real, timeperiod: int):
+    """求timeperiod周期内real最低值
+
+    LLV(real, timeperiod: int = 5)
+    """
     return _bn.move_min(real, window=timeperiod, axis=0)
 
 
-def LLVBARS(real, timeperiod: int = 5):
-    """求timeperiod周期内real最低值到当前周期数"""
+def LLVBARS(real, timeperiod):
+    """求timeperiod周期内real最低值到当前周期数
+
+    LLVBARS(real, timeperiod: int = 5)
+    """
     return _bn.move_argmin(real, window=timeperiod, axis=0)
 
 
-def REF(real, timeperiod: int = 1):
-    """向前引用，特意模仿shift"""
+def REF(real, timeperiod: int):
+    """向前引用，特意模仿shift
+
+    REF(real, timeperiod: int = 1)
+    """
     if timeperiod == 0 or _np.isnan(timeperiod):
         # 该不该复制呢？
         return real
@@ -58,8 +80,10 @@ def REF(real, timeperiod: int = 1):
     return arr
 
 
-def SUM(real, timeperiod: int = 5):
+def SUM(real, timeperiod: int):
     """时序滚动求和
+
+    SUM(real, timeperiod: int = 5)
 
     Parameters
     ----------
@@ -87,8 +111,10 @@ def TR(high, low, close):
     return MAX(high - low, ABS(high - lc), ABS(lc - low))
 
 
-def MA(real, timeperiod: int = 5):
+def MA(real, timeperiod: int):
     """简单移动平均
+
+    MA(real, timeperiod: int = 5)
 
     等价于talib中的SMA"""
     return _bn.move_mean(real, window=timeperiod, axis=0)
@@ -125,9 +151,11 @@ def BARSSINCEN(cond, timeperiod):
     return numpy_rolling_apply([pd_to_np(cond)], timeperiod, _rolling_func_1_nb, _bars_since_n_nb, timeperiod)
 
 
-def PRODUCT(real, timeperiod: int = 5):
+def PRODUCT(real, timeperiod: int):
+    """PRODUCT(real, timeperiod: int = 5)"""
     return numpy_rolling_apply([pd_to_np(real)], timeperiod, _rolling_func_1_nb, _product_nb)
 
 
-def WMA(real, timeperiod: int = 5):
+def WMA(real, timeperiod: int):
+    """WMA(real, timeperiod: int = 5)"""
     return _ta2d.WMA(real, timeperiod=timeperiod)

@@ -24,24 +24,33 @@ def series_groupby_apply(func, by, to_kwargs=[]):
     """
 
     @wraps(func)
-    def decorated(s: pd.Series, *args, **kwargs):
+    def decorated(s1: pd.Series, *args, **kwargs):
         # 参数位置调整，实现命命参数简化
         _kwargs = {k: args[i] for i, k in enumerate(to_kwargs)}
 
-        return s.groupby(by=by, group_keys=False).apply(to_pd(func), **_kwargs, **kwargs)
+        # 跳过空值
+        s2 = s1.dropna()
+        if len(s2) == 0:
+            return pd.Series(index=s1.index, dtype=float)
+
+        s3 = s2.groupby(by=by, group_keys=False).apply(to_pd(func), **_kwargs, **kwargs)
+
+        if len(s1) == len(s2):
+            return s3
+        else:
+            # 由于长度变化了，只能重整长度
+            return pd.Series(s3, index=s1.index)
 
     return decorated
 
 
-def dataframe_groupby_apply(func, by, dropna, to_df=[], to_kwargs={}):
+def dataframe_groupby_apply(func, by, dropna=True, to_df=[], to_kwargs={}):
     """普通指标转换成按分组处理的指标。支持多输入
 
     Parameters
     ----------
     func
     by
-    dropna
-        慎用。丢弃后可能长度变小，与其它数据计算时长度不对
     to_df
     to_kwargs
 
@@ -62,13 +71,22 @@ def dataframe_groupby_apply(func, by, dropna, to_df=[], to_kwargs={}):
 
     @wraps(func)
     def decorated(*args, **kwargs):
-        df = pd.DataFrame({k: get(i, k, args, kwargs) for i, k in enumerate(to_df)})
         _kwargs = {k: args[i] for i, k in to_kwargs.items()}
-
-        # 这里长度的变化会不会导致外部计算出错？
+        s1 = pd.DataFrame({k: get(i, k, args, kwargs) for i, k in enumerate(to_df)})
         if dropna:
-            df = df.dropna()
-        return df.groupby(by=by, group_keys=False).apply(to_pd(dataframe_split(func)), **_kwargs)
+            s2 = s1.dropna()
+        else:
+            s2 = s1
+        if len(s2) == 0:
+            return pd.Series(index=s1.index, dtype=float)
+
+        s3 = s2.groupby(by=by, group_keys=False).apply(to_pd(dataframe_split(func)), **_kwargs)
+
+        if len(s1) == len(s2):
+            return s3
+        else:
+            # 由于长度变化了，只能重整长度
+            return pd.Series(s3, index=s1.index)
 
     return decorated
 

@@ -8,14 +8,20 @@ import pandas as pd
 
 import ta_cn.talib as ta
 
-ta.init(mode=1, skipna=True)
+_ta1d = ta.init(mode=1, skipna=False)
 
 # 都是单支股票的循环，直接调用更快
-from ta_cn.talib import CORREL as CORR
-from ta_cn.talib import LINEARREG_SLOPE as REGSLOPE
-from ta_cn.talib import SMA as MEAN
-from ta_cn.talib import SMA as WMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
-from ta_cn.talib import WMA as DECAYLINEAR
+CORR = _ta1d.CORREL
+REGSLOPE = _ta1d.LINEARREG_SLOPE
+MEAN = _ta1d.SMA
+WMA = _ta1d.SMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
+DECAYLINEAR = _ta1d.WMA
+
+# from ta_cn.talib import CORREL as CORR
+# from ta_cn.talib import LINEARREG_SLOPE as REGSLOPE
+# from ta_cn.talib import SMA as MEAN
+# from ta_cn.talib import SMA as WMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
+# from ta_cn.talib import WMA as DECAYLINEAR
 
 from .alpha import LessThan
 from .alpha import RANK
@@ -106,14 +112,14 @@ REGSLOPE = series_groupby_apply(REGSLOPE, by=BY_ASSET, to_kwargs=['timeperiod'])
 CUMPROD = series_groupby_apply(CUMPROD, by=BY_ASSET, to_kwargs=[])
 
 # 时序，双输入
-CORR = dataframe_groupby_apply(CORR, by=BY_ASSET, dropna=True, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
-COVIANCE = dataframe_groupby_apply(COVIANCE, by=BY_ASSET, dropna=True, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
-REGBETA = dataframe_groupby_apply(REGBETA, by=BY_ASSET, dropna=dropna, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
+CORR = dataframe_groupby_apply(CORR, by=BY_ASSET, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
+COVIANCE = dataframe_groupby_apply(COVIANCE, by=BY_ASSET, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
+REGBETA = dataframe_groupby_apply(REGBETA, by=BY_ASSET, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
 
 # 注意，SUMIF参数的位置常用的方式不同
-SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET, dropna=dropna, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
-FILTER = dataframe_groupby_apply(FILTER, by=BY_ASSET, dropna=dropna, to_df=[0, 1], to_kwargs={})
-REGRESI = dataframe_groupby_apply(REGRESI, by=BY_ASSET, dropna=dropna, to_df=[0, 1, 2, 3], to_kwargs={4: 'timeperiod'})
+SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET, to_df=[0, 1], to_kwargs={2: 'timeperiod'})
+FILTER = dataframe_groupby_apply(FILTER, by=BY_ASSET, to_df=[0, 1], to_kwargs={}, dropna=False)
+REGRESI = dataframe_groupby_apply(REGRESI, by=BY_ASSET, to_df=[0, 1, 2, 3], to_kwargs={4: 'timeperiod'})
 
 # 截面
 RANK = series_groupby_apply(RANK, by=BY_DATE)

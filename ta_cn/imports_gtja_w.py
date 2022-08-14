@@ -8,14 +8,19 @@ import numpy as np
 import ta_cn.talib as ta
 from .utils_wide import wide_wraps
 
-ta.init(mode=2, skipna=True)
+_ta2d = ta.init(mode=2, skipna=True)
 
-# 都是单支股票的循环，直接调用更快
-from ta_cn.talib import CORREL as CORR
-from ta_cn.talib import LINEARREG_SLOPE as REGSLOPE
-from ta_cn.talib import SMA as MEAN
-from ta_cn.talib import SMA as WMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
-from ta_cn.talib import WMA as DECAYLINEAR
+CORR = _ta2d.CORREL
+REGSLOPE = _ta2d.LINEARREG_SLOPE
+MEAN = _ta2d.SMA
+WMA = _ta2d.SMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
+DECAYLINEAR = _ta2d.WMA
+
+# from ta_cn.talib import CORREL as CORR
+# from ta_cn.talib import LINEARREG_SLOPE as REGSLOPE
+# from ta_cn.talib import SMA as MEAN
+# from ta_cn.talib import SMA as WMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
+# from ta_cn.talib import WMA as DECAYLINEAR
 
 from .alpha import LessThan
 from .alpha import RANK
@@ -42,7 +47,6 @@ from .regress import SLOPE_YX_NB as REGBETA
 from .regress import ts_multiple_regress
 from .statistics import COVAR as COVIANCE
 from .statistics import STDP as STD  # 引入的是全体标准差
-from .utils_long import dataframe_groupby_apply
 
 """
 1. 将通达信公式改名成World Quant中对应公式
@@ -58,7 +62,7 @@ def FILTER(A, condition):
 
 def CUMPROD(A):
     if A.ndim == 2:
-        return np.cumsum(A, axis=0)
+        return np.cumprod(A, axis=0)
     else:
         return np.cumprod(A)
 
@@ -76,15 +80,6 @@ SIGN = wide_wraps(SIGN, direction=None, input_num=1, output_num=1, to_kwargs={})
 MAX = wide_wraps(MAX, direction=None, input_num=2, output_num=1, to_kwargs={})
 MIN = wide_wraps(MIN, direction=None, input_num=2, output_num=1, to_kwargs={})
 ABS = wide_wraps(ABS, direction=None, input_num=1, output_num=1, to_kwargs={})
-
-# 按股票分组，计算时序指标。注意，组内时序需要已经排序
-BY_ASSET = 'asset'
-# 按时间分组。计算横截面
-BY_DATE = 'date'
-# 横截面上进行行业中性化
-BY_GROUP = ['date', 'group']
-
-dropna = False
 
 # 时序
 STD = wide_wraps(STD, direction='down', input_num=1, output_num=1, to_kwargs={1: 'timeperiod'})

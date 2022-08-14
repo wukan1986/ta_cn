@@ -154,13 +154,14 @@ def alpha_027(volume, vwap, **kwargs):
 
 def alpha_028(high, low, close, adv20, **kwargs):
     """Alpha#28: scale(((correlation(adv20, low, 5) + ((high + low) / 2)) - close))"""
-    return scale(((correlation(adv20, low, 5) + ((high + low) / 2)) - close))
+    return scale(((correlation(adv20, low, 5) + ((high + low) / 2)) - close), 1)
 
 
 def alpha_029(close, returns, **kwargs):
     """Alpha#29: (min(product(rank(rank(scale(log(sum(ts_min(rank(rank((-1 * rank(delta((close - 1), 5))))), 2), 1))))), 1), 5) + ts_rank(delay((-1 * returns), 6), 5))"""
-    return (min(product(rank(rank(scale(log(sum(ts_min(rank(rank((-1 * rank(delta((close - 1), 5))))), 2), 1))))), 1),
-                5) + ts_rank(delay((-1 * returns), 6), 5))
+    return (min(
+        product(rank(rank(scale(log(sum(ts_min(rank(rank((-1 * rank(delta((close - 1), 5))))), 2), 1)), 1))), 1),
+        5) + ts_rank(delay((-1 * returns), 6), 5))
 
 
 def alpha_030(close, volume, **kwargs):
@@ -175,12 +176,12 @@ def alpha_031(low, close, adv20, **kwargs):
 delta(close, 3)))) + sign(scale(correlation(adv20, low, 12))))"""
     return ((rank(rank(rank(decay_linear((-1 * rank(rank(delta(close, 10)))), 10)))) + rank((-1 *
                                                                                              delta(close, 3)))) + sign(
-        scale(correlation(adv20, low, 12))))
+        scale(correlation(adv20, low, 12), 1)))
 
 
 def alpha_032(close, vwap, **kwargs):
     """Alpha#32: (scale(((sum(close, 7) / 7) - close)) + (20 * scale(correlation(vwap, delay(close, 5), 230))))"""
-    return (scale(((sum(close, 7) / 7) - close)) + (20 * scale(correlation(vwap, delay(close, 5), 230))))
+    return (scale(((sum(close, 7) / 7) - close), 1) + (20 * scale(correlation(vwap, delay(close, 5), 230), 1)))
 
 
 def alpha_033(open, close, **kwargs):
@@ -355,8 +356,8 @@ def alpha_059(volume, vwap, industry, **kwargs):
 def alpha_060(high, low, close, volume, **kwargs):
     """Alpha#60: (0 - (1 * ((2 * scale(rank(((((close - low) - (high - close)) / (high - low)) * volume)))) -
 scale(rank(ts_argmax(close, 10))))))"""
-    return (0 - (1 * ((2 * scale(rank(((((close - low) - (high - close)) / (high - low)) * volume)))) -
-                      scale(rank(ts_argmax(close, 10))))))
+    return (0 - (1 * ((2 * scale(rank(((((close - low) - (high - close)) / (high - low)) * volume)), 1)) -
+                      scale(rank(ts_argmax(close, 10)), 1))))
 
 
 def alpha_061(vwap, adv180, **kwargs):
@@ -713,9 +714,9 @@ IndClass.subindustry))) * (volume / adv20))))"""
     return (0 - (1 * (((1.5 * scale(indneutralize(indneutralize(rank(((((close - low) - (high -
                                                                                          close)) / (
                                                                                high - low)) * volume)),
-                                                                group=subindustry), group=subindustry))) -
+                                                                group=subindustry), group=subindustry), 1)) -
                        scale(indneutralize((correlation(close, rank(adv20), 5) - rank(ts_argmin(close, 30))),
-                                           group=subindustry))) * (volume / adv20))))
+                                           group=subindustry), 1)) * (volume / adv20))))
 
 
 def alpha_101(open, high, low, close, **kwargs):

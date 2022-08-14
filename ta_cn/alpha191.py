@@ -243,7 +243,7 @@ def alpha_036(VOLUME, VWAP, **kwargs):
     """Alpha36 RANK(SUM(CORR(RANK(VOLUME), RANK(VWAP)), 6), 2)"""
     # 没有CORR的参数？
     t1 = CORR(RANK(VOLUME), RANK(VWAP), 6)
-    return RANK(SUM(t1, 6), 2)
+    return RANK(SUM(t1, 2))
 
 
 def alpha_037(OPEN, RET, **kwargs):
@@ -1087,7 +1087,7 @@ E-DELAY(CLOSE,1))/DELAY(CLOSE,1)-((CLOSE-DELAY(CLOSE,1))/DELAY(CLOSE,1)-SMA((CLO
     t1 = (CLOSE - t0) / t0
     t2 = SMA(t1, 61, 2)
     t3 = t1 - t2
-    return MEAN(t3, 20) * t3 / SMA(t2 ** 2, 60)
+    return MEAN(t3, 20) * t3 / SMA(t2 ** 2, 60, 1)
 
 
 def alpha_147(CLOSE, **kwargs):

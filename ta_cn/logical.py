@@ -23,13 +23,19 @@ def IF(condition, T, F):
     return _np.where(condition, T, F)
 
 
-def EVERY(real, timeperiod=5):
-    """最近timeperiod天是否全为True"""
+def EVERY(real, timeperiod):
+    """最近timeperiod天是否全为True
+
+    EVERY(real, timeperiod=5)
+    """
     return SUM(real, timeperiod) == timeperiod
 
 
-def EXIST(real, timeperiod=5):
-    """最近timeperiod天是否存在一天为True"""
+def EXIST(real, timeperiod):
+    """最近timeperiod天是否存在一天为True
+
+    EXIST(real, timeperiod=5)
+    """
     return SUM(real, timeperiod) > 0
 
 
@@ -43,8 +49,11 @@ def VALUEWHEN(S, X):
     return np_to_pd(_np.where(S, X, _np.nan)).ffill()
 
 
-def LAST(real, n=20, m=10):
-    """LAST(X,A,B)，A>B，表示从前A日到前B日一致满足X条件"""
+def LAST(real, n, m):
+    """LAST(X,A,B)，A>B，表示从前A日到前B日一致满足X条件
+
+    LAST(real, n=20, m=10)
+    """
     return numpy_rolling_apply([pd_to_np(real)], n, _rolling_func_1_nb, _last_nb, n, m)
 
 

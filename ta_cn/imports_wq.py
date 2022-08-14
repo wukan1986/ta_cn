@@ -10,11 +10,14 @@ from functools import wraps
 
 import ta_cn.talib as ta
 
-ta.init(mode=1, skipna=True)
+_ta1d = ta.init(mode=1, skipna=False)
 
-# 都是单支股票的循环，直接调用更快
-from ta_cn.talib import CORREL as correlation
-from ta_cn.talib import WMA as decay_linear
+correlation = _ta1d.CORREL
+decay_linear = _ta1d.WMA
+
+# # 都是单支股票的循环，直接调用更快
+# from ta_cn.talib import CORREL as correlation
+# from ta_cn.talib import WMA as decay_linear
 
 from .alpha import LessThan
 from .alpha import RANK as rank
@@ -99,15 +102,15 @@ decay_linear = round_a_i(series_groupby_apply(decay_linear, by=BY_ASSET, to_kwar
 product = round_a_i(series_groupby_apply(product, by=BY_ASSET, to_kwargs=['timeperiod']))
 
 # 时序，双输入
-correlation = round_a_a_i(dataframe_groupby_apply(correlation, by=BY_ASSET, dropna=True, to_df=[0, 1], to_kwargs={2: 'timeperiod'}))
-covariance = round_a_a_i(dataframe_groupby_apply(covariance, by=BY_ASSET, dropna=True, to_df=[0, 1], to_kwargs={2: 'timeperiod'}))
+correlation = round_a_a_i(dataframe_groupby_apply(correlation, by=BY_ASSET, to_df=[0, 1], to_kwargs={2: 'timeperiod'}))
+covariance = round_a_a_i(dataframe_groupby_apply(covariance, by=BY_ASSET, to_df=[0, 1], to_kwargs={2: 'timeperiod'}))
 
 # 截面
 rank = series_groupby_apply(rank, by=BY_DATE)
-scale = series_groupby_apply(scale, by=BY_DATE)
+scale = series_groupby_apply(scale, by=BY_DATE, to_kwargs=['a'])
 
 # 行业中性。demean法
-indneutralize = dataframe_groupby_apply(demean, by=BY_GROUP, dropna=dropna, to_df=[0, 'group'], to_kwargs={})
+indneutralize = dataframe_groupby_apply(demean, by=BY_GROUP, to_df=[0, 'group'], to_kwargs={})
 
 # 部分别名，这样官方公式可以减少改动
 Ts_Rank = ts_rank

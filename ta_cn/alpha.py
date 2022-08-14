@@ -11,14 +11,19 @@ def signedpower(real, n):
     return _np.sign(real) * (abs(real) ** n)
 
 
-def TS_RANK(real, timeperiod: int = 10):
-    """滚动rank"""
+def TS_RANK(real, timeperiod: int):
+    """滚动rank
+
+    real, timeperiod: int = 10
+    """
     t1 = _bn.move_rank(real, window=timeperiod, axis=0)
     return (t1 + 1.) / 2.
 
 
-def RANK(real, pct: bool = True):
+def RANK(real):
     """横截面rank"""
+    pct: bool = True
+
     if real.ndim == 2:
         t1 = _bn.nanrankdata(real, axis=1)
         t2 = _np.nansum(~_np.isnan(real), axis=1, keepdims=True)
@@ -31,8 +36,11 @@ def RANK(real, pct: bool = True):
         return t1
 
 
-def scale(real, a=1):
-    """横截面缩放"""
+def scale(real, a):
+    """横截面缩放
+
+    scale(real, a=1)
+    """
     if real.ndim == 2:
         b = _np.nansum(abs(real), axis=1, keepdims=True)
     else:

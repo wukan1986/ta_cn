@@ -1,6 +1,6 @@
 import pandas as _pd
 
-import ta_cn.talib as _ta2d
+import ta_cn.talib as ta
 from ta_cn.talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 from .ewm_nb import ewm_mean
 from .nb import ma_1st, sum_1st
@@ -22,38 +22,51 @@ Warnings
 由于EMA的计算特点，只要调用了此文件中的公式，都需要预留一些数据，数据太短可能导致起点不同值不同
 
 """
+_ta2d = ta.init(mode=2, skipna=False)
 
 
-def EMA_0_TA(real, timeperiod=24):
-    """EMA第一个值用MA"""
+def EMA_0_TA(real, timeperiod: int):
+    """EMA第一个值用MA
+
+    EMA_0_TA(real, timeperiod=24)
+    """
     set_compatibility(TA_COMPATIBILITY_DEFAULT)
     return _ta2d.EMA(real, timeperiod=timeperiod)
 
 
-def EXPMEMA(real, timeperiod=24):
+def EXPMEMA(real, timeperiod):
     """EMA第一个值用MA
+
+    EXPMEMA(real, timeperiod=24)
 
     return np_to_pd(ma_1st(real, timeperiod)).ewm(span=timeperiod, min_periods=0, adjust=False).mean()
     """
     return ewm_mean(ma_1st(real, timeperiod), span=timeperiod, min_periods=0, adjust=False)
 
 
-def EMA_1_TA(real, timeperiod=24):
-    """EMA第一个值用Price"""
+def EMA_1_TA(real, timeperiod):
+    """EMA第一个值用Price
+
+    EMA_1_TA(real, timeperiod=24)
+    """
     set_compatibility(TA_COMPATIBILITY_METASTOCK)
     return _ta2d.EMA(real, timeperiod=timeperiod)
 
 
-def EMA_1_PD(real, timeperiod=24):
+def EMA_1_PD(real, timeperiod):
     """EMA第一个值用Price
+
+    EMA_1_PD(real, timeperiod=24)
 
     return np_to_pd(real).ewm(span=timeperiod, min_periods=timeperiod, adjust=False).mean()
     """
     return ewm_mean(real, span=timeperiod, min_periods=timeperiod, adjust=False)
 
 
-def SMA(real, timeperiod=24, M=1):
+def SMA(real, timeperiod, M):
     """EMA第一个值用MA
+
+    SMA(real, timeperiod=24, M=1)
 
     return np_to_pd(ma_1st(real, timeperiod)).ewm(alpha=M / timeperiod, min_periods=0, adjust=False).mean()
     """
@@ -70,8 +83,10 @@ def DMA(real, alpha):
     return ewm_mean(real, alpha=alpha, min_periods=0, adjust=False)
 
 
-def WS_SUM(real: _pd.DataFrame, timeperiod: int = 5):
+def WS_SUM(real: _pd.DataFrame, timeperiod):
     """Wilder Smooth 威尔德平滑求和
+
+    WS_SUM(real: _pd.DataFrame, timeperiod: int = 5)
 
     Notes
     -----

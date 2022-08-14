@@ -160,13 +160,19 @@ def init(mode=1, skipna=False):
         - 确信数据不会中途出现空值建议设置成False, 加快计算（如pushna后的数据）
 
     """
-    print(f'ta_cn mode: {mode}, skipna: {skipna}')
     assert mode in (1, 2)
-    if mode == 1:
-        print(f'\t1. 输入一维数据，支持skipna跳过空值。必须使用命名参数传入周期，使用位置参数传入数据。')
-    if mode == 2:
-        print(f'\t2. 输入二维数据，支持skipna跳过空值。必须使用命名参数传入周期，使用位置参数传入数据。周期参数由只支持标量升级为一维向量')
 
+    # print(f'ta_cn mode: {mode}, skipna: {skipna}')
+    #
+    # if mode == 1:
+    #     print(f'\t1. 输入一维数据，支持skipna跳过空值。必须使用命名参数传入周期，使用位置参数传入数据。')
+    # if mode == 2:
+    #     print(f'\t2. 输入二维数据，支持skipna跳过空值。必须使用命名参数传入周期，使用位置参数传入数据。周期参数由只支持标量升级为一维向量')
+
+    class TA_CN_LIB:
+        pass
+
+    lib = TA_CN_LIB()
     for i, func_name in enumerate(_talib.get_functions()):
         """talib遍历"""
         _ta_func = getattr(_talib, func_name)
@@ -175,7 +181,9 @@ def init(mode=1, skipna=False):
         input_names = info['input_names']
 
         # 创建函数
-        globals()[func_name] = ta_decorator(_ta_func, mode, input_names, output_names, skipna)
+        setattr(lib, func_name, ta_decorator(_ta_func, mode, input_names, output_names, skipna))
+
+    return lib
 
 
 # =============================================

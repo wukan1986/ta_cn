@@ -187,14 +187,14 @@ def alpha_027(volume, vwap, **kwargs):
 
 def alpha_028(high, low, close, adv20, **kwargs):
     """Alpha#28: scale(((correlation(adv20, low, 5) + ((high + low) / 2)) - close))"""
-    return scale(((correlation(adv20, low, 5) + ((high + low) / 2)) - close))
+    return scale(((correlation(adv20, low, 5) + ((high + low) / 2)) - close), 1)
 
 
 def alpha_029(close, returns, **kwargs):
     """Alpha#29: (min(product(rank(rank(scale(log(sum(ts_min(rank(rank((-1 * rank(delta((close - 1), 5))))), 2), 1))))), 1), 5) + ts_rank(delay((-1 * returns), 6), 5))"""
     # product(,1) # 省略掉了
     t1 = rank(rank(-rank(delta((close - 1), 5))))
-    t2 = rank(rank(scale(log(sum(ts_min(t1, 2), 1)))))
+    t2 = rank(rank(scale(log(sum(ts_min(t1, 2), 1)), 1)))
     return MIN(t2, 5) + ts_rank(delay(- returns, 6), 5)
 
 
@@ -213,14 +213,14 @@ delta(close, 3)))) + sign(scale(correlation(adv20, low, 12))))"""
     t1 = decay_linear((-1 * rank((delta(close, 10)))), 10)
     t2 = (-1 * delta(close, 3))
     t3 = correlation(adv20, low, 12)
-    return ((rank(t1) + rank(t2)) + sign(scale(t3)))
+    return ((rank(t1) + rank(t2)) + sign(scale(t3, 1)))
 
 
 def alpha_032(close, vwap, **kwargs):
     """Alpha#32: (scale(((sum(close, 7) / 7) - close)) + (20 * scale(correlation(vwap, delay(close, 5), 230))))"""
     t1 = sum(close, 7) / 7  # 7日移动平均
     t2 = correlation(vwap, delay(close, 5), 230)  # vwap与5天前价格的多日滚动相关系数
-    return scale(t1 - close) + (20 * scale(t2))
+    return scale(t1 - close, 1) + (20 * scale(t2, 1))
 
 
 def alpha_033(open, close, **kwargs):
@@ -439,7 +439,7 @@ def alpha_060(high, low, close, volume, **kwargs):
 scale(rank(ts_argmax(close, 10))))))"""
     t1 = ts_argmax(close, 10)
     t2 = ((close - low) - (high - close)) / (high - low) * volume
-    return scale(rank(t1)) - 2 * scale(rank(t2))
+    return scale(rank(t1), 1) - 2 * scale(rank(t2), 1)
 
 
 def alpha_061(vwap, adv180, **kwargs):
@@ -828,7 +828,7 @@ IndClass.subindustry))) * (volume / adv20))))"""
     t1 = rank((((close - low) - (high - close)) / (high - low)) * volume)
     t2 = (correlation(close, rank(adv20), 5) - rank(ts_argmin(close, 30)))
     t3 = indneutralize(t1, group=subindustry)
-    t4 = 1.5 * scale(indneutralize(t3, group=subindustry)) - scale(indneutralize(t2, group=subindustry))
+    t4 = 1.5 * scale(indneutralize(t3, group=subindustry), 1) - scale(indneutralize(t2, group=subindustry), 1)
     return - t4 * (volume / adv20)
 
 

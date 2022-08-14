@@ -90,8 +90,11 @@ def MEAN(*args):
     return ADD(*args) / len(args)
 
 
-def ROUND(a, decimals=3):
-    """四舍五入取3位小数"""
+def ROUND(a, decimals):
+    """四舍五入取3位小数
+
+    ROUND(a, decimals=3)
+    """
     return _np.round(a, decimals)
 
 

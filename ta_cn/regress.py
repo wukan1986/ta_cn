@@ -1,12 +1,15 @@
 import warnings
 
-import ta_cn.bn_wraps as _bn
 import numba
 import numpy as _np
 
-from ta_cn import talib as _ta2d
+import ta_cn.bn_wraps as _bn
+from ta_cn import talib as ta
 from .nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb
 from .utils import pd_to_np
+
+_ta1d = ta.init(mode=1, skipna=False)
+_ta2d = ta.init(mode=2, skipna=False)
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
@@ -24,8 +27,10 @@ def _slope_yx_nb(y, x):
     return _np.sum((x - m_x) * (y - m_y)) / _np.sum((x - m_x) ** 2)
 
 
-def FORCAST(real, timeperiod=14):
+def FORCAST(real, timeperiod):
     """线性回归预测值
+
+    FORCAST(real, timeperiod=14)
 
     Parameters
     ----------
@@ -40,8 +45,10 @@ def FORCAST(real, timeperiod=14):
     return _ta2d.LINEARREG(real, timeperiod=timeperiod)
 
 
-def SLOPE(real, timeperiod=14):
+def SLOPE(real, timeperiod):
     """线性回归斜率
+
+    SLOPE(real, timeperiod=14)
 
     Parameters
     ----------
@@ -56,15 +63,21 @@ def SLOPE(real, timeperiod=14):
     return _ta2d.LINEARREG_SLOPE(real, timeperiod=timeperiod)
 
 
-def SLOPE_NB(real, timeperiod=14):
-    """numba版，输出结果与LINEARREG_SLOPE一样"""
+def SLOPE_NB(real, timeperiod):
+    """numba版，输出结果与LINEARREG_SLOPE一样
+
+    SLOPE_NB(real, timeperiod=14)
+    """
     x = _np.arange(timeperiod)
     m_x = _np.mean(x)
     return numpy_rolling_apply([pd_to_np(real)], timeperiod, _rolling_func_1_nb, _slope_nb, x, m_x)
 
 
-def SLOPE_YX_NB(real0, real1, timeperiod=30):
-    """与talib.BETA不一样，talib将price转return后再回归"""
+def SLOPE_YX_NB(real0, real1, timeperiod):
+    """与talib.BETA不一样，talib将price转return后再回归
+
+    SLOPE_YX_NB(real0, real1, timeperiod=30)
+    """
     return numpy_rolling_apply([pd_to_np(real0), pd_to_np(real1)],
                                timeperiod, _rolling_func_2_nb, _slope_yx_nb)
 

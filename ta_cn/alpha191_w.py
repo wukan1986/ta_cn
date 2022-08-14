@@ -927,7 +927,7 @@ def alpha_126(HIGH, LOW, CLOSE, **kwargs):
 def alpha_127(CLOSE, **kwargs):
     """Alpha127 (MEAN((100*(CLOSE-MAX(CLOSE,12))/(MAX(CLOSE,12)))^2))^(1/2)"""
     """!!!原公式有问题，补了12"""
-    t1 = MAX(CLOSE, 12)
+    t1 = TSMAX(CLOSE, 12)
     return (MEAN((100 * (CLOSE - t1) / (t1)) ** 2, 12)) ** (1 / 2)
 
 

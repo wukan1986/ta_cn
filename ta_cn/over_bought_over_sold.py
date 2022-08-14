@@ -1,22 +1,28 @@
-import talib as _ta1d
 from talib import MA_Type
 
-import ta_cn.talib as _ta2d
+import ta_cn.talib as ta
 from ta_cn.talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 from .maths import MEAN
 from .reference import LLV, HHV, REF, MA, TR
 
+_ta1d = ta.init(mode=1, skipna=False)
+_ta2d = ta.init(mode=2, skipna=False)
 
-def ATR_CN(high, low, close, timeperiod=14):
+
+def ATR_CN(high, low, close, timeperiod):
     """ATR真实波幅N日平均
+
+    ATR_CN(high, low, close, timeperiod=14)
 
     talib的ATR算法类似于EMA，所以要重写此处才与中国ATR相同
     """
     return MA(TR(high, low, close), timeperiod)
 
 
-def BIAS(real, timeperiod=6):
+def BIAS(real, timeperiod):
     """BIAS乖离率
+
+    BIAS(real, timeperiod=6)
 
     Parameters
     ----------
@@ -28,8 +34,10 @@ def BIAS(real, timeperiod=6):
     return (real / MA(real, timeperiod) - 1) * 100
 
 
-def KDJ(high, low, close, fastk_period=9, M1=3, M2=3):
+def KDJ(high, low, close, fastk_period, M1, M2):
     """KDJ指标
+
+    KDJ(high, low, close, fastk_period=9, M1=3, M2=3)
 
     talib中EMA的参数用法不同
     """
