@@ -8,7 +8,8 @@ import ta_cn.bn_wraps as _bn
 
 def signedpower(real, n):
     """保持符号的次方"""
-    return _np.sign(real) * (abs(real) ** n)
+    with _np.errstate(invalid='ignore', divide='ignore'):
+        return _np.sign(real) * (abs(real) ** n)
 
 
 def TS_RANK(real, timeperiod: int):

@@ -8,7 +8,7 @@
 3. ^改成**
 4 <改成LessThan
 """
-from ..imports_wq import *
+from ta_cn.imports.wq_long import *
 
 
 def alpha_001(close, returns, **kwargs):

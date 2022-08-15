@@ -53,7 +53,8 @@ def tafunc_nditer_1(tafunc, args, kwargs, input_names, output_names, skipna):
     return outputs[0] if output_num == 1 else tuple(outputs)
 
 
-def tafunc_nditer_2(tafunc, args, kwargs, input_names, output_names, skipna):
+def tafunc_nditer_2(tafunc, args, kwargs, input_names, output_names,
+                    skipna, order='F'):
     """内部按列迭代函数，支持timeperiod等命名参数向量化
 
     Parameters
@@ -68,6 +69,9 @@ def tafunc_nditer_2(tafunc, args, kwargs, input_names, output_names, skipna):
         tafunc输出参数名
     skipna:
         如想跳过空值，需将数据堆叠到首或尾，实现连续计算
+    order:
+        F, 按列进行遍历
+        C, 按行进行遍历
 
     Returns
     -------
@@ -106,7 +110,7 @@ def tafunc_nditer_2(tafunc, args, kwargs, input_names, output_names, skipna):
     # 只有一行输入时需要特别处理
     with np.nditer(inputs + outputs,
                    flags=['external_loop'] if real.shape[0] > 1 else None,
-                   order='F',
+                   order=order,
                    op_flags=[['readonly']] * len(inputs) + [['writeonly']] * len(outputs)) as it:
         for i, in_out in enumerate(it):
             if real.shape[0] == 1:

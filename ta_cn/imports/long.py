@@ -11,6 +11,7 @@ from ..maths import LN
 from ..maths import MAX
 from ..maths import MIN
 from ..maths import SGN
+from ..preprocess import demean
 from ..reference import COUNT
 from ..reference import DIFF
 from ..reference import HHV
@@ -82,3 +83,6 @@ REGRESI4 = dataframe_groupby_apply(REGRESI, by=BY_ASSET, to_df=[0, 1, 2, 3], to_
 
 COVAR = dataframe_groupby_apply(COVAR, by=BY_ASSET)
 STDP = series_groupby_apply(STDP, by=BY_ASSET)
+
+# 行业中性。demean法
+indneutralize = dataframe_groupby_apply(demean, by=BY_GROUP, to_df=[0, 'group'], to_kwargs={})

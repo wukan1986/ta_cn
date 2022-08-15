@@ -203,15 +203,6 @@ def standardize_minmax(x, min_=0, max_=1):
     return (max_ - min_) * _std + min_
 
 
-def demean(x):
-    """行业中性化
-
-    RuntimeWarning: Mean of empty slice
-    nanmean在全nan时报此警告。这个警告还不好屏蔽
-    """
-    return x - _np.nanmean(x)
-
-
 def fill_na(x):
     """用中位数填充，还是用平均值填充？
 
@@ -220,3 +211,15 @@ def fill_na(x):
     x = x.copy()
     x[_np.isnan(x)] = _np.nanmedian(x)
     return x
+
+
+def demean(x):
+    """行业中性化，需要与groupby配合使用
+
+    RuntimeWarning: Mean of empty slice
+    nanmean在全nan时报此警告。这个警告还不好屏蔽
+    """
+    return x - _np.nanmean(x)
+
+
+

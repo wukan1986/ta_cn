@@ -5,6 +5,8 @@ from ..alpha import FILTER
 from ..alpha import LessThan
 from ..alpha import RANK
 from ..alpha import TS_RANK
+from ..alpha import scale
+from ..alpha import signedpower
 from ..ema import SMA
 from ..logical import IF
 from ..maths import ABS
@@ -27,7 +29,8 @@ from ..regress import REGRESI
 from ..regress import SLOPE_YX_NB
 from ..statistics import COVAR
 from ..statistics import STDP
-from ..utils_wide import wide_wraps
+from ..utils import np_to_pd
+from ..utils_wide import wide_wraps, get_raw_arr, WArr
 
 _ta2d = ta.init(mode=2, skipna=False, to_globals=False)
 
@@ -45,7 +48,8 @@ FILTER = wide_wraps(FILTER, input_num=2, to_kwargs={})
 RANK = wide_wraps(RANK, direction='left', to_kwargs={})
 TS_RANK = wide_wraps(TS_RANK)
 LessThan = wide_wraps(LessThan, input_num=2, to_kwargs={})
-
+scale = wide_wraps(scale, direction='left', to_kwargs={1: 'a'})
+signedpower = wide_wraps(signedpower, direction=None, input_num=2, to_kwargs={})  # 输入n不是数字，而是矩阵
 
 #
 IF = wide_wraps(IF, direction=None, input_num=3, to_kwargs={})
@@ -76,3 +80,19 @@ REGRESI4 = wide_wraps(REGRESI, input_num=4, to_kwargs={4: 'timeperiod'})
 
 COVAR = wide_wraps(COVAR, input_num=2, to_kwargs={2: 'timeperiod'})
 STDP = wide_wraps(STDP)
+
+
+def indneutralize(x, group):
+    """行业中性化
+    """
+    from .long import indneutralize as _indneutralize
+
+    x1 = np_to_pd(get_raw_arr(x)).stack(dropna=False)
+    g1 = np_to_pd(get_raw_arr(group)).stack(dropna=False)
+
+    x1.index.names = ['date', 'asset']
+    g1.index.names = ['date', 'asset']
+
+    r = _indneutralize(x1, g1)
+
+    return WArr.from_array(r.unstack(), direction=None)

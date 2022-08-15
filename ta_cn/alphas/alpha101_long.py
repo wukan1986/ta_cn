@@ -1,5 +1,5 @@
 """alpha101的实现"""
-from .imports_wq import *
+from ta_cn.imports.wq_long import *
 
 
 def alpha_001(close, returns, **kwargs):

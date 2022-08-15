@@ -240,6 +240,14 @@ class WArr(np.ndarray):
         else:
             return self.from_array(self.raw() ** power, self.direction)
 
+    def __rpow__(self, other):
+        if isinstance(other, (int, float)):
+            return self.from_args(other ** self.arr, self.row, self.col, self.direction)
+        if isinstance(other, WArr):
+            return self.from_array(other.raw() ** self.raw(), self.direction)
+        else:
+            return self.from_array(other ** self.raw(), self.direction)
+
     def __neg__(self):
         return self.from_args(-self.arr, self.row, self.col, self.direction)
 
@@ -254,6 +262,12 @@ class WArr(np.ndarray):
             return self.from_array(self.raw() | other.raw(), self.direction)
         else:
             return self.from_array(self.raw() | other, self.direction)
+
+
+def get_raw_arr(arr):
+    if isinstance(arr, WArr):
+        return arr.raw()
+    return arr
 
 
 def wide_wraps(func, direction='down', input_num=1, output_num=1, to_kwargs={1: 'timeperiod'}):

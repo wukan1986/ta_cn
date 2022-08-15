@@ -19,29 +19,29 @@ decay_linear = _ta1d.WMA
 # from ta_cn.talib import CORREL as correlation
 # from ta_cn.talib import WMA as decay_linear
 
-from .alpha import LessThan
-from .alpha import RANK as rank
-from .alpha import TS_RANK as ts_rank
-from .alpha import scale
-from .alpha import signedpower as SignedPower
-from .logical import IF
-from .maths import LN as log  # 引入的是自然对数
-from .maths import MAX
-from .maths import MIN
-from .maths import SGN as sign
-from .preprocess import demean
-from .reference import DIFF as delta
-from .reference import HHV as ts_max
-from .reference import HHVBARS as ts_argmax
-from .reference import LLV as ts_min
-from .reference import LLVBARS as ts_argmin
-from .reference import PRODUCT as product
-from .reference import REF as delay
-from .reference import SUM as sum
-from .statistics import COVAR as covariance
-from .statistics import STDP as stddev  # 引入的是全体标准差
-from .utils import to_pd
-from .utils_long import series_groupby_apply, dataframe_groupby_apply
+from ta_cn.alpha import LessThan
+from ta_cn.alpha import RANK as rank
+from ta_cn.alpha import TS_RANK as ts_rank
+from ta_cn.alpha import scale
+from ta_cn.alpha import signedpower as SignedPower
+from ta_cn.logical import IF
+from ta_cn.maths import LN as log  # 引入的是自然对数
+from ta_cn.maths import MAX
+from ta_cn.maths import MIN
+from ta_cn.maths import SGN as sign
+from ta_cn.preprocess import demean
+from ta_cn.reference import DIFF as delta
+from ta_cn.reference import HHV as ts_max
+from ta_cn.reference import HHVBARS as ts_argmax
+from ta_cn.reference import LLV as ts_min
+from ta_cn.reference import LLVBARS as ts_argmin
+from ta_cn.reference import PRODUCT as product
+from ta_cn.reference import REF as delay
+from ta_cn.reference import SUM as sum
+from ta_cn.statistics import COVAR as covariance
+from ta_cn.statistics import STDP as stddev  # 引入的是全体标准差
+from ta_cn.utils import to_pd
+from ta_cn.utils_long import series_groupby_apply, dataframe_groupby_apply
 
 """
 1. 将通达信公式改名成World Quant中对应公式
@@ -106,7 +106,7 @@ correlation = round_a_a_i(dataframe_groupby_apply(correlation, by=BY_ASSET, to_d
 covariance = round_a_a_i(dataframe_groupby_apply(covariance, by=BY_ASSET, to_df=[0, 1], to_kwargs={2: 'timeperiod'}))
 
 # 截面
-rank = series_groupby_apply(rank, by=BY_DATE)
+rank = series_groupby_apply(rank, by=BY_DATE, to_kwargs=[])
 scale = series_groupby_apply(scale, by=BY_DATE, to_kwargs=['a'])
 
 # 行业中性。demean法
