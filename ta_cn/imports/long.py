@@ -12,6 +12,8 @@ from ..alpha import FILTER
 from ..alpha import LessThan
 from ..alpha import RANK
 from ..alpha import TS_RANK
+from ..alpha import scale
+from ..alpha import signedpower
 from ..ema import SMA
 from ..logical import IF
 from ..maths import ABS
@@ -62,6 +64,8 @@ FILTER = dataframe_groupby_apply(FILTER, by=BY_ASSET, to_kwargs={}, dropna=False
 RANK = series_groupby_apply(RANK, by=BY_DATE, to_kwargs={})
 TS_RANK = series_groupby_apply(TS_RANK, by=BY_ASSET)
 LessThan = to_pd(LessThan)
+scale = series_groupby_apply(scale, by=BY_DATE, to_kwargs={1: 'a'}, dropna=False)
+signedpower = to_pd(signedpower)
 
 #
 IF = to_pd(IF)
@@ -82,7 +86,7 @@ HHVBARS = series_groupby_apply(HHVBARS, by=BY_ASSET)
 LLV = series_groupby_apply(LLV, by=BY_ASSET)
 LLVBARS = series_groupby_apply(LLVBARS, by=BY_ASSET)
 MA = series_groupby_apply(MA, by=BY_ASSET)
-PRODUCT = series_groupby_apply(PRODUCT, by=BY_ASSET)
+PRODUCT = series_groupby_apply(PRODUCT, by=BY_ASSET, dropna=False)
 REF = series_groupby_apply(REF, by=BY_ASSET)
 SUM = series_groupby_apply(SUM, by=BY_ASSET)
 SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET)

@@ -827,8 +827,8 @@ scale(indneutralize((correlation(close, rank(adv20), 5) - rank(ts_argmin(close, 
 IndClass.subindustry))) * (volume / adv20))))"""
     t1 = rank((((close - low) - (high - close)) / (high - low)) * volume)
     t2 = (correlation(close, rank(adv20), 5) - rank(ts_argmin(close, 30)))
-    t3 = indneutralize(t1, group=subindustry)
-    t4 = 1.5 * scale(indneutralize(t3, group=subindustry), 1) - scale(indneutralize(t2, group=subindustry), 1)
+    # indneutralize套两层可简化
+    t4 = 1.5 * scale(indneutralize(t1, group=subindustry), 1.) - scale(indneutralize(t2, group=subindustry), 1.)
     return - t4 * (volume / adv20)
 
 

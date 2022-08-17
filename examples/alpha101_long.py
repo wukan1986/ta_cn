@@ -54,7 +54,7 @@ if __name__ == '__main__':
     kwargs_l.index.names = ['date', 'asset']
     kwargs_l = kwargs_l.to_dict(orient='series')
 
-    for i in range(13, 101 + 1):
+    for i in range(1, 100 + 1):
         # if i not in (62,):
         #     continue
         name = f'alpha_{i:03d}'

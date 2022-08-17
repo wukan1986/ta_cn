@@ -6,30 +6,9 @@
 1. 部分函数即有全小写，又有大小写混合
 2. 很多参数应当是整数，但输入是小数，不得不做修正
 """
-from functools import wraps
 
 from ta_cn.imports import wide as W
-
-
-def round_a_i(func):
-    """将参数 向量浮点 调整成 向量整数"""
-
-    @wraps(func)
-    def decorated(a, i):
-        return func(a, round(i))
-
-    return decorated
-
-
-def round_a_a_i(func):
-    """将参数 向量向量浮点 调整成 向量向量整数"""
-
-    @wraps(func)
-    def decorated(a, b, i):
-        return func(a, b, round(i))
-
-    return decorated
-
+from ta_cn.utils import round_a_i, round_a_a_i
 
 correlation = round_a_a_i(W.CORREL)
 decay_linear = round_a_i(W.WMA)

@@ -1,4 +1,5 @@
 import pandas as pd
+from numpy.testing import assert_allclose
 from pandas._testing import assert_series_equal, assert_numpy_array_equal
 
 import ta_cn.alphas.alpha101_long as b
@@ -54,19 +55,24 @@ if __name__ == '__main__':
     kwargs_l = kwargs_l.to_dict(orient='series')
 
     for i in range(1, 101 + 1):
-        if i in (81, 100):
-            continue
+        # if i in (-100,):
+        #     continue
         name = f'alpha_{i:03d}'
         f1 = getattr(a, name, None)
         f2 = getattr(b, name, None)
         if f1 is None:
             continue
         print(name)
-        #r1 = f1(**kwargs_w)
+        r1 = f1(**kwargs_w)
         r2 = f2(**kwargs_l)
-        #r1.raw()
+        # r1.raw()
         # print(r1.raw())
         # print(r2.unstack())
         # pd.DataFrame(r1.raw()).to_csv('1.csv')
         # r2.unstack().to_csv('2.csv')
-        #assert_numpy_array_equal(r1.raw(), r2.unstack().values)
+        if i == 100:
+            # alpha 100 scale后有少量误差，只能用allclose
+            # scale(indneutralize(t1, group=subindustry), 1.)
+            assert_allclose(r1.raw(), r2.unstack().values)
+        else:
+            assert_numpy_array_equal(r1.raw(), r2.unstack().values)

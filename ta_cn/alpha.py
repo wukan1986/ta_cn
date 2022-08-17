@@ -45,7 +45,7 @@ def scale(real, a):
     if real.ndim == 2:
         b = _np.nansum(abs(real), axis=1, keepdims=True)
     else:
-        b = _np.nansum(abs(real))
+        b = _np.nansum(abs(real), keepdims=True)
 
     return real / b * a
 

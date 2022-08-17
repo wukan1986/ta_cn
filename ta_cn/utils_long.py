@@ -8,7 +8,7 @@ import pandas as pd
 from ta_cn.utils import to_pd
 
 
-def series_groupby_apply(func, by='asset', to_kwargs={1: 'timeperiod'}):
+def series_groupby_apply(func, by='asset', to_kwargs={1: 'timeperiod'}, dropna=True):
     """普通指标转换成按分组处理的指标。只支持单参数
 
     Parameters
@@ -29,8 +29,11 @@ def series_groupby_apply(func, by='asset', to_kwargs={1: 'timeperiod'}):
         _kwargs = {k: args[i] for i, k in to_kwargs.items() if i < len(args)}
         s1 = args[0]
 
-        # 跳过空值
-        s2 = s1.dropna()
+        if dropna:
+            s2 = s1.dropna()
+        else:
+            s2 = s1
+
         if len(s2) == 0:
             return pd.Series(index=s1.index, dtype=float)
 

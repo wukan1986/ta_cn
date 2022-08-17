@@ -205,3 +205,23 @@ def ANY_NAN(*args):
 def ALL_NOTNA(*args):
     """多输入，同位置没有出现过nan,标记成True"""
     return reduce(lambda x, y: np.logical_and(x, ~np.isnan(y)), [True] + list(args))
+
+
+def round_a_i(func):
+    """将参数 向量浮点 调整成 向量整数"""
+
+    @wraps(func)
+    def decorated(a, i):
+        return func(a, round(i))
+
+    return decorated
+
+
+def round_a_a_i(func):
+    """将参数 向量向量浮点 调整成 向量向量整数"""
+
+    @wraps(func)
+    def decorated(a, b, i):
+        return func(a, b, round(i))
+
+    return decorated

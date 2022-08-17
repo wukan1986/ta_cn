@@ -55,7 +55,7 @@ FILTER = wide_wraps(FILTER, input_num=2, to_kwargs={})
 RANK = wide_wraps(RANK, direction='left', to_kwargs={})
 TS_RANK = wide_wraps(TS_RANK)
 LessThan = wide_wraps(LessThan, input_num=2, to_kwargs={})
-scale = wide_wraps(scale, direction='left', to_kwargs={1: 'a'})
+scale = wide_wraps(scale, direction=None, to_kwargs={1: 'a'})
 signedpower = wide_wraps(signedpower, direction=None, input_num=2, to_kwargs={})  # 输入n不是数字，而是矩阵
 
 #
