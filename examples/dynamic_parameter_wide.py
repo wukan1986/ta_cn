@@ -3,11 +3,7 @@
 """
 import numpy as np
 
-import ta_cn.talib as ta
-
-# 默认会启用模式1，这里设置成模式二
-# 注意：周期等参数一定得使用命名参数，开高低收等一定要使用位置参数
-ta.init(mode=2)
+import ta_cn.imports.wide as W
 
 # 准备数据
 o = np.random.rand(1000000).reshape(-1, 5000)
@@ -52,8 +48,8 @@ def func(open_, high, low, close, factor,
     close *= f
 
     # 计算指标
-    ma = ta.SMA(close, timeperiod=period1)
-    atr = ta.ATR(high, low, close, timeperiod=period2)
+    ma = W.SMA_TA(close, timeperiod=period1).raw()
+    atr = W.ATR(high, low, close, timeperiod=period2).raw()
 
     # 每天记录新值
     return (ma + atr), (ma - atr)
@@ -137,7 +133,7 @@ loop(func,
      [p1, p2, f],
      [p1, p2],
      [up, down],
-     is_backtest=True)
+     is_backtest=False)
 
 # up与down是我们想要的结果
 print(up)

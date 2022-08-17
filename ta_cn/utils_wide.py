@@ -95,8 +95,8 @@ def pullna(arr, row, col):
 
 
 class WArr(np.ndarray):
-    """宽表计算中间体，用于进行输入的堆叠，输出的还原"""
-    arr = None
+    """宽表计算中间体，用于进行输入的堆叠，输出的还原，不可修改"""
+    arr = None  # 堆叠后的数据
     row = None
     col = None
     direction = None
@@ -287,7 +287,7 @@ def wide_wraps(func, direction='down', input_num=1, output_num=1, to_kwargs={1: 
 
     @wraps(func)
     def decorated(*args, **kwargs):
-        _kwargs = {k: args[i] for i, k in to_kwargs.items()}
+        _kwargs = {k: args[i] for i, k in to_kwargs.items() if i < len(args)}
         _args = [WArr.from_obj(v, direction) for i, v in enumerate(args) if i not in to_kwargs]
         arg0 = _args[0]
 

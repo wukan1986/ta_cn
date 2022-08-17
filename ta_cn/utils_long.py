@@ -8,7 +8,7 @@ import pandas as pd
 from ta_cn.utils import to_pd
 
 
-def series_groupby_apply(func, by='asset', to_kwargs=['timeperiod']):
+def series_groupby_apply(func, by='asset', to_kwargs={1: 'timeperiod'}):
     """普通指标转换成按分组处理的指标。只支持单参数
 
     Parameters
@@ -24,9 +24,10 @@ def series_groupby_apply(func, by='asset', to_kwargs=['timeperiod']):
     """
 
     @wraps(func)
-    def decorated(s1: pd.Series, *args, **kwargs):
+    def decorated(*args, **kwargs):
         # 参数位置调整，实现命命参数简化
-        _kwargs = {k: args[i] for i, k in enumerate(to_kwargs)}
+        _kwargs = {k: args[i] for i, k in to_kwargs.items() if i < len(args)}
+        s1 = args[0]
 
         # 跳过空值
         s2 = s1.dropna()
@@ -72,7 +73,7 @@ def dataframe_groupby_apply(func, by='asset', to_kwargs={2: 'timeperiod'}, to_df
 
     @wraps(func)
     def decorated(*args, **kwargs):
-        _kwargs = {k: args[i] for i, k in to_kwargs.items()}
+        _kwargs = {k: args[i] for i, k in to_kwargs.items() if i < len(args)}
         s1 = pd.DataFrame({k: get(i, k, args, kwargs) for i, k in enumerate(to_df)})
         if dropna:
             s2 = s1.dropna()

@@ -80,7 +80,7 @@ h = np.random.rand(1000000).reshape(-1, 5000) + 10
 l = np.random.rand(1000000).reshape(-1, 5000)
 c = np.random.rand(1000000).reshape(-1, 5000)
 # 指定模式，否则对talib封装的所有函数都不存在
-ta.init(mode=1, skipna=False)
+ta.init(mode=2, skipna=False, to_globals=True)
 
 # 几个调用函数演示
 r = ta.ATR(h, l, c, timeperiod=10)
@@ -98,15 +98,6 @@ rr = ta.SMA(arr, timeperiod=10)
 r = pullna(rr, row, col)
 print(r)
 
-# 使用skip_na在内部跳过停牌
-ta.init(mode=1, skipna=True)
-r = ta.SMA(c, timeperiod=10)
-print(r)
-
-# 使用多参数
-ta.init(mode=2, skipna=True)
-r = ta.SMA(c, timeperiod=[10, 20])
-print(r)
 
 ```
 
@@ -116,13 +107,16 @@ import numpy as np
 
 # ta_cn.talib库底层是循环调用talib，部分计算效率不高
 # 可导入ta_cn中的公式，只加这一句即导入多个文件中的函数
-from ta_cn.imports import *
 # 准备数据
-from ta_cn.talib import set_compatibility_enable, set_compatibility
+from ta_cn.over_bought_over_sold import ATR_CN
+from ta_cn.talib import init, set_compatibility_enable, set_compatibility
+from ta_cn.trend import MACD
 
 h = np.random.rand(10000000).reshape(-1, 50000) + 10
 l = np.random.rand(10000000).reshape(-1, 50000)
 c = np.random.rand(10000000).reshape(-1, 50000)
+
+init(mode=2, skipna=False)
 
 r = ATR_CN(h, l, c, timeperiod=10)
 print(r)
@@ -132,46 +126,20 @@ set_compatibility_enable(True)
 set_compatibility(1)
 set_compatibility_enable(False)
 
-x, y, z = MACD(c)
+x, y, z = MACD(c, fastperiod=12, slowperiod=26, signalperiod=9)
 print(z)
 ```
 
-### 输入DataFrame，输出是ndarray?
-只要通过np_to_pd，并传入index/columns两参数即可还原成DataFrame
-```python
-import pandas as pd
-
-from ta_cn.imports import *
-from ta_cn.utils import np_to_pd
-
-pd._testing._N = 250
-pd._testing._K = 30
-h = pd._testing.makeTimeDataFrame() + 10
-l = pd._testing.makeTimeDataFrame()
-c = pd._testing.makeTimeDataFrame()
-
-r = ATR_CN(h, l, c)
-# 返回的数据可能是np.ndarray
-print(r[-5:])
-
-# 可以再封装回pd.DataFrame
-d = np_to_pd(r, copy=False, index=c.index, columns=c.columns)
-print(d.iloc[-5:])
-
-```
-## 分组计算
+## 长宽表处理
 二维矩阵计算，的确方便，`Alpha101`中的公式很快就可以实现，即支持时序又支持截面，但其中有一个难点，
-就是NaN值的处理。`pushna`和`pullna`可用于解决此问题，但在公式中嵌入就比较棘手。所以我们还提供了分组封装功能
-可以将指定的指标转换成支持长表输入。
+就是NaN值的处理。`pushna`和`pullna`可用于解决此问题，但在公式中嵌入就比较棘手。
+### 长表
+处理慢一些，但结果更适合于机器学习
 ```python
 import pandas as pd
 
-import ta_cn.talib as ta
-from ta_cn.alpha import RANK
-from ta_cn.preprocess import demean
-from ta_cn.utils_long import series_groupby_apply, dataframe_groupby_apply
-
-ta.init(mode=1, skipna=True)
+from ta_cn.imports.gtja_long import RANK
+from ta_cn.imports.long import SMA_TA, ATR, indneutralize
 
 pd._testing._N = 500
 pd._testing._K = 30
@@ -193,16 +161,8 @@ df = pd.DataFrame(df)
 df.index.names = ['date', 'asset']
 kwargs = df.to_dict(orient='series')
 
-# 套上装饰器，实现组内计算
-SMA = series_groupby_apply(ta.SMA, by='asset', dropna=True, to_args=[], to_kwargs=['timeperiod'])
-ATR = dataframe_groupby_apply(ta.ATR, by='asset', dropna=True, to_df=[0, 1, 2], to_kwargs={3: 'timeperiod'})
-# 横截面
-RANK = series_groupby_apply(RANK, by='date', dropna=True)
-# 行业中性化
-indneutralize = dataframe_groupby_apply(demean, by=['date', 'group'], dropna=False, to_df=[0, 'group'], to_kwargs={})
-
 # 单输入
-r = SMA(df['close'], 10)
+r = SMA_TA(df['close'], timeperiod=10)
 print(r.unstack())
 # 多输入
 r = ATR(df['high'], df['low'], df['close'], 10)
@@ -210,9 +170,33 @@ print(r.unstack())
 # 横截面
 r = RANK(df['close'])
 print(r.unstack())
-r = indneutralize(df['close'], group=df['group'])
+r = indneutralize(df['close'], df['group'])
 
 print(r.unstack())
+
+```
+
+### 宽表
+处理速度通常比长表要快。核心是输入需要封装成`WArr`,输出要`.raw()`提取
+```python
+import pandas as pd
+
+from ta_cn.imports.wide import ATR
+from ta_cn.utils import np_to_pd
+
+pd._testing._N = 250
+pd._testing._K = 30
+h = pd._testing.makeTimeDataFrame() + 10
+l = pd._testing.makeTimeDataFrame()
+c = pd._testing.makeTimeDataFrame()
+
+r = ATR(h, l, c, 10)
+# 返回的数据可能是np
+print(r.raw())
+
+# 可以再封装回pd.DataFrame
+d = np_to_pd(r.raw(), copy=False, index=c.index, columns=c.columns)
+print(d.iloc[-5:])
 
 ```
 

@@ -15,10 +15,6 @@ _ta1d = ta.init(mode=1, skipna=False)
 correlation = _ta1d.CORREL
 decay_linear = _ta1d.WMA
 
-# # 都是单支股票的循环，直接调用更快
-# from ta_cn.talib import CORREL as correlation
-# from ta_cn.talib import WMA as decay_linear
-
 from ta_cn.alpha import LessThan
 from ta_cn.alpha import RANK as rank
 from ta_cn.alpha import TS_RANK as ts_rank
@@ -89,25 +85,25 @@ BY_GROUP = ['date', 'group']
 dropna = False
 
 # 时序
-stddev = round_a_i(series_groupby_apply(stddev, by=BY_ASSET, to_kwargs=['timeperiod']))
-ts_argmax = round_a_i(series_groupby_apply(ts_argmax, by=BY_ASSET, to_kwargs=['timeperiod']))
-ts_argmin = round_a_i(series_groupby_apply(ts_argmin, by=BY_ASSET, to_kwargs=['timeperiod']))
-delta = round_a_i(series_groupby_apply(delta, by=BY_ASSET, to_kwargs=['timeperiod']))
-ts_rank = round_a_i(series_groupby_apply(ts_rank, by=BY_ASSET, to_kwargs=['timeperiod']))
-delay = round_a_i(series_groupby_apply(delay, by=BY_ASSET, to_kwargs=['timeperiod']))
-ts_max = round_a_i(series_groupby_apply(ts_max, by=BY_ASSET, to_kwargs=['timeperiod']))
-ts_min = round_a_i(series_groupby_apply(ts_min, by=BY_ASSET, to_kwargs=['timeperiod']))
-sum = round_a_i(series_groupby_apply(sum, by=BY_ASSET, to_kwargs=['timeperiod']))
-decay_linear = round_a_i(series_groupby_apply(decay_linear, by=BY_ASSET, to_kwargs=['timeperiod']))
-product = round_a_i(series_groupby_apply(product, by=BY_ASSET, to_kwargs=['timeperiod']))
+stddev = round_a_i(series_groupby_apply(stddev, by=BY_ASSET))
+ts_argmax = round_a_i(series_groupby_apply(ts_argmax, by=BY_ASSET))
+ts_argmin = round_a_i(series_groupby_apply(ts_argmin, by=BY_ASSET))
+delta = round_a_i(series_groupby_apply(delta, by=BY_ASSET))
+ts_rank = round_a_i(series_groupby_apply(ts_rank, by=BY_ASSET))
+delay = round_a_i(series_groupby_apply(delay, by=BY_ASSET))
+ts_max = round_a_i(series_groupby_apply(ts_max, by=BY_ASSET))
+ts_min = round_a_i(series_groupby_apply(ts_min, by=BY_ASSET))
+sum = round_a_i(series_groupby_apply(sum, by=BY_ASSET))
+decay_linear = round_a_i(series_groupby_apply(decay_linear, by=BY_ASSET))
+product = round_a_i(series_groupby_apply(product, by=BY_ASSET))
 
 # 时序，双输入
 correlation = round_a_a_i(dataframe_groupby_apply(correlation, by=BY_ASSET, to_df=[0, 1], to_kwargs={2: 'timeperiod'}))
 covariance = round_a_a_i(dataframe_groupby_apply(covariance, by=BY_ASSET, to_df=[0, 1], to_kwargs={2: 'timeperiod'}))
 
 # 截面
-rank = series_groupby_apply(rank, by=BY_DATE, to_kwargs=[])
-scale = series_groupby_apply(scale, by=BY_DATE, to_kwargs=['a'])
+rank = series_groupby_apply(rank, by=BY_DATE, to_kwargs={})
+scale = series_groupby_apply(scale, by=BY_DATE, to_kwargs={1: 'a'})
 
 # 行业中性。demean法
 indneutralize = dataframe_groupby_apply(demean, by=BY_GROUP, to_df=[0, 'group'], to_kwargs={})

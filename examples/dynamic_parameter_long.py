@@ -7,6 +7,7 @@ import pandas as pd
 import talib as ta
 
 # 准备数据
+
 o = np.random.rand(1000000).reshape(-1, 5000)
 h = np.random.rand(1000000).reshape(-1, 5000) + 10
 l = np.random.rand(1000000).reshape(-1, 5000)

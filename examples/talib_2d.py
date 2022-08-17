@@ -12,7 +12,7 @@ h = np.random.rand(1000000).reshape(-1, 5000) + 10
 l = np.random.rand(1000000).reshape(-1, 5000)
 c = np.random.rand(1000000).reshape(-1, 5000)
 # 指定模式，否则对talib封装的所有函数都不存在
-ta.init(mode=2, skipna=False)
+ta.init(mode=2, skipna=False, to_globals=True)
 
 # 几个调用函数演示
 r = ta.ATR(h, l, c, timeperiod=10)
@@ -28,14 +28,4 @@ c[c < 0.4] = np.nan
 arr, row, col = pushna(c, direction='down')
 rr = ta.SMA(arr, timeperiod=10)
 r = pullna(rr, row, col)
-print(r)
-
-# 使用skip_na在内部跳过停牌
-ta.init(mode=2, skipna=True)
-r = ta.SMA(c, timeperiod=10)
-print(r)
-
-# 使用多参数
-ta.init(mode=2, skipna=True)
-r = ta.SMA(c, timeperiod=[10, 20])
 print(r)

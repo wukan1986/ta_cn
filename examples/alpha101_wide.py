@@ -62,9 +62,9 @@ if __name__ == '__main__':
         if f1 is None:
             continue
         print(name)
-        r1 = f1(**kwargs_w)
-        #r2 = f2(**kwargs_l)
-        r1.raw()
+        #r1 = f1(**kwargs_w)
+        r2 = f2(**kwargs_l)
+        #r1.raw()
         # print(r1.raw())
         # print(r2.unstack())
         # pd.DataFrame(r1.raw()).to_csv('1.csv')

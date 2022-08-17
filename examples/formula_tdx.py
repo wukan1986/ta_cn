@@ -2,9 +2,10 @@ import numpy as np
 
 # ta_cn.talib库底层是循环调用talib，部分计算效率不高
 # 可导入ta_cn中的公式，只加这一句即导入多个文件中的函数
-from ta_cn.imports import *
 # 准备数据
+from ta_cn.over_bought_over_sold import ATR_CN
 from ta_cn.talib import init, set_compatibility_enable, set_compatibility
+from ta_cn.trend import MACD
 
 h = np.random.rand(10000000).reshape(-1, 50000) + 10
 l = np.random.rand(10000000).reshape(-1, 50000)
@@ -20,7 +21,7 @@ set_compatibility_enable(True)
 set_compatibility(1)
 set_compatibility_enable(False)
 
-x, y, z = MACD(c)
+x, y, z = MACD(c, fastperiod=12, slowperiod=26, signalperiod=9)
 print(z)
 
 """

@@ -1,4 +1,11 @@
-"""函数太多，又想要智能提示，只能手工按需补充"""
+"""
+对指标的算子化包装
+1. 包装成只支持 宽表 输入，输出是特殊格式，需要处理得到输出
+2. 简化参数输入，命名参数也可当成位置参数输入
+3. 通过堆叠的方法，自动跳过停牌
+
+!!!函数太多，又想要智能提示，只能手工按需补充
+"""
 import ta_cn.talib as ta
 from ..alpha import CUMPROD
 from ..alpha import FILTER
@@ -29,13 +36,13 @@ from ..regress import REGRESI
 from ..regress import SLOPE_YX_NB
 from ..statistics import COVAR
 from ..statistics import STDP
-from ..utils import np_to_pd
-from ..utils_wide import wide_wraps, get_raw_arr, WArr
+from ..utils_wide import wide_wraps
 
 _ta2d = ta.init(mode=2, skipna=False, to_globals=False)
 
 # TALIB, 多输入
 CORREL = wide_wraps(_ta2d.CORREL, input_num=2, to_kwargs={2: 'timeperiod'})
+ATR = wide_wraps(_ta2d.ATR, input_num=3, to_kwargs={3: 'timeperiod'})
 
 # TALIB, 单输入
 LINEARREG_SLOPE = wide_wraps(_ta2d.LINEARREG_SLOPE)
@@ -81,18 +88,6 @@ REGRESI4 = wide_wraps(REGRESI, input_num=4, to_kwargs={4: 'timeperiod'})
 COVAR = wide_wraps(COVAR, input_num=2, to_kwargs={2: 'timeperiod'})
 STDP = wide_wraps(STDP)
 
+from .wide_long import indneutralize
 
-def indneutralize(x, group):
-    """行业中性化
-    """
-    from .long import indneutralize as _indneutralize
-
-    x1 = np_to_pd(get_raw_arr(x)).stack(dropna=False)
-    g1 = np_to_pd(get_raw_arr(group)).stack(dropna=False)
-
-    x1.index.names = ['date', 'asset']
-    g1.index.names = ['date', 'asset']
-
-    r = _indneutralize(x1, g1)
-
-    return WArr.from_array(r.unstack(), direction=None)
+indneutralize = indneutralize

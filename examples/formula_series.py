@@ -1,11 +1,7 @@
 import pandas as pd
 
-import ta_cn.talib as ta
-from ta_cn.alpha import RANK
-from ta_cn.preprocess import demean
-from ta_cn.utils_long import series_groupby_apply, dataframe_groupby_apply
-
-ta.init(mode=1, skipna=True)
+from ta_cn.imports.gtja_long import RANK
+from ta_cn.imports.long import SMA_TA, ATR, indneutralize
 
 pd._testing._N = 500
 pd._testing._K = 30
@@ -27,16 +23,8 @@ df = pd.DataFrame(df)
 df.index.names = ['date', 'asset']
 kwargs = df.to_dict(orient='series')
 
-# 套上装饰器，实现组内计算
-SMA = series_groupby_apply(ta.SMA, by='asset', dropna=True, to_args=[], to_kwargs=['timeperiod'])
-ATR = dataframe_groupby_apply(ta.ATR, by='asset', dropna=True, to_df=[0, 1, 2], to_kwargs={3: 'timeperiod'})
-# 横截面
-RANK = series_groupby_apply(RANK, by='date', dropna=True)
-# 行业中性化
-indneutralize = dataframe_groupby_apply(demean, by=['date', 'group'], dropna=False, to_df=[0, 'group'], to_kwargs={})
-
 # 单输入
-r = SMA(df['close'], 10)
+r = SMA_TA(df['close'], timeperiod=10)
 print(r.unstack())
 # 多输入
 r = ATR(df['high'], df['low'], df['close'], 10)
@@ -44,6 +32,6 @@ print(r.unstack())
 # 横截面
 r = RANK(df['close'])
 print(r.unstack())
-r = indneutralize(df['close'], group=df['group'])
+r = indneutralize(df['close'], df['group'])
 
 print(r.unstack())
