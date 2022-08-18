@@ -1,5 +1,12 @@
 """alpha101的实现"""
-from ta_cn.imports.wq_long import *
+import os
+
+if os.environ.get('TA_CN_MODE', 'LONG') == 'WIDE':
+    print('导入宽表函数')
+    from ta_cn.imports.wq_wide import *
+else:
+    print('导入长表函数')
+    from ta_cn.imports.wq_long import *
 
 
 def alpha_001(close, returns, **kwargs):
@@ -677,7 +684,7 @@ def alpha_084(close, vwap, **kwargs):
     return SignedPower(t2, t3)
 
 
-def alpha_085(open, high, low, close, volume, adv30, **kwargs):
+def alpha_085(high, low, close, volume, adv30, **kwargs):
     """Alpha#85: (rank(correlation(((high * 0.876703) + (close * (1 - 0.876703))), adv30,
 9.61331))^rank(correlation(Ts_Rank(((high + low) / 2), 3.70596), Ts_Rank(volume, 10.1595),
 7.11408)))"""
@@ -827,8 +834,7 @@ scale(indneutralize((correlation(close, rank(adv20), 5) - rank(ts_argmin(close, 
 IndClass.subindustry))) * (volume / adv20))))"""
     t1 = rank((((close - low) - (high - close)) / (high - low)) * volume)
     t2 = (correlation(close, rank(adv20), 5) - rank(ts_argmin(close, 30)))
-    # indneutralize套两层可简化
-    t4 = 1.5 * scale(indneutralize(t1, group=subindustry), 1.) - scale(indneutralize(t2, group=subindustry), 1.)
+    t4 = 1.5 * scale(indneutralize(t1, group=subindustry), 1) - scale(indneutralize(t2, group=subindustry), 1)
     return - t4 * (volume / adv20)
 
 

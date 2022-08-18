@@ -2,9 +2,8 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 from pandas.testing import assert_series_equal
 
-import ta_cn.alphas.alpha101_long as b
-import ta_cn.alphas.alpha101_test as a
-from ta_cn.utils_wide import WArr
+import ta_cn.alphas.test101 as a
+import ta_cn.alphas.alpha101 as b
 
 if __name__ == '__main__':
     pd._testing._N = 500
@@ -47,7 +46,7 @@ if __name__ == '__main__':
         'cap': cap,
     }
 
-    kwargs_w = {k: WArr.from_array(v, direction='down') for k, v in df.items()}
+    # kwargs_w = {k: WArr.from_array(v, direction='down') for k, v in df.items()}
 
     kwargs_l = {k: v.stack() for k, v in df.items()}
     kwargs_l = pd.DataFrame(kwargs_l)

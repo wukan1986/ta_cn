@@ -1,10 +1,20 @@
+import os
+import sys
+
 import pandas as pd
 from numpy.testing import assert_allclose
 from pandas._testing import assert_series_equal, assert_numpy_array_equal
 
-import ta_cn.alphas.alpha101_long as b
-import ta_cn.alphas.alpha101_wide as a
 from ta_cn.utils_wide import WArr
+
+os.environ['TA_CN_MODE'] = 'WIDE'
+import ta_cn.alphas.alpha101 as a
+
+# 移除，这样就可以重复导入包了
+sys.modules.pop('ta_cn.alphas.alpha101')
+
+os.environ['TA_CN_MODE'] = 'LONG'
+import ta_cn.alphas.alpha101 as b
 
 if __name__ == '__main__':
     pd._testing._N = 500

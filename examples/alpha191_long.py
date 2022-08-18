@@ -1,8 +1,8 @@
 import pandas as pd
 from pandas._testing import assert_series_equal
 
-import ta_cn.alphas.alpha191_long as b
-import ta_cn.alphas.alpha191_test as a
+import ta_cn.alphas.alpha191 as b
+import ta_cn.alphas.test191 as a
 
 if __name__ == '__main__':
     pd._testing._N = 500
