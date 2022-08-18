@@ -7,13 +7,14 @@ from pandas._testing import assert_series_equal, assert_numpy_array_equal
 from ta_cn.utils_wide import WArr
 
 os.environ['TA_CN_MODE'] = 'WIDE'
-import ta_cn.alphas.alpha191 as a
+import ta_cn.alphas.alpha191 as w
 
 # 移除，这样就可以重复导入包了
 sys.modules.pop('ta_cn.alphas.alpha191')
 
 os.environ['TA_CN_MODE'] = 'LONG'
-import ta_cn.alphas.alpha191 as b
+import ta_cn.alphas.alpha191 as l
+import ta_cn.alphas.test191 as t
 
 if __name__ == '__main__':
     pd._testing._N = 500
@@ -55,41 +56,20 @@ if __name__ == '__main__':
     kwargs_l.index.names = ['date', 'asset']
     kwargs_l = kwargs_l.to_dict(orient='series')
 
-    # t1 = time.time()
-    #
-    # for i in range(1, 191 + 1):
-    #     if i in (165, 183, 30):
-    #         continue
-    #     name = f'alpha_{i:03d}'
-    #     f1 = getattr(a, name, None)
-    #     print(name)
-    #     r1 = f1(**kwargs_w)
-    #     # r1.raw()
-    #
-    # t2 = time.time()
-    #
-    # for i in range(1, 191 + 1):
-    #     if i in (165, 183, 30):
-    #         continue
-    #     name = f'alpha_{i:03d}'
-    #     f1 = getattr(b, name, None)
-    #     print(name)
-    #     r1 = f1(**kwargs_l)
-    #
-    # t3 = time.time()
-    #
-    # print(t3 - t2, t2 - t1)
-
     for i in range(1, 191 + 1):
         # 165 183 是MAX 与 SUMAC 问题
         if i in (165, 183, 30):
             continue
         name = f'alpha_{i:03d}'
-        f1 = getattr(a, name, None)
-        f2 = getattr(b, name, None)
-        if f1 is None:
-            continue
+        ft = getattr(t, name, None)
+        fl = getattr(l, name, None)
+        fw = getattr(w, name, None)
+
         print(name)
-        r1 = f1(**kwargs_w)
-        r2 = f2(**kwargs_l)
-        assert_numpy_array_equal(r1.raw(), r2.unstack().values)
+        rt = ft(**kwargs_l)
+        rl = fl(**kwargs_l)
+        rw = fw(**kwargs_w)
+        # 比较 原版公式 与 优化后公式的 结果是否相同
+        assert_series_equal(rt, rl)
+        # 比较 长表 与 宽表 结果是否相同
+        assert_numpy_array_equal(rw.raw(), rl.unstack().values)
