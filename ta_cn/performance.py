@@ -32,6 +32,8 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
+from .utils import np_to_pd
+
 
 def to_log_returns(prices: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, pd.DataFrame]:
     """对数收益率
@@ -50,15 +52,17 @@ def to_log_returns(prices: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, p
     ffn
 
     """
+    prices = np_to_pd(prices).replace(0, np.nan)
     return np.log(prices / prices.shift(1))
 
 
-def to_returns(prices: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, pd.DataFrame]:
+def to_returns(prices: Union[pd.Series, pd.DataFrame], sub_one=True) -> Union[pd.Series, pd.DataFrame]:
     """简单收益率
 
     Parameters
     ----------
     prices
+    sub_one
 
     Returns
     -------
@@ -69,10 +73,14 @@ def to_returns(prices: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, pd.Da
     ffn
 
     """
-    return prices / prices.shift(1) - 1
+    prices = np_to_pd(prices).replace(0, np.nan)
+    if sub_one:
+        return prices / prices.shift(1) - 1.
+    else:
+        return prices / prices.shift(1)
 
 
-def returns_cumsum(returns: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, pd.DataFrame]:
+def log_returns_cumsum(returns: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, pd.DataFrame]:
     """对数收益率累加
 
     Parameters
@@ -86,16 +94,18 @@ def returns_cumsum(returns: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, 
     - 对数收益率: cumsum得到的是log(pn/p1)，本质上是复利
 
     """
+    returns = np_to_pd(returns)
     return returns.fillna(0.0).cumsum()
 
 
-def returns_cumprod(returns: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, pd.DataFrame]:
+def returns_cumprod(returns: Union[pd.Series, pd.DataFrame], add_one=True) -> Union[pd.Series, pd.DataFrame]:
     """简单收益率累乘
 
     Parameters
     ----------
     returns
         简单收益率
+    add_one
 
     Returns
     -------
@@ -107,18 +117,29 @@ def returns_cumprod(returns: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series,
     - 对数收益率：不能累乘
 
     """
-    return returns.add(1.0, fill_value=0.0).cumprod()
+    returns = np_to_pd(returns)
+    if add_one:
+        # 简单收益率(减一过于的值)
+        return returns.add(1., fill_value=0.0).cumprod()
+    else:
+        # 价格比(nan需要改成1) 1表示P1/P1
+        return returns.fillna(1.).cumprod()
 
 
-def returns_exp(returns: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, pd.DataFrame]:
-    """累加对数收益率还原
+def log_returns_exp(returns: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, pd.DataFrame]:
+    """对数收益率还原。还原后是Pn/P1比值，相当于净值
+
+    to_returns(df)+1 = returns_exp(to_log_returns(df))
+
+    -1 = log(exp(-1))
+    1 = exp(log(1)) 。 log定义域>0
 
     Parameters
     ----------
     returns
-        - 简单收益率：不可exp
-        - 对数收益率：不可exp
-        - 累加对数收益率：可还原
+        - 输入简单收益率：原数据没有经过log处理，还原无意义
+        - 输入对数收益率：还原的只是价格比，-1后才是简单收益率
+        - 累加对数收益率。还原后是以1为起点的净值
 
     """
     return np.exp(returns)
@@ -144,30 +165,27 @@ def equal_weighted_index(prices: Union[pd.Series, pd.DataFrame]) -> pd.Series:
     pd.Series
         指数或合成净值
 
+    """
+    # 不进行加1减1的操作，加快速度
+    # 虽然是累乘，但由于只计算一列，所以速度还能接受
+    return returns_cumprod(to_returns(prices, False).mean(axis=1), False)
+
+
+def weighted_index(prices, weights):
+    """加权指数
+
+    Parameters
+    ----------
+    prices
+        价格
+    weights
+        权重
+
+    Returns
+    -------
+    加权指数
 
     """
-    # 虽然是累乘，但由于只计算一列，所以速度还能接受
-    return returns_cumprod(to_returns(prices).mean(axis=1))
-
-
-if __name__ == '__main__':
-    # 测试通过价格序列生成等权指数
-    df = pd.DataFrame({
-        'A': [1, 2, 3, 4, 5, 6],
-        'B': [10, 20, 30, 40, 50, 60],
-        'C': [100, np.nan, np.nan, 400, 500, 600],
-    })
-    print(equal_weighted_index(df))
-
-    # 生成测试数据
-    df = pd._testing.makeDataFrame() + 10
-    df.reset_index(inplace=True, drop=True)
-    df.loc[4, 'A'] = np.nan
-    print(df)
-
-    #
-    log_rets = to_log_returns(df)
-    log_navs = returns_cumsum(log_rets)
-    navs = returns_exp(log_navs)
-    print(navs)
-    print(equal_weighted_index(navs))
+    returns = to_returns(prices, False).fillna(1)
+    weights = weights.div(weights.sum(axis=1), axis=0).fillna(0)
+    return returns_cumprod((returns * weights).sum(axis=1), False)

@@ -72,3 +72,10 @@ def CUMPROD(A):
         return _np.cumprod(A, axis=0)
     else:
         return _np.cumprod(A)
+
+
+def CUMSUM(A):
+    if A.ndim == 2:
+        return _np.cumsum(A, axis=0)
+    else:
+        return _np.cumsum(A)
