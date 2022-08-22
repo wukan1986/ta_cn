@@ -1,7 +1,7 @@
 import numba
 import numpy as np
 
-from ta_cn.utils import pd_to_np
+from .utils import pd_to_np
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)

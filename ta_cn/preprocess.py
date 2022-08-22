@@ -1,6 +1,6 @@
 import numpy as _np
 
-import ta_cn.bn_wraps as _bn
+from . import bn_wraps as _bn
 from .utils import pd_to_np
 
 
@@ -220,6 +220,3 @@ def demean(x):
     nanmean在全nan时报此警告。这个警告还不好屏蔽
     """
     return x - _np.nanmean(x)
-
-
-

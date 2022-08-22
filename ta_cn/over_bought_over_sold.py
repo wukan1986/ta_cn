@@ -1,9 +1,9 @@
 from talib import MA_Type
 
-import ta_cn.talib as ta
-from ta_cn.talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
+from . import talib as ta
 from .maths import MEAN
 from .reference import LLV, HHV, REF, MA, TR
+from .talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 
 _ta1d = ta.init(mode=1, skipna=False)
 _ta2d = ta.init(mode=2, skipna=False)

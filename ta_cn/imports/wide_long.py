@@ -1,7 +1,7 @@
 """宽表不好处理的算子，转成长表进行处理再还原"""
-from ta_cn.utils import np_to_pd
-from ta_cn.utils_wide import get_raw_arr, WArr
 from .long import indneutralize as _indneutralize
+from ..utils import np_to_pd
+from ..utils_wide import get_raw_arr, WArr
 
 
 def indneutralize(x, group):

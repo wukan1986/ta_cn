@@ -3,7 +3,7 @@
 """
 import numpy as _np
 
-import ta_cn.bn_wraps as _bn
+from . import bn_wraps as _bn
 
 
 def signedpower(real, n):

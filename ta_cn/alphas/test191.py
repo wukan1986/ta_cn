@@ -3,7 +3,7 @@
 
 1. =要改成==
 """
-from ta_cn.imports.gtja_long import *
+from ..imports.gtja_long import *
 
 
 def alpha_001(OPEN, CLOSE, VOLUME, **kwargs):

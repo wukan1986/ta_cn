@@ -2,7 +2,7 @@
 import numpy as _np
 import pandas as _pd
 
-import ta_cn.talib as ta
+from . import talib as ta
 from .ema import EMA_1_PD, WS_SUM, SMA
 from .maths import MAX, ABS
 from .nb import fill_notna
@@ -11,9 +11,9 @@ from .reference import HHV, LLV, MA, REF, SUM, TR
 from .statistics import AVEDEV
 from .utils import np_to_pd
 
-
 _ta1d = ta.init(mode=1, skipna=False)
 _ta2d = ta.init(mode=2, skipna=False)
+
 
 def ATR(high, low, close, timeperiod=14):
     """ATR真实波幅N日平均

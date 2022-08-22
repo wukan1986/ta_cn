@@ -3,10 +3,10 @@ import os
 
 if os.environ.get('TA_CN_MODE', 'LONG') == 'WIDE':
     print('导入宽表函数')
-    from ta_cn.imports.wq_wide import *
+    from ..imports.wq_wide import *
 else:
     print('导入长表函数')
-    from ta_cn.imports.wq_long import *
+    from ..imports.wq_long import *
 
 
 def alpha_001(close, returns, **kwargs):

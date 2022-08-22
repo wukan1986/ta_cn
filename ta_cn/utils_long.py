@@ -5,7 +5,7 @@ from functools import wraps
 
 import pandas as pd
 
-from ta_cn.utils import to_pd
+from .utils import to_pd
 
 
 def series_groupby_apply(func, by='asset', to_kwargs={1: 'timeperiod'}, dropna=True):

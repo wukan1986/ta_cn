@@ -1,9 +1,9 @@
 import pandas as _pd
 
-import ta_cn.talib as ta
-from ta_cn.talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
+from . import talib as ta
 from .ewm_nb import ewm_mean
 from .nb import ma_1st, sum_1st
+from .talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 from .utils import np_to_pd
 
 """

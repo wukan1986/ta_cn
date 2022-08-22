@@ -4,7 +4,7 @@
 国泰君安－基于短周期价量特征的多因子选股
 """
 
-from ta_cn.imports import wide as W
+from ..imports import wide as W
 
 CORR = W.CORREL
 REGSLOPE = W.LINEARREG_SLOPE

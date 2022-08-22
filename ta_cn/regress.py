@@ -4,8 +4,8 @@ import numba
 import numpy as _np
 import pandas as _pd
 
-import ta_cn.bn_wraps as _bn
-from ta_cn import talib as ta
+from . import bn_wraps as _bn
+from . import talib as ta
 from .nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb
 from .utils import pd_to_np
 

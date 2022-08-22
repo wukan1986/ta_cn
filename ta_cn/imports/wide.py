@@ -6,7 +6,7 @@
 
 !!!函数太多，又想要智能提示，只能手工按需补充
 """
-import ta_cn.talib as ta
+from .. import talib as ta
 from ..alpha import CUMPROD
 from ..alpha import FILTER
 from ..alpha import LessThan

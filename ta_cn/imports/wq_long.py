@@ -6,8 +6,8 @@
 1. 部分函数即有全小写，又有大小写混合
 2. 很多参数应当是整数，但输入是小数，不得不做修正
 """
-from ta_cn.imports import long as L
-from ta_cn.utils import round_a_i, round_a_a_i
+from ..imports import long as L
+from ..utils import round_a_i, round_a_a_i
 
 correlation = round_a_a_i(L.CORREL)
 decay_linear = round_a_i(L.WMA)
@@ -38,7 +38,6 @@ covariance = round_a_a_i(L.COVAR)
 stddev = round_a_i(L.STDP)  # 引入的是全体标准差
 
 indneutralize = L.indneutralize
-
 
 # 部分别名，这样官方公式可以减少改动
 Ts_Rank = ts_rank

@@ -3,10 +3,10 @@ import os
 
 if os.environ.get('TA_CN_MODE', 'LONG') == 'WIDE':
     print('导入宽表函数')
-    from ta_cn.imports.gtja_wide import *
+    from ..imports.gtja_wide import *
 else:
     print('导入长表函数')
-    from ta_cn.imports.gtja_long import *
+    from ..imports.gtja_long import *
 
 
 def alpha_001(OPEN, CLOSE, VOLUME, **kwargs):

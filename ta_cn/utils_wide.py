@@ -5,7 +5,7 @@ from functools import wraps
 
 import numpy as np
 
-from ta_cn.utils import pd_to_np
+from .utils import pd_to_np
 
 
 def get_uint_type(i):

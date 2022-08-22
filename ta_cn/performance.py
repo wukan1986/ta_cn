@@ -29,7 +29,6 @@
 import warnings
 from typing import Union
 
-import numpy as _np
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -216,7 +215,7 @@ def ic(factor, returns, rank=True):
         if rank:
             y = _bn.nanrankdata(y)
             x = _bn.nanrankdata(x)
-        return _np.corrcoef(y, x)[0, 1]
+        return np.corrcoef(y, x)[0, 1]
     else:
         if rank:
             y = _bn.nanrankdata(y, axis=1)
@@ -342,7 +341,5 @@ def turnover(weight, periods=1):
     1  表示被调入
     0  表示不动，可能在池中，也可能在池外
     """
-    w_shift = w.shift(periods)
-    w_diff = w - w_shift  # 老-新
-    # 调出数量/原数量
-    return (w_diff == -1).sum(axis=1) / (w != 0).sum(axis=1)
+    # 调入数量/原数量
+    return (w.diff(periods) == 1).sum(axis=1) / (w != 0).sum(axis=1)
