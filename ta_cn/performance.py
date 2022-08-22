@@ -26,12 +26,15 @@
 3. 这些平台都当成算法交易执行工具进行回测
 
 """
-
+import warnings
 from typing import Union
 
+import numpy as _np
 import numpy as np
 import pandas as pd
+from scipy import stats
 
+from . import bn_wraps as _bn
 from .utils import np_to_pd
 
 
@@ -189,3 +192,157 @@ def weighted_index(prices, weights):
     returns = to_returns(prices, False).fillna(1)
     weights = weights.div(weights.sum(axis=1), axis=0).fillna(0)
     return returns_cumprod((returns * weights).sum(axis=1), False)
+
+
+def ic(factor, returns, rank=True):
+    """IC信息系数(Information Coefficient)
+
+    输入一维时，输出标量
+    输入二维时，输出一维序列，本质上是横截面上计算IC
+
+    Parameters
+    ----------
+    factor
+    returns
+    rank
+
+    Returns
+    -------
+
+    """
+    x = returns
+    y = factor
+    if y.ndim == 1:
+        if rank:
+            y = _bn.nanrankdata(y)
+            x = _bn.nanrankdata(x)
+        return _np.corrcoef(y, x)[0, 1]
+    else:
+        if rank:
+            y = _bn.nanrankdata(y, axis=1)
+            x = _bn.nanrankdata(x, axis=1)
+
+        up = _bn.nanmean(x * y, axis=1) - _bn.nanmean(x, axis=1) * _bn.nanmean(y, axis=1)
+        down = _bn.nanstd(x, axis=1) * _bn.nanstd(y, axis=1)
+        return up / down
+
+
+def ir(ics):
+    """IR即信息比率（Information Ratio）
+
+    IR有两种：
+
+    - 因子IR: IC均值/IC标准差
+    - 策略IR: 超额收益/超额收益波动率
+
+    Parameters
+    ----------
+    ics: array_like
+        IC序列
+
+    Returns
+    -------
+    double
+        IR值
+
+    Examples
+    --------
+
+
+    """
+    return _bn.nanmean(ics) / _bn.nanstd(ics)
+
+
+def ic_decay(factor, returns, rank=True, lag=[1, 2, 3, 4]):
+    """IC衰减
+
+    Parameters
+    ----------
+    factor: pd.DataFrame
+        当期因子
+    returns: pd.DataFrame
+        下期收益。请认真考虑是否要shift
+    rank: str
+        - spearman: 相当于 ``rank(pct=False)`` ,然后 `pearson`
+        - pearson:
+    lag: list
+        延后期数
+
+        - 0: 表示当期因子，当期收益。使用了未来数据，不合法
+        - 1: 表示当期因子，下一期收益
+
+    Returns
+    -------
+    pd.DataFrame
+        IC衰减值
+
+    Examples
+    --------
+    >>> ics = ic_decay(factor, returns, lag=range(1, 5))
+    >>> ics.mean().plot.bar()
+
+    """
+
+    ics = {}
+    for i in lag:
+        if i == 0:
+            warnings.warn('0：表示当期因子，当期收益。使用了未来数据')
+        ics[i] = ic(factor, returns.shift(1 - i), rank)
+    return pd.DataFrame(ics)
+
+
+def ttest(ics):
+    """t检验。
+
+    Parameters
+    ----------
+    ics: 1d array
+        一维序列
+
+    Returns
+    -------
+
+    """
+    t_stat, p_value = stats.ttest_1samp(ics, 0, nan_policy='omit')
+    return t_stat, p_value
+
+
+def turnover(weight, periods=1):
+    """滚动换手率=(老仓-新仓)/老仓
+
+    Parameters
+    ----------
+    weight : array_like
+        每股仓位
+    periods : int, optional
+        滚动计算周期，默认值为1，即为计算每条截面数据的滚动换手率
+
+    Returns
+    -------
+    array_like:
+        滚动换手率
+
+    References
+    ----------
+    https://github.com/quantopian/alphalens/blob/master/alphalens/performance.py#L568
+
+    """
+    weight = np_to_pd(weight)
+    # nan与0都要标记成0，其它的都要标记成1
+    w = (weight.fillna(0) != 0).astype(int)
+
+    """
+    a,b,c,d,e
+    1,1,0,0,0
+    0,1,0,1,1
+
+    -1,0,0,1,1
+    
+    -1 表示被调出
+    1  表示被调入
+    0  表示不动，可能在池中，也可能在池外
+    """
+    w_shift = w.shift(periods)
+    w_diff = w - w_shift  # 老-新
+    # 调出数量/原数量
+    return (w_diff == -1).sum(axis=1) / (w != 0).sum(axis=1)
