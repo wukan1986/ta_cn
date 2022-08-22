@@ -147,7 +147,7 @@ def log_returns_exp(returns: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series,
     return np.exp(returns)
 
 
-def equal_weighted_index(prices: Union[pd.Series, pd.DataFrame]) -> pd.Series:
+def equal_weighted_index(prices=None, returns=None, need_one=False) -> pd.Series:
     """等权重指数
 
     将多条价格或净值等权重合成一条指数
@@ -161,6 +161,9 @@ def equal_weighted_index(prices: Union[pd.Series, pd.DataFrame]) -> pd.Series:
     ----------
     prices
         价格或净值
+    returns
+    need_one
+
 
     Returns
     -------
@@ -168,12 +171,14 @@ def equal_weighted_index(prices: Union[pd.Series, pd.DataFrame]) -> pd.Series:
         指数或合成净值
 
     """
+    if returns is None:
+        returns = to_returns(prices, need_one)
     # 不进行加1减1的操作，加快速度
     # 虽然是累乘，但由于只计算一列，所以速度还能接受
-    return returns_cumprod(to_returns(prices, False).mean(axis=1), False)
+    return returns_cumprod(returns.mean(axis=1), need_one)
 
 
-def weighted_index(prices, weights):
+def weighted_index(weights, prices=None, returns=None, need_one=False):
     """加权指数
 
     Parameters
@@ -182,15 +187,28 @@ def weighted_index(prices, weights):
         价格
     weights
         权重
+    returns
+    need_one
+
 
     Returns
     -------
     加权指数
 
     """
-    returns = to_returns(prices, False).fillna(1)
+    if returns is None:
+        returns = to_returns(prices, need_one)
+    else:
+        returns = np_to_pd(returns)
+
+    if need_one:
+        returns = returns.fillna(0)
+    else:
+        returns = returns.fillna(1)
+
+    weights = np_to_pd(weights)
     weights = weights.div(weights.sum(axis=1), axis=0).fillna(0)
-    return returns_cumprod((returns * weights).sum(axis=1), False)
+    return returns_cumprod((returns * weights).sum(axis=1), need_one)
 
 
 def ic(factor, returns, rank=True):
@@ -281,6 +299,7 @@ def ic_decay(factor, returns, rank=True, lag=[1, 2, 3, 4]):
     >>> ics.mean().plot.bar()
 
     """
+    returns = np_to_pd(returns)
 
     ics = {}
     for i in lag:

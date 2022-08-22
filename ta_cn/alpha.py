@@ -21,9 +21,8 @@ def TS_RANK(real, timeperiod: int):
     return (t1 + 1.) / 2.
 
 
-def RANK(real):
+def RANK(real, pct: bool = True):
     """横截面rank"""
-    pct: bool = True
 
     if real.ndim == 2:
         t1 = _bn.nanrankdata(real, axis=1)
