@@ -58,13 +58,14 @@ def to_log_returns(prices: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, p
     return np.log(prices / prices.shift(1))
 
 
-def to_returns(prices: Union[pd.Series, pd.DataFrame], sub_one=True) -> Union[pd.Series, pd.DataFrame]:
+def to_simple_returns(prices: Union[pd.Series, pd.DataFrame], sub_one=True) -> Union[pd.Series, pd.DataFrame]:
     """简单收益率
 
     Parameters
     ----------
     prices
     sub_one
+        是否要在内部减1。减1是收益率，不减是价格比
 
     Returns
     -------
@@ -100,14 +101,15 @@ def log_returns_cumsum(returns: Union[pd.Series, pd.DataFrame]) -> Union[pd.Seri
     return returns.fillna(0.0).cumsum()
 
 
-def returns_cumprod(returns: Union[pd.Series, pd.DataFrame], add_one=True) -> Union[pd.Series, pd.DataFrame]:
+def simple_returns_cumprod(returns: Union[pd.Series, pd.DataFrame], add_one=True) -> Union[pd.Series, pd.DataFrame]:
     """简单收益率累乘
 
     Parameters
     ----------
     returns
-        简单收益率
+        简单收益率或价格比
     add_one
+        是否内存加1。输入是收益率，需要加1，输入是价格比，可省去加1
 
     Returns
     -------
@@ -121,7 +123,7 @@ def returns_cumprod(returns: Union[pd.Series, pd.DataFrame], add_one=True) -> Un
     """
     returns = np_to_pd(returns)
     if add_one:
-        # 简单收益率(减一过于的值)
+        # 简单收益率(减一后的值)
         return returns.add(1., fill_value=0.0).cumprod()
     else:
         # 价格比(nan需要改成1) 1表示P1/P1
@@ -134,7 +136,9 @@ def log_returns_exp(returns: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series,
     to_returns(df)+1 = returns_exp(to_log_returns(df))
 
     -1 = log(exp(-1))
-    1 = exp(log(1)) 。 log定义域>0
+    1 = exp(log(1))
+
+    log定义域>0
 
     Parameters
     ----------
@@ -162,7 +166,9 @@ def equal_weighted_index(prices=None, returns=None, need_one=False) -> pd.Series
     prices
         价格或净值
     returns
+        收益率或价格比
     need_one
+        收益率是否要加1。如果已经是比值了就不需
 
 
     Returns
@@ -172,10 +178,10 @@ def equal_weighted_index(prices=None, returns=None, need_one=False) -> pd.Series
 
     """
     if returns is None:
-        returns = to_returns(prices, need_one)
+        returns = to_simple_returns(prices, need_one)
     # 不进行加1减1的操作，加快速度
     # 虽然是累乘，但由于只计算一列，所以速度还能接受
-    return returns_cumprod(returns.mean(axis=1), need_one)
+    return simple_returns_cumprod(returns.mean(axis=1), need_one)
 
 
 def weighted_index(weights, prices=None, returns=None, need_one=False):
@@ -188,7 +194,9 @@ def weighted_index(weights, prices=None, returns=None, need_one=False):
     weights
         权重
     returns
+        收益率或价格比
     need_one
+        收益率是否要加1。如果已经是比值了就不需
 
 
     Returns
@@ -197,7 +205,7 @@ def weighted_index(weights, prices=None, returns=None, need_one=False):
 
     """
     if returns is None:
-        returns = to_returns(prices, need_one)
+        returns = to_simple_returns(prices, need_one)
     else:
         returns = np_to_pd(returns)
 
@@ -207,8 +215,8 @@ def weighted_index(weights, prices=None, returns=None, need_one=False):
         returns = returns.fillna(1)
 
     weights = np_to_pd(weights)
-    weights = weights.div(weights.sum(axis=1), axis=0).fillna(0)
-    return returns_cumprod((returns * weights).sum(axis=1), need_one)
+    weights = weights.div(weights.abs().sum(axis=1), axis=0).fillna(0)
+    return simple_returns_cumprod((returns * weights).sum(axis=1), need_one)
 
 
 def ic(factor, returns, rank=True):
