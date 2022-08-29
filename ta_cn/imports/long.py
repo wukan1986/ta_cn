@@ -7,6 +7,7 @@
 !!!函数太多，又想要智能提示，只能手工按需补充
 """
 from .. import talib as ta
+from ..aggregate import A_div_AB
 from ..alpha import CUMPROD
 from ..alpha import FILTER
 from ..alpha import LessThan
@@ -99,3 +100,8 @@ STDP = series_groupby_apply(STDP, by=BY_ASSET)
 
 # 行业中性。demean法
 indneutralize = dataframe_groupby_apply(demean, by=BY_GROUP, to_df=[0, 'group'], to_kwargs={})
+
+# 可用于 全部市场宽度
+A_div_AB_1 = series_groupby_apply(A_div_AB, by=BY_DATE, to_kwargs={})
+# 可用于 板块市场宽度
+A_div_AB_2 = dataframe_groupby_apply(A_div_AB, by=BY_GROUP, to_df=[0, 'group'], to_kwargs={})

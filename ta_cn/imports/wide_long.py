@@ -1,5 +1,5 @@
 """宽表不好处理的算子，转成长表进行处理再还原"""
-from .long import indneutralize as _indneutralize
+from .long import indneutralize as _indneutralize, BY_DATE, BY_ASSET
 from ..utils import np_to_pd
 from ..utils_wide import get_raw_arr, WArr
 
@@ -13,8 +13,8 @@ def indneutralize(x, group):
     x1 = np_to_pd(get_raw_arr(x)).stack(dropna=False)
     g1 = np_to_pd(get_raw_arr(group)).stack(dropna=False)
 
-    x1.index.names = ['date', 'asset']
-    g1.index.names = ['date', 'asset']
+    x1.index.names = [BY_DATE, BY_ASSET]
+    g1.index.names = [BY_DATE, BY_ASSET]
 
     r = _indneutralize(x1, g1)
 
