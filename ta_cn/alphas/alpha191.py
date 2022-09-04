@@ -1218,10 +1218,11 @@ def alpha_162(CLOSE, **kwargs):
 E-DELAY(CLOSE,1),0),12,1)/SMA(ABS(CLOSE-DELAY(CLOSE,1)),12,1)*100,12))/(MAX(SMA(MAX(CLOSE-DELAY(C
 LOSE,1),0),12,1)/SMA(ABS(CLOSE-DELAY(CLOSE,1)),12,1)*100,12)-MIN(SMA(MAX(CLOSE-DELAY(CLOSE,1),0),12,
 1)/SMA(ABS(CLOSE-DELAY(CLOSE,1)),12,1)*100,12))"""
+    """将MIN改成了TSMIN, MAX改成了TSMAX"""
     t0 = CLOSE - DELAY(CLOSE, 1)
     t1 = SMA(MAX(t0, 0), 12, 1) / SMA(ABS(t0), 12, 1) * 100
-    t2 = MIN(t1, 12)
-    t3 = MAX(t1, 12)
+    t2 = TSMIN(t1, 12)
+    t3 = TSMAX(t1, 12)
     return (t1 - t2) / (t3 - t2)
 
 
