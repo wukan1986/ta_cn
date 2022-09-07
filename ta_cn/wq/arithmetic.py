@@ -5,6 +5,8 @@ from functools import reduce
 
 import numpy as np
 
+from .time_series import ts_delta
+
 
 def abs(x):
     """Absolute value of x"""
@@ -21,11 +23,10 @@ def add(*args, filter=False):
         y = np.ma.masked_array(y, mask=x.mask)
         return (x + y).filled(np.nan)
 
-    if filter:
-        with np.errstate(over='ignore'):
-            return reduce(_add, args)
-    else:
-        return reduce(np.add, args)
+    func = _add if filter else np.add
+
+    with np.errstate(over='ignore'):
+        return reduce(func, args)
 
 
 def ceiling(x):
@@ -68,7 +69,7 @@ def log(x):
 
 def log_diff(x):
     """Returns log(current value of input or x[t] ) - log(previous value of input or x[t-1])."""
-    return x
+    return ts_delta(log(x), 1)
 
 
 def max(*args):
@@ -91,11 +92,10 @@ def multiply(*args, filter=False):
         y = np.ma.masked_array(y, mask=x.mask)
         return (x * y).filled(np.nan)
 
-    if filter:
-        with np.errstate(over='ignore'):
-            return reduce(_multiply, args)
-    else:
-        return reduce(np.multiply, args)
+    func = _multiply if filter else np.multiply
+
+    with np.errstate(over='ignore'):
+        return reduce(func, args)
 
 
 def nan_mask(x, y):
@@ -189,11 +189,10 @@ def subtract(*args, filter=False):
         y = np.ma.masked_array(y, mask=x.mask)
         return (x - y).filled(np.nan)
 
-    if filter:
-        with np.errstate(over='ignore'):
-            return reduce(_subtract, args)
-    else:
-        return reduce(np.subtract, args)
+    func = _subtract if filter else np.subtract
+
+    with np.errstate(over='ignore'):
+        return reduce(func, args)
 
 
 def to_nan(x, value=0, reverse=False):
