@@ -1,7 +1,16 @@
 """
 Time Series Operators
 """
+import numba
+import numpy as np
+
 from .. import bn_wraps as bn
+from .. import talib as ta
+from ..nb import numpy_rolling_apply, _rolling_func_1_nb
+from ..utils import pd_to_np
+
+_ta1d = ta.init(mode=1, skipna=False)
+_ta2d = ta.init(mode=2, skipna=False)
 
 
 def days_from_last_change(x):
@@ -46,6 +55,7 @@ def last_diff_value(x, d):
 
 def ts_arg_max(x, d):
     """Returns the relative index of the min value in the time series for the past d days. If the current day has the min value for the past d days, it returns 0. If previous day has the min value for the past d days, it returns 1."""
+    # 文档中的数据其实要[::-1]
     return bn.move_argmax(x, window=d, axis=0)
 
 
@@ -56,7 +66,16 @@ def ts_arg_min(x, d):
 
 def ts_av_diff(x, d):
     """Returns x - tsmean(x, d), but deals with NaNs carefully. That is NaNs are ignored during mean computation."""
-    return x - ts_mean(x, d)
+
+    def _ts_mean(x, d):
+        """Returns average value of x for the past d days."""
+        # 这里为了跳过空值
+        t1 = bn.move_sum(np.nan_to_num(x), window=d, axis=0)
+        t2 = bn.move_sum(~np.isnan(x), window=d, axis=0)
+        return t1 / t2
+
+    # 平均数的计算要跳过NaN
+    return x - _ts_mean(x, d)
 
 
 def ts_backfill(x, lookback=10, k=1, ignore="NAN"):
@@ -81,7 +100,7 @@ def ts_co_skewness(y, x, d):
 
 def ts_count_nans(x, d):
     """Returns the number of NaN values in x for the past d days"""
-    pass
+    return bn.move_sum(np.isnan(x), window=d, axis=0)
 
 
 def ts_covariance(y, x, d):
@@ -96,12 +115,27 @@ def ts_decay_exp_window(x, d, factor=0.5):
 
 def ts_decay_linear(x, d, dense=False):
     """Returns the linear decay on x for the past d days. Dense parameter=false means operator works in sparse mode and we treat NaN as 0. In dense mode we do not."""
-    pass
+    # TODO: 这样写是否合适？
+    if dense:
+        return _ta2d.WMA(x, timeperiod=d)
+    else:
+        return _ta2d.WMA(np.nan_to_num(x), timeperiod=d)
 
 
 def ts_delay(x, d):
     """Returns x value d days ago"""
-    pass
+    if d == 0 or np.isnan(d):
+        # 该不该复制呢？
+        return x
+    arr = np.empty_like(d)
+    if d > 0:
+        arr[:d] = np.nan
+        arr[d:] = x[:-d]
+    if d < 0:
+        # 为了复刻shift(-n)
+        arr[d:] = np.nan
+        arr[:d] = x[-d:]
+    return arr
 
 
 def ts_delta(x, d):
@@ -161,7 +195,17 @@ def ts_min_max_diff(x, d, f=0.5):
 
 def ts_moment(x, d, k=0):
     """Returns K-th central moment of x for the past d days."""
-    pass
+
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _moment_nb(arr, k):
+        """中心矩阵"""
+        return np.nanmean((arr - np.nanmean(arr)) ** k)
+
+    if k == 2:
+        # 结果是一样的，使用计算更快的版本
+        return bn.move_var(x, window=d, axis=0)
+    # 计算K阶中心矩
+    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _moment_nb, k)
 
 
 def ts_partial_corr(x, y, z, d):
@@ -181,7 +225,12 @@ def ts_poly_regression(y, x, d, k=1):
 
 def ts_product(x, d):
     """Returns product of x for the past d days"""
-    pass
+
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _product_nb(a):
+        return np.nanprod(a)
+
+    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _product_nb)
 
 
 def ts_rank(x, d, constant=0):
@@ -197,14 +246,19 @@ def ts_regression(y, x, d, lag=0, rettype=0):
 
 def ts_returns(x, d, mode=1):
     """Returns the relative change in the x value ."""
-    pass
+    t1 = ts_delay(x, d)
+    if mode == 1:
+        return (x - t1) / t1
+    if mode == 2:
+        return (x - t1) / ((x + t1) / 2)
 
 
 def ts_scale(x, d, constant=0):
     """Returns (x – ts_min(x, d)) / (ts_max(x, d) – ts_min(x, d)) + constant
 This operator is similar to scale down operator but acts in time series space."""
     t1 = ts_min(x, d)
-    return (x - t1) / (ts_max(x, d) - t1) + constant
+    t2 = ts_max(x, d)
+    return (x - t1) / (t2 - t1) + constant
 
 
 def ts_skewness(x, d):
@@ -249,7 +303,7 @@ def ts_entropy(x, d):
 
 def ts_vector_neut(x, y, d):
     """Returns x- ts_vector_proj(x,y,d)"""
-    pass
+    return x - ts_vector_proj(x, y, d)
 
 
 def ts_vector_proj(x, y, d):
@@ -263,5 +317,5 @@ def ts_rank_gmean_amean_diff(input1, input2, input3, d):
 
 
 def ts_quantile(x, d, driver="gaussian"):
-    """"""
+    """It calculates ts_rank and apply to its value an inverse cumulative density function from driver distribution. Possible values of driver (optional ) are "gaussian", "uniform", "cauchy" distribution where "gaussian" is the default."""
     pass

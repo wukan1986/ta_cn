@@ -41,32 +41,35 @@ def keep(x, f, period=5):
 
 def left_tail(x, maximum=0):
     """NaN everything greater than maximum, maximum should be constant."""
-    pass
+    return np.where(x > maximum, np.nan, x)
 
 
 def pasteurize(x):
     """Set to NaN if x is INF or if the underlying instrument is not in the Alpha universe"""
-    pass
+    # TODO: 不在票池中的的功能无法表示
+    x = x.copy()
+    x[np.isinf(x)] = np.nan
+    return x
 
 
 def right_tail(x, minimum=0):
     """NaN everything less than minimum, minimum should be constant."""
-    pass
+    return np.where(x < minimum, np.nan, x)
 
 
 def sigmoid(x):
     """Returns 1 / (1 + exp(-x))"""
-    pass
+    return 1 / (1 + np.exp(-x))
 
 
 def tail(x, lower=0, upper=0, newval=0):
     """If (x > lower AND x < upper) return newval, else return x. Lower, upper, newval should be constants. """
-    pass
+    return np.where((x > lower) & (x < upper), newval, x)
 
 
 def tanh(x):
     """Hyperbolic tangent of x"""
-    pass
+    return np.tanh(x)
 
 
 def trade_when(x, y, z):
