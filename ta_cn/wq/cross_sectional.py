@@ -12,16 +12,13 @@ def normalize(x, useStd=False, limit=0.0):
     axis = x.ndim - 1
     t1 = np.nanmean(x, axis=axis, keepdims=True)
     if useStd:
-        # 这里用ddof=1才能与文档数值对应上
+        # 这里用ddof=1才能与文档示例的数值对应上
         t2 = np.nanstd(x, axis=axis, keepdims=True, ddof=1)
         r = (x - t1) / t2
     else:
         r = (x - t1)
 
-    if limit != 0:
-        return np.clip(r, -limit, limit)
-    else:
-        return r
+    return r if limit == 0 else np.clip(r, -limit, limit)
 
 
 def one_side(x, side='long'):
@@ -41,9 +38,8 @@ def quantile(x, driver='gaussian', sigma=1.0):
     pass
 
 
-def rank(x, rate=2):
+def rank(x, rate=2, pct=True):
     """Ranks the input among all the instruments and returns an equally distributed number between 0.0 and 1.0. For precise sort, use the rate as 0."""
-    pct = True
     axis = x.ndim - 1
     t1 = bn.nanrankdata(x, axis=axis)
 
@@ -133,6 +129,12 @@ def zscore(x):
     return (x - _mean) / _std
 
 
-def rank_gmean_amean_diff(input1, input2, input3, ):
+def rank_gmean_amean_diff(*args):
     """Operator returns difference of geometric mean and arithmetic mean of cross sectional rank of inputs."""
-    pass
+    # TODO: 输入输出的形式还没搞清，核心功能已经实现先放这
+    def _gmean(x):
+        return np.exp(np.nanmean(np.log(x)))
+
+    inputs = rank(np.array(args))
+    inputs = np.array(args)
+    return _gmean(inputs) - np.nanmean(inputs)

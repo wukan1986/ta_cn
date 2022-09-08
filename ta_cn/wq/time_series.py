@@ -6,7 +6,7 @@ import numpy as np
 
 from .. import bn_wraps as bn
 from .. import talib as ta
-from ..nb import numpy_rolling_apply, _rolling_func_1_nb
+from ..nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb, _rolling_func_3_nb
 from ..utils import pd_to_np
 
 _ta1d = ta.init(mode=1, skipna=False)
@@ -45,7 +45,10 @@ def jump_decay(x, d, sensitivity=0.5, force=0.1):
 
 def kth_element(x, d, k=1):
     """Returns K-th value of input by looking through lookback days. This operator can be used to backfill missing data if k=1"""
-    pass
+    # 由于原文档中数据需要[::-1]，所以backfill其实是ffill
+    # ignore参数用来计数时跳过，文档不对应
+    # TODO:
+    return df.rolling(d).nth(k)
 
 
 def last_diff_value(x, d):
@@ -85,17 +88,44 @@ def ts_backfill(x, lookback=10, k=1, ignore="NAN"):
 
 def ts_co_kurtosis(y, x, d):
     """Returns cokurtosis of y and x for the past d days."""
-    pass
+
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _co_kurtosis_nb(arr0, arr1):
+        t1 = arr0 - np.nanmean(arr0)
+        t2 = arr1 - np.nanmean(arr1)
+        t3 = np.nanstd(arr0)
+        t4 = np.nanstd(arr1)
+        return np.nanmean(t1 * (t2 ** 3)) / (t3 * (t4 ** 3))
+
+    return numpy_rolling_apply([pd_to_np(y), pd_to_np(x)],
+                               d, _rolling_func_2_nb, _co_kurtosis_nb)
 
 
 def ts_corr(x, y, d):
     """Returns correlation of x and y for the past d days"""
-    pass
+
+    # return _ta2d.CORREL(x, y, timeperiod=d)
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _corr_nb(arr0, arr1):
+        return np.corrcoef(arr0, arr1)[0, 1]
+
+    return numpy_rolling_apply([pd_to_np(x), pd_to_np(y)],
+                               d, _rolling_func_2_nb, _corr_nb)
 
 
 def ts_co_skewness(y, x, d):
     """Returns coskewness of y and x for the past d days."""
-    pass
+
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _co_skewness_nb(arr0, arr1):
+        t1 = arr0 - np.nanmean(arr0)
+        t2 = arr1 - np.nanmean(arr1)
+        t3 = np.nanstd(arr0)
+        t4 = np.nanstd(arr1)
+        return np.nanmean(t1 * (t2 ** 2)) / (t3 * (t4 ** 2))
+
+    return numpy_rolling_apply([pd_to_np(y), pd_to_np(x)],
+                               d, _rolling_func_2_nb, _co_skewness_nb)
 
 
 def ts_count_nans(x, d):
@@ -105,7 +135,14 @@ def ts_count_nans(x, d):
 
 def ts_covariance(y, x, d):
     """Returns covariance of y and x for the past d days"""
-    pass
+
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _covariance_nb(arr0, arr1):
+        """协方差矩阵"""
+        return np.cov(arr0, arr1)[0, 1]
+
+    return numpy_rolling_apply([pd_to_np(y), pd_to_np(x)],
+                               d, _rolling_func_2_nb, _covariance_nb)
 
 
 def ts_decay_exp_window(x, d, factor=0.5):
@@ -150,7 +187,14 @@ def ts_ir(x, d):
 
 def ts_kurtosis(x, d):
     """Returns kurtosis of x for the last d days."""
-    pass
+
+    # # 与scipy.stats.kurtosis结果相同，与pd.rolling.kurt结果不同, bias的问题
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _kurtosis_nb(arr):
+        t1 = arr - np.nanmean(arr)
+        return np.nanmean(t1 ** 4) / (np.nanmean(t1 ** 2) ** 2)
+
+    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _kurtosis_nb) - 3
 
 
 def ts_max(x, d):
@@ -210,12 +254,32 @@ def ts_moment(x, d, k=0):
 
 def ts_partial_corr(x, y, z, d):
     """Returns partial correlation of x, y, z for the past d days."""
-    pass
+
+    # TODO: 不知道是否写正确，需要check
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _partial_corr_nb(arr0, arr1, arr2):
+        c = np.corrcoef(np.vstack((arr0, arr1, arr2)))
+        pxy = c[0, 1]
+        pxz = c[0, 2]
+        pyz = c[1, 2]
+        t1 = pxy - pxz * pyz
+        t2 = (1 - pxz ** 2) ** 0.5
+        t3 = (1 - pyz ** 2) ** 0.5
+        return t1 / (t2 * t3)
+
+    return numpy_rolling_apply([pd_to_np(x), pd_to_np(y), pd_to_np(z)],
+                               d, _rolling_func_3_nb, _partial_corr_nb)
 
 
 def ts_percentage(x, d, percentage=0.5):
     """Returns percentile value of x for the past d days."""
-    pass
+
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _percentage_nb(a, percentage):
+        return np.percentile(a, percentage)
+
+    # 注意内部的参数范围是0~100
+    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _percentage_nb, percentage * 100)
 
 
 def ts_poly_regression(y, x, d, k=1):
@@ -263,7 +327,14 @@ This operator is similar to scale down operator but acts in time series space.""
 
 def ts_skewness(x, d):
     """Return skewness of x for the past d days."""
-    pass
+
+    # 与scipy.stats.skew结果相同，与pd.rolling.skew结果不同, bias的问题
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _skewness_nb(arr):
+        t1 = arr - np.nanmean(arr)
+        return np.nanmean(t1 ** 3) / (np.nanmean(t1 ** 2) ** 1.5)
+
+    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _skewness_nb)
 
 
 def ts_std_dev(x, d):
@@ -273,7 +344,8 @@ def ts_std_dev(x, d):
 
 def ts_step(d):
     """Returns days' counter"""
-    pass
+    # TODO: 这种如何应用是个问题
+    return np.arange(d)
 
 
 def ts_sum(x, d):
@@ -288,7 +360,19 @@ def ts_theilsen(x, y, d):
 
 def ts_triple_corr(x, y, z, d):
     """Returns triple correlation of x, y, z for the past d days."""
-    pass
+
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _triple_corr_nb(arr0, arr1, arr2):
+        t1 = arr0 - np.nanmean(arr0)
+        t2 = arr1 - np.nanmean(arr1)
+        t3 = arr2 - np.nanmean(arr2)
+        t4 = np.nanstd(arr0)
+        t5 = np.nanstd(arr1)
+        t6 = np.nanstd(arr2)
+        return np.nanmean(t1 * t2 * t3) / (t4 * t5 * t6)
+
+    return numpy_rolling_apply([pd_to_np(x), pd_to_np(y), pd_to_np(z)],
+                               d, _rolling_func_3_nb, _triple_corr_nb)
 
 
 def ts_zscore(x, d):
@@ -318,4 +402,9 @@ def ts_rank_gmean_amean_diff(input1, input2, input3, d):
 
 def ts_quantile(x, d, driver="gaussian"):
     """It calculates ts_rank and apply to its value an inverse cumulative density function from driver distribution. Possible values of driver (optional ) are "gaussian", "uniform", "cauchy" distribution where "gaussian" is the default."""
-    pass
+    # 与ts_percentage区别是什么，缺失一个参数是什么？
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _quantile_nb(a, q):
+        return np.quantile(a, q)
+
+    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _quantile_nb, 0.5)

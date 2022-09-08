@@ -208,6 +208,40 @@ def _cov_nb(arr0, arr1):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
+def _rolling_func_3_nb(arr0, arr1, arr2, out, timeperiod, func, *args):
+    """滚动函数，在二维或三维数上遍历，三组输入
+
+    Parameters
+    ----------
+    arr0:
+        输入。二维或三维
+    out:
+        输出。一维或二维。降了一个维度
+    window: int
+        窗口长度
+    func:
+        单向量处理函数
+    args:
+        func的位置参数
+
+    Returns
+    -------
+    np.ndarray
+        一维或二维数组
+
+    """
+    if arr0.ndim == 3:
+        for i, (aa, bb, cc) in enumerate(zip(arr0, arr1, arr2)):
+            for j, (a, b, c) in enumerate(zip(aa, bb, cc)):
+                out[i + timeperiod - 1, j] = func(a, b, c, *args)
+    elif arr0.ndim == 2:
+        for i, (a, b, c) in enumerate(zip(arr0, arr1, arr2)):
+            out[i + timeperiod - 1] = func(a, b, c, *args)
+
+    return out
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
 def _rolling_func_2_nb(arr0, arr1, out, timeperiod, func, *args):
     """滚动函数，在二维或三维数上遍历，二组输入
 
