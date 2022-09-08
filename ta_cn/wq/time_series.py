@@ -164,7 +164,7 @@ def ts_delay(x, d):
     if d == 0 or np.isnan(d):
         # 该不该复制呢？
         return x
-    arr = np.empty_like(d)
+    arr = np.empty_like(x)
     if d > 0:
         arr[:d] = np.nan
         arr[d:] = x[:-d]
@@ -350,7 +350,11 @@ def ts_step(d):
 
 def ts_sum(x, d):
     """Sum values of x for the past d days."""
-    return bn.move_sum(x, window=d, axis=0)
+    if d > 0:
+        return bn.move_sum(x, window=d, axis=0)
+    else:
+        # 0表示全量累计求和，这是为通达信公式服务
+        return np.cumsum(x, axis=0)
 
 
 def ts_theilsen(x, y, d):
@@ -380,7 +384,7 @@ def ts_zscore(x, d):
     return (x - ts_mean(x, d)) / ts_std_dev(x, d)
 
 
-def ts_entropy(x, d):
+def ts_entropy(x, d, buckets=10):
     """For each instrument, we collect values of input in the past d days and calculate the probability distribution then the information entropy via a histogram as a result."""
     pass
 
@@ -402,6 +406,7 @@ def ts_rank_gmean_amean_diff(input1, input2, input3, d):
 
 def ts_quantile(x, d, driver="gaussian"):
     """It calculates ts_rank and apply to its value an inverse cumulative density function from driver distribution. Possible values of driver (optional ) are "gaussian", "uniform", "cauchy" distribution where "gaussian" is the default."""
+
     # 与ts_percentage区别是什么，缺失一个参数是什么？
     @numba.jit(nopython=True, cache=True, nogil=True)
     def _quantile_nb(a, q):

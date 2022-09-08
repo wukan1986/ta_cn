@@ -18,25 +18,25 @@ RANK = L.RANK
 TSRANK = L.TS_RANK
 LessThan = L.LessThan
 
-IF = L.IF
-ABS = L.ABS
-LOG = L.LN  # 这里是用的自然对数
+IF = L.if_else
+ABS = L.abs
+LOG = L.log  # 这里是用的自然对数
 MAX = L.MAX2
 MIN = L.MIN2
-SIGN = L.SGN
+SIGN = L.sign
 
 SMA = L.SMA
 
 COUNT = L.COUNT
-DELTA = L.DIFF
-TSMAX = L.HHV
-HIGHDAY = L.HHVBARS
-TSMIN = L.LLV
-LOWDAY = L.LLVBARS
-MA = L.MA
-PROD = L.PRODUCT
-DELAY = L.REF
-SUM = L.SUM
+DELTA = L.ts_delta
+TSMAX = L.ts_max
+HIGHDAY = L.ts_arg_max
+TSMIN = L.ts_min
+LOWDAY = L.ts_arg_min
+MA = L.ts_mean
+PROD = L.ts_product
+DELAY = L.ts_delay
+SUM = L.ts_sum
 SUMIF = L.SUMIF  # 注意，SUMIF参数的位置常用的方式不同
 
 REGBETA = L.SLOPE_YX_NB

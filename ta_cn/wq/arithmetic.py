@@ -52,7 +52,8 @@ def floor(x):
 
 def fraction(x):
     """This operator removes the whole number part and returns the remaining fraction part with sign."""
-    return sign(x) * (abs(x) - floor(abs(x)))
+    # return sign(x) * (abs(x) - floor(abs(x)))
+    return sign(x) * (abs(x) % 1.)
 
 
 def inverse(x):

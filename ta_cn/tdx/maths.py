@@ -3,22 +3,22 @@ from functools import reduce
 import numpy as _np
 
 
-def ABS(x):
-    """绝对值"""
-    return _np.abs(x)
+# def ABS(x):
+#     """绝对值"""
+#     return _np.abs(x)
 
 
-def LN(x):
-    """底是e的对数
-
-    0返回-inf。不好看，还是先用where过滤
-    """
-    return _np.log(_np.where(x > 0, x, _np.nan))
-
-
-def LOG(x):
-    """底是10的对数"""
-    return _np.log10(_np.where(x > 0, x, _np.nan))
+# def LN(x):
+#     """底是e的对数
+#
+#     0返回-inf。不好看，还是先用where过滤
+#     """
+#     return _np.log(_np.where(x > 0, x, _np.nan))
+#
+#
+# def LOG(x):
+#     """底是10的对数"""
+#     return _np.log10(_np.where(x > 0, x, _np.nan))
 
 
 def POW(x1, x2):
@@ -96,30 +96,3 @@ def ROUND(a, decimals):
     ROUND(a, decimals=3)
     """
     return _np.round(a, decimals)
-
-
-def SGN(x):
-    """求符号方向
-
-    return (0 < x) * 1 - (x < 0)
-    """
-    return _np.sign(x)
-
-
-if __name__ == '__main__':
-    a = _np.random.rand(10000)
-    a[:20] = _np.nan
-    a[:10] = -10
-    a[:5] = 0
-    b = ABS(a)
-    print(b)
-    b = LN(a)
-    print(b)
-    b = LOG(a)
-    print(b)
-    b = SQRT(a)
-    print(b)
-    b = DIV(a, a)
-    print(b)
-    b = SGN(a)
-    print(b)

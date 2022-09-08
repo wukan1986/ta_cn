@@ -18,25 +18,25 @@ RANK = W.RANK
 TSRANK = W.TS_RANK
 LessThan = W.LessThan
 
-IF = W.IF
-ABS = W.ABS
-LOG = W.LN  # 这里是用的自然对数
+IF = W.if_else
+ABS = W.abs
+LOG = W.log  # 这里是用的自然对数
 MAX = W.MAX2
 MIN = W.MIN2
-SIGN = W.SGN
+SIGN = W.sign
 
 SMA = W.SMA
 
 COUNT = W.COUNT
-DELTA = W.DIFF
-TSMAX = W.HHV
-HIGHDAY = W.HHVBARS
-TSMIN = W.LLV
-LOWDAY = W.LLVBARS
-MA = W.MA
-PROD = W.PRODUCT
-DELAY = W.REF
-SUM = W.SUM
+DELTA = W.ts_delta
+TSMAX = W.ts_max
+HIGHDAY = W.ts_arg_max
+TSMIN = W.ts_min
+LOWDAY = W.ts_arg_min
+MA = W.ts_mean
+PROD = W.ts_product
+DELAY = W.ts_delay
+SUM = W.ts_sum
 SUMIF = W.SUMIF  # 注意，SUMIF参数的位置常用的方式不同
 
 REGBETA = W.SLOPE_YX_NB

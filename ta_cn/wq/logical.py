@@ -16,9 +16,9 @@ def or_(*args):
     return reduce(lambda x, y: np.logical_or(x, y), args)
 
 
-def equal(*args):
+def equal(input1, input2):
     """Returns true if both inputs are same and returns false otherwise"""
-    return reduce(lambda x, y: np.equal(x, y), args)
+    return input1 == input2
 
 
 def negate(input):
@@ -26,9 +26,9 @@ def negate(input):
     return ~input
 
 
-def less(*args):
+def less(input1, input2):
     """If input1 < input2 return true, else return false"""
-    return reduce(lambda x, y: np.less(x, y), args)
+    return input1 - input2 < 0
 
 
 def if_else(input1, input2, input3):

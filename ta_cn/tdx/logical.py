@@ -1,10 +1,8 @@
-from functools import reduce
-
 import numpy as _np
 
-from .nb import numpy_rolling_apply, _rolling_func_1_nb, _last_nb
-from .reference import SUM
-from .utils import np_to_pd, num_to_np, pd_to_np
+from ta_cn.nb import numpy_rolling_apply, _rolling_func_1_nb, _last_nb
+from ta_cn.utils import np_to_pd, num_to_np, pd_to_np
+from ta_cn.wq.time_series import ts_sum as SUM
 
 
 def CROSS(S1, S2):
@@ -16,11 +14,6 @@ def CROSS(S1, S2):
     arr = _np.zeros_like(S1, dtype=bool)
     arr[1:] = (S1 <= S2)[:-1] & (S1 > S2)[1:]
     return arr
-
-
-def IF(condition, T, F):
-    """序列布尔判断"""
-    return _np.where(condition, T, F)
 
 
 def EVERY(real, timeperiod):
@@ -56,10 +49,9 @@ def LAST(real, n, m):
     """
     return numpy_rolling_apply([pd_to_np(real)], n, _rolling_func_1_nb, _last_nb, n, m)
 
-
-def AND(*args):
-    return reduce(lambda x, y: _np.logical_and(x, y), [True] + list(args))
-
-
-def OR(*args):
-    return reduce(lambda x, y: _np.logical_or(x, y), [False] + list(args))
+# def AND(*args):
+#     return reduce(lambda x, y: _np.logical_and(x, y), [True] + list(args))
+#
+#
+# def OR(*args):
+#     return reduce(lambda x, y: _np.logical_or(x, y), [False] + list(args))

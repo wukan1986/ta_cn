@@ -191,11 +191,6 @@ def _bars_since_n_nb(a, n):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
-def _product_nb(a):
-    return _np.nanprod(a)
-
-
-@numba.jit(nopython=True, cache=True, nogil=True)
 def _last_nb(arr, n, m):
     """LAST(X,A,B)，A>B，表示从前A日到前B日一致满足X条件"""
     return _np.all(arr[:n - m])

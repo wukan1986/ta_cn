@@ -6,6 +6,24 @@
 
 !!!函数太多，又想要智能提示，只能手工按需补充
 """
+from ta_cn.tdx.maths import MAX
+from ta_cn.tdx.maths import MIN
+from ta_cn.tdx.reference import COUNT
+from ta_cn.tdx.reference import SUMIF
+from ta_cn.wq.arithmetic import abs
+from ta_cn.wq.arithmetic import log
+from ta_cn.wq.arithmetic import sign
+from ta_cn.wq.arithmetic import signed_power
+from ta_cn.wq.logical import if_else
+from ta_cn.wq.time_series import ts_arg_max
+from ta_cn.wq.time_series import ts_arg_min
+from ta_cn.wq.time_series import ts_delay
+from ta_cn.wq.time_series import ts_delta
+from ta_cn.wq.time_series import ts_max
+from ta_cn.wq.time_series import ts_mean
+from ta_cn.wq.time_series import ts_min
+from ta_cn.wq.time_series import ts_product
+from ta_cn.wq.time_series import ts_sum
 from .. import talib as ta
 from ..aggregate import A_div_AB
 from ..alpha import CUMPROD
@@ -14,26 +32,8 @@ from ..alpha import LessThan
 from ..alpha import RANK
 from ..alpha import TS_RANK
 from ..alpha import scale
-from ..alpha import signedpower
 from ..ema import SMA
-from ..logical import IF
-from ..maths import ABS
-from ..maths import LN
-from ..maths import MAX
-from ..maths import MIN
-from ..maths import SGN
 from ..preprocess import demean
-from ..reference import COUNT
-from ..reference import DIFF
-from ..reference import HHV
-from ..reference import HHVBARS
-from ..reference import LLV
-from ..reference import LLVBARS
-from ..reference import MA
-from ..reference import PRODUCT
-from ..reference import REF
-from ..reference import SUM
-from ..reference import SUMIF
 from ..regress import REGRESI
 from ..regress import SLOPE_YX_NB
 from ..statistics import COVAR
@@ -66,30 +66,30 @@ RANK = series_groupby_apply(RANK, by=BY_DATE, to_kwargs={})
 TS_RANK = series_groupby_apply(TS_RANK, by=BY_ASSET)
 LessThan = to_pd(LessThan)
 scale = series_groupby_apply(scale, by=BY_DATE, to_kwargs={1: 'a'}, dropna=False)
-signedpower = to_pd(signedpower)
+signed_power = to_pd(signed_power)
 
 #
-IF = to_pd(IF)
-ABS = to_pd(ABS)
-LN = to_pd(LN)
+if_else = to_pd(if_else)
+abs = to_pd(abs)
+log = to_pd(log)
 MAX2 = to_pd(MAX)
 MIN2 = to_pd(MIN)
-SGN = to_pd(SGN)
+sign = to_pd(sign)
 
 #
 SMA = series_groupby_apply(SMA, by=BY_ASSET, to_kwargs={1: 'timeperiod', 2: 'M'})
 
 #
 COUNT = series_groupby_apply(COUNT, by=BY_ASSET)
-DIFF = series_groupby_apply(DIFF, by=BY_ASSET)
-HHV = series_groupby_apply(HHV, by=BY_ASSET)
-HHVBARS = series_groupby_apply(HHVBARS, by=BY_ASSET)
-LLV = series_groupby_apply(LLV, by=BY_ASSET)
-LLVBARS = series_groupby_apply(LLVBARS, by=BY_ASSET)
-MA = series_groupby_apply(MA, by=BY_ASSET)
-PRODUCT = series_groupby_apply(PRODUCT, by=BY_ASSET, dropna=False)
-REF = series_groupby_apply(REF, by=BY_ASSET)
-SUM = series_groupby_apply(SUM, by=BY_ASSET)
+ts_delta = series_groupby_apply(ts_delta, by=BY_ASSET, to_kwargs={1: 'd'})
+ts_max = series_groupby_apply(ts_max, by=BY_ASSET, to_kwargs={1: 'd'})
+ts_arg_max = series_groupby_apply(ts_arg_max, by=BY_ASSET, to_kwargs={1: 'd'})
+ts_min = series_groupby_apply(ts_min, by=BY_ASSET, to_kwargs={1: 'd'})
+ts_arg_min = series_groupby_apply(ts_arg_min, by=BY_ASSET, to_kwargs={1: 'd'})
+ts_mean = series_groupby_apply(ts_mean, by=BY_ASSET, to_kwargs={1: 'd'})
+ts_product = series_groupby_apply(ts_product, by=BY_ASSET, to_kwargs={1: 'd'}, dropna=False)
+ts_delay = series_groupby_apply(ts_delay, by=BY_ASSET, to_kwargs={1: 'd'})
+ts_sum = series_groupby_apply(ts_sum, by=BY_ASSET, to_kwargs={1: 'd'})
 SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET)
 
 SLOPE_YX_NB = dataframe_groupby_apply(SLOPE_YX_NB, by=BY_ASSET)

@@ -17,23 +17,23 @@ LessThan = W.LessThan
 rank = W.RANK
 ts_rank = round_a_i(W.TS_RANK)
 scale = W.scale
-SignedPower = W.signedpower
+SignedPower = W.signed_power
 
-IF = W.IF
-abs = W.ABS
-log = W.LN  # 这里是用的自然对数
+IF = W.if_else
+abs = W.abs
+log = W.log  # 这里是用的自然对数
 MAX = W.MAX2
 MIN = W.MIN2
-sign = W.SGN
+sign = W.sign
 
-delta = round_a_i(W.DIFF)
-ts_max = round_a_i(W.HHV)
-ts_argmax = round_a_i(W.HHVBARS)
-ts_min = round_a_i(W.LLV)
-ts_argmin = round_a_i(W.LLVBARS)
-product = round_a_i(W.PRODUCT)
-delay = round_a_i(W.REF)
-sum = round_a_i(W.SUM)
+delta = round_a_i(W.ts_delta)
+ts_max = round_a_i(W.ts_max)
+ts_argmax = round_a_i(W.ts_arg_max)
+ts_min = round_a_i(W.ts_min)
+ts_argmin = round_a_i(W.ts_arg_min)
+product = round_a_i(W.ts_product)
+delay = round_a_i(W.ts_delay)
+sum = round_a_i(W.ts_sum)
 
 covariance = round_a_a_i(W.COVAR)
 stddev = round_a_i(W.STDP)  # 引入的是全体标准差

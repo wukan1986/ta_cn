@@ -4,10 +4,10 @@ import pandas as _pd
 
 from . import talib as ta
 from .ema import EMA_1_PD, WS_SUM, SMA
-from .maths import MAX, ABS
+from ta_cn.tdx.maths import MAX, ABS
 from .nb import fill_notna
-from .over_bought_over_sold import ROC, TYPPRICE
-from .reference import HHV, LLV, MA, REF, SUM, TR
+from ta_cn.tdx.over_bought_over_sold import ROC, TYPPRICE
+from ta_cn.tdx.reference import HHV, LLV, MA, REF, SUM, TR
 from .statistics import AVEDEV
 from .utils import np_to_pd
 

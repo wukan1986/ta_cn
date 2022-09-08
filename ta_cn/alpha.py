@@ -6,12 +6,6 @@ import numpy as _np
 from . import bn_wraps as _bn
 
 
-def signedpower(real, n):
-    """保持符号的次方"""
-    with _np.errstate(invalid='ignore', divide='ignore'):
-        return _np.sign(real) * (abs(real) ** n)
-
-
 def TS_RANK(real, timeperiod: int):
     """滚动rank
 
