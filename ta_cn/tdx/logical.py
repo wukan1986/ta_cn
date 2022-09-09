@@ -1,8 +1,9 @@
+import numba
 import numpy as _np
 
-from ta_cn.nb import numpy_rolling_apply, _rolling_func_1_nb, _last_nb
-from ta_cn.utils import np_to_pd, num_to_np, pd_to_np
-from ta_cn.wq.time_series import ts_sum as SUM
+from ..nb import numpy_rolling_apply, _rolling_func_1_nb
+from ..utils import np_to_pd, num_to_np, pd_to_np
+from ..wq.time_series import ts_sum as SUM
 
 
 def CROSS(S1, S2):
@@ -47,11 +48,10 @@ def LAST(real, n, m):
 
     LAST(real, n=20, m=10)
     """
-    return numpy_rolling_apply([pd_to_np(real)], n, _rolling_func_1_nb, _last_nb, n, m)
 
-# def AND(*args):
-#     return reduce(lambda x, y: _np.logical_and(x, y), [True] + list(args))
-#
-#
-# def OR(*args):
-#     return reduce(lambda x, y: _np.logical_or(x, y), [False] + list(args))
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _last_nb(arr, n, m):
+        """LAST(X,A,B)，A>B，表示从前A日到前B日一致满足X条件"""
+        return _np.all(arr[:n - m])
+
+    return numpy_rolling_apply([pd_to_np(real)], n, _rolling_func_1_nb, _last_nb, n, m)

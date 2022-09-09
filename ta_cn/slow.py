@@ -8,7 +8,7 @@ from ta_cn.tdx.maths import MAX, ABS
 from .nb import fill_notna
 from ta_cn.tdx.over_bought_over_sold import ROC, TYPPRICE
 from ta_cn.tdx.reference import HHV, LLV, MA, REF, SUM, TR
-from .statistics import AVEDEV
+from ta_cn.tdx.statistics import AVEDEV
 from .utils import np_to_pd
 
 _ta1d = ta.init(mode=1, skipna=False)

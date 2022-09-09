@@ -28,6 +28,7 @@ def negate(input):
 
 def less(input1, input2):
     """If input1 < input2 return true, else return false"""
+    # ValueError: Can only compare identically-labeled Series objects
     return input1 - input2 < 0
 
 

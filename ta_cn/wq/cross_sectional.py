@@ -3,6 +3,7 @@ Cross Sectional Operators
 """
 import numpy as np
 
+from .arithmetic import add, abs_
 from .. import bn_wraps as bn
 from ..utils import pd_to_np
 
@@ -73,13 +74,19 @@ def regression_proj(y, x):
 
 def scale(x, scale=1, longscale=1, shortscale=1):
     """Scales input to booksize. We can also scale the long positions and short positions to separate scales by mentioning additional parameters to the operator."""
-    pass
-    # if x.ndim == 2:
-    #     b = np.nansum(abs(x), axis=1, keepdims=True)
-    # else:
-    #     b = np.nansum(abs(x), keepdims=True)
-    #
-    # return x / b * scale
+    if longscale != 1 or shortscale != 1:
+        L = np.where(x > 0, x, np.nan)
+        S = np.where(x < 0, x, np.nan)
+
+        sum_l = np.nansum(abs_(L), axis=x.ndim - 1, keepdims=True)
+        sum_s = np.nansum(abs_(S), axis=x.ndim - 1, keepdims=True)
+
+        with np.errstate(divide='ignore', invalid='ignore'):
+            return add(L / sum_l * longscale, S / sum_s * shortscale, filter=True)
+    else:
+        sum_x = np.nansum(abs_(x), axis=x.ndim - 1, keepdims=True)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            return x / sum_x * scale
 
 
 def scale_down(x, constant=0):
@@ -131,6 +138,7 @@ def zscore(x):
 
 def rank_gmean_amean_diff(*args):
     """Operator returns difference of geometric mean and arithmetic mean of cross sectional rank of inputs."""
+
     # TODO: 输入输出的形式还没搞清，核心功能已经实现先放这
     def _gmean(x):
         return np.exp(np.nanmean(np.log(x)))

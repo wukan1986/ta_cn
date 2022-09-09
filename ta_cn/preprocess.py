@@ -42,36 +42,36 @@ def winsorize_mad(x, n=3, constant=1.4826):
     return _np.clip(x_, _median - _mad, _median + _mad)
 
 
-def winsorize_3sigma(x, min_=-3, max_=3, ddof=0):
-    """缩尾去极值，三倍标准差法
-
-    Parameters
-    ----------
-    x: array
-        需要缩尾去极值的数据
-    min_: float
-        设置下界标准差倍数
-    max_: float
-        设置上界标准差倍数
-    ddof: int
-        计算标准差的过程中分母为N - ddof：求标准差时默认除以 n 的，即是有偏的，ddof = 0；计算无偏样本标准差方式为除以 n-1 ，加入参数 ddof = 1
-
-    Returns
-    -------
-    array
-        `x` 经过三倍标准差法缩尾去极值处理后的新数据
-
-    """
-
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        _mean = _bn.nanmean(x_, axis=1)[:, None]
-        _std = _bn.nanstd(x_, axis=1, ddof=ddof)[:, None]
-    else:
-        _mean = _bn.nanmean(x_)
-        _std = _bn.nanstd(x_, ddof=ddof)
-
-    return _np.clip(x_, _mean + _std * min_, _mean + _std * max_)
+# def winsorize_3sigma(x, min_=-3, max_=3, ddof=0):
+#     """缩尾去极值，三倍标准差法
+#
+#     Parameters
+#     ----------
+#     x: array
+#         需要缩尾去极值的数据
+#     min_: float
+#         设置下界标准差倍数
+#     max_: float
+#         设置上界标准差倍数
+#     ddof: int
+#         计算标准差的过程中分母为N - ddof：求标准差时默认除以 n 的，即是有偏的，ddof = 0；计算无偏样本标准差方式为除以 n-1 ，加入参数 ddof = 1
+#
+#     Returns
+#     -------
+#     array
+#         `x` 经过三倍标准差法缩尾去极值处理后的新数据
+#
+#     """
+#
+#     x_ = pd_to_np(x, copy=False)
+#     if x_.ndim == 2:
+#         _mean = _bn.nanmean(x_, axis=1)[:, None]
+#         _std = _bn.nanstd(x_, axis=1, ddof=ddof)[:, None]
+#     else:
+#         _mean = _bn.nanmean(x_)
+#         _std = _bn.nanstd(x_, ddof=ddof)
+#
+#     return _np.clip(x_, _mean + _std * min_, _mean + _std * max_)
 
 
 def winsorize_quantile(x, min_=0.1, max_=0.9):
@@ -144,63 +144,63 @@ def drop_quantile(x, min_=0.1, max_=0.9):
 """
 
 
-def standardize_zscore(x, ddof=0):
-    """zscore标准化
-
-    Parameters
-    ----------
-    x: 2d array
-        需要进行zscore标准化的数据
-    ddof: int
-        计算标准差的过程中分母为N - ddof：求标准差时默认ddof = 0；计算无偏样本标准差时ddof = 1
-
-    Returns
-    -------
-    2d array
-        `x` 经过zscore标准化后的新数据
-
-    """
-
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        _mean = _bn.nanmean(x_, axis=1)[:, None]
-        _std = _bn.nanstd(x_, axis=1, ddof=ddof)[:, None]
-    else:
-        _mean = _bn.nanmean(x_)
-        _std = _bn.nanstd(x_, ddof=ddof)
-
-    return (x_ - _mean) / _std
-
-
-def standardize_minmax(x, min_=0, max_=1):
-    """MinMax归一化
-
-    Parameters
-    ----------
-    x: array
-        需要进行MinMax归一化的数据
-    min_: float
-        归一化范围的下界
-    max_: float
-        归一化范围的上界
-
-    Returns
-    -------
-    array
-        `x` 经过MinMax归一化后的新数据
+# def standardize_zscore(x, ddof=0):
+#     """zscore标准化
+#
+#     Parameters
+#     ----------
+#     x: 2d array
+#         需要进行zscore标准化的数据
+#     ddof: int
+#         计算标准差的过程中分母为N - ddof：求标准差时默认ddof = 0；计算无偏样本标准差时ddof = 1
+#
+#     Returns
+#     -------
+#     2d array
+#         `x` 经过zscore标准化后的新数据
+#
+#     """
+#
+#     x_ = pd_to_np(x, copy=False)
+#     if x_.ndim == 2:
+#         _mean = _bn.nanmean(x_, axis=1)[:, None]
+#         _std = _bn.nanstd(x_, axis=1, ddof=ddof)[:, None]
+#     else:
+#         _mean = _bn.nanmean(x_)
+#         _std = _bn.nanstd(x_, ddof=ddof)
+#
+#     return (x_ - _mean) / _std
 
 
-    """
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        _min = _bn.nanmin(x_, axis=1)[:, None]
-        _max = _bn.nanmax(x_, axis=1)[:, None]
-    else:
-        _min = _bn.nanmin(x_)
-        _max = _bn.nanmax(x_)
-
-    _std = (x_ - _min) / (_max - _min)
-    return (max_ - min_) * _std + min_
+# def standardize_minmax(x, min_=0, max_=1):
+#     """MinMax归一化
+#
+#     Parameters
+#     ----------
+#     x: array
+#         需要进行MinMax归一化的数据
+#     min_: float
+#         归一化范围的下界
+#     max_: float
+#         归一化范围的上界
+#
+#     Returns
+#     -------
+#     array
+#         `x` 经过MinMax归一化后的新数据
+#
+#
+#     """
+#     x_ = pd_to_np(x, copy=False)
+#     if x_.ndim == 2:
+#         _min = _bn.nanmin(x_, axis=1)[:, None]
+#         _max = _bn.nanmax(x_, axis=1)[:, None]
+#     else:
+#         _min = _bn.nanmin(x_)
+#         _max = _bn.nanmax(x_)
+#
+#     _std = (x_ - _min) / (_max - _min)
+#     return (max_ - min_) * _std + min_
 
 
 def fill_na(x):

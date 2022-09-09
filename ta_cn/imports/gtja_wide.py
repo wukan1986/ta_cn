@@ -10,16 +10,16 @@ CORR = W.CORREL
 REGSLOPE = W.LINEARREG_SLOPE
 MEAN = W.SMA_TA
 WMA = W.SMA_TA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
-DECAYLINEAR = W.WMA
+DECAYLINEAR = W.ts_decay_linear
 
 CUMPROD = W.CUMPROD
 FILTER = W.FILTER
-RANK = W.RANK
-TSRANK = W.TS_RANK
-LessThan = W.LessThan
+RANK = W.rank
+TSRANK = W.ts_rank
+LessThan = W.less
 
 IF = W.if_else
-ABS = W.abs
+ABS = W.abs_
 LOG = W.log  # 这里是用的自然对数
 MAX = W.MAX2
 MIN = W.MIN2
@@ -27,7 +27,7 @@ SIGN = W.sign
 
 SMA = W.SMA
 
-COUNT = W.COUNT
+COUNT = W.ts_count
 DELTA = W.ts_delta
 TSMAX = W.ts_max
 HIGHDAY = W.ts_arg_max
@@ -42,5 +42,5 @@ SUMIF = W.SUMIF  # 注意，SUMIF参数的位置常用的方式不同
 REGBETA = W.SLOPE_YX_NB
 REGRESI = W.REGRESI4
 
-COVIANCE = W.COVAR
-STD = W.STDP  # 引入的是全体标准差
+COVIANCE = W.ts_covariance
+STD = W.ts_std_dev  # 引入的是全体标准差

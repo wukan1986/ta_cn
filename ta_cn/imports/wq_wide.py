@@ -11,16 +11,16 @@ from ..imports import wide as W
 from ..utils import round_a_i, round_a_a_i
 
 correlation = round_a_a_i(W.CORREL)
-decay_linear = round_a_i(W.WMA)
+decay_linear = round_a_i(W.ts_decay_linear)
 
-LessThan = W.LessThan
-rank = W.RANK
-ts_rank = round_a_i(W.TS_RANK)
+LessThan = W.less
+rank = W.rank
+ts_rank = round_a_i(W.ts_rank)
 scale = W.scale
 SignedPower = W.signed_power
 
 IF = W.if_else
-abs = W.abs
+abs = W.abs_
 log = W.log  # 这里是用的自然对数
 MAX = W.MAX2
 MIN = W.MIN2
@@ -35,8 +35,8 @@ product = round_a_i(W.ts_product)
 delay = round_a_i(W.ts_delay)
 sum = round_a_i(W.ts_sum)
 
-covariance = round_a_a_i(W.COVAR)
-stddev = round_a_i(W.STDP)  # 引入的是全体标准差
+covariance = round_a_a_i(W.ts_covariance)
+stddev = round_a_i(W.ts_std_dev)  # 引入的是全体标准差
 
 indneutralize = W.indneutralize
 

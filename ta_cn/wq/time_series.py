@@ -103,14 +103,15 @@ def ts_co_kurtosis(y, x, d):
 
 def ts_corr(x, y, d):
     """Returns correlation of x and y for the past d days"""
+    if True:
+        return _ta2d.CORREL(x, y, timeperiod=d)
+    else:
+        @numba.jit(nopython=True, cache=True, nogil=True)
+        def _corr_nb(arr0, arr1):
+            return np.corrcoef(arr0, arr1)[0, 1]
 
-    # return _ta2d.CORREL(x, y, timeperiod=d)
-    @numba.jit(nopython=True, cache=True, nogil=True)
-    def _corr_nb(arr0, arr1):
-        return np.corrcoef(arr0, arr1)[0, 1]
-
-    return numpy_rolling_apply([pd_to_np(x), pd_to_np(y)],
-                               d, _rolling_func_2_nb, _corr_nb)
+        return numpy_rolling_apply([pd_to_np(x), pd_to_np(y)],
+                                   d, _rolling_func_2_nb, _corr_nb)
 
 
 def ts_co_skewness(y, x, d):
@@ -130,7 +131,7 @@ def ts_co_skewness(y, x, d):
 
 def ts_count_nans(x, d):
     """Returns the number of NaN values in x for the past d days"""
-    return bn.move_sum(np.isnan(x), window=d, axis=0)
+    return ts_sum(np.isnan(x), d)
 
 
 def ts_covariance(y, x, d):
@@ -150,7 +151,7 @@ def ts_decay_exp_window(x, d, factor=0.5):
     pass
 
 
-def ts_decay_linear(x, d, dense=False):
+def ts_decay_linear(x, d, dense=True):
     """Returns the linear decay on x for the past d days. Dense parameter=false means operator works in sparse mode and we treat NaN as 0. In dense mode we do not."""
     # TODO: 这样写是否合适？
     if dense:
@@ -276,10 +277,9 @@ def ts_percentage(x, d, percentage=0.5):
 
     @numba.jit(nopython=True, cache=True, nogil=True)
     def _percentage_nb(a, percentage):
-        return np.percentile(a, percentage)
+        return np.quantile(a, percentage)
 
-    # 注意内部的参数范围是0~100
-    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _percentage_nb, percentage * 100)
+    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _percentage_nb, percentage)
 
 
 def ts_poly_regression(y, x, d, k=1):
@@ -413,3 +413,10 @@ def ts_quantile(x, d, driver="gaussian"):
         return np.quantile(a, q)
 
     return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _quantile_nb, 0.5)
+
+
+# ------------------------
+
+
+# 其它功能别名
+ts_count = ts_sum

@@ -1,8 +1,12 @@
 from talib import MA_Type
 
 from ta_cn import talib as ta
-from ta_cn.tdx.maths import MEAN
-from ta_cn.tdx.reference import LLV, HHV, REF, MA, TR
+from ta_cn.tdx.reference import TR
+from ta_cn.wq.time_series import ts_min as LLV
+from ta_cn.wq.time_series import ts_max as HHV
+from ta_cn.wq.time_series import ts_mean as MA
+from ta_cn.wq.arithmetic import mean as MEAN
+from ta_cn.wq.time_series import ts_delay as REF
 from ta_cn.talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 
 _ta1d = ta.init(mode=1, skipna=False)

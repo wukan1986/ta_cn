@@ -176,33 +176,6 @@ def sum_1st(arr, n=1):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
-def _avedev_nb(a):
-    """avedev平均绝对偏差"""
-    return _np.mean(_np.abs(a - _np.mean(a)))
-
-
-@numba.jit(nopython=True, cache=True, nogil=True)
-def _bars_since_n_nb(a, n):
-    """BARSSINCEN(X,N):N周期内第一次X不为0到现在的天数"""
-    for i, x in enumerate(a):
-        if x:
-            return n - i - 1
-    return 0
-
-
-@numba.jit(nopython=True, cache=True, nogil=True)
-def _last_nb(arr, n, m):
-    """LAST(X,A,B)，A>B，表示从前A日到前B日一致满足X条件"""
-    return _np.all(arr[:n - m])
-
-
-@numba.jit(nopython=True, cache=True, nogil=True)
-def _cov_nb(arr0, arr1):
-    """协方差矩阵"""
-    return _np.cov(arr0, arr1)[0, 1]
-
-
-@numba.jit(nopython=True, cache=True, nogil=True)
 def _rolling_func_3_nb(arr0, arr1, arr2, out, timeperiod, func, *args):
     """滚动函数，在二维或三维数上遍历，三组输入
 
