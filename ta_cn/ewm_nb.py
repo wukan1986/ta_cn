@@ -5,6 +5,75 @@ from .utils import pd_to_np
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
+def _sum_1st_nb(arr, n):
+    """前部分数据求和，之前的设置成0"""
+    is_1d = arr.ndim == 1
+    x = arr.shape[0]
+    y = 1 if is_1d else arr.shape[1]
+
+    for j in range(y):
+        a = arr if is_1d else arr[:, j]
+        k = n
+        s = 0.0
+        skip_nan = True
+        for i in range(x):
+            cur = a[i]
+            if cur != cur:  # 用来判断NaN
+                if skip_nan:
+                    continue
+                else:
+                    a[i] = 0
+            skip_nan = False
+            s += cur
+            a[i] = 0
+            k -= 1
+            if k <= 0:
+                a[i] = s
+                break
+    return arr
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _ma_1st_nb(arr, n):
+    """前部分数据求和，之前的设置成0"""
+    is_1d = arr.ndim == 1
+    x = arr.shape[0]
+    y = 1 if is_1d else arr.shape[1]
+
+    for j in range(y):
+        a = arr if is_1d else arr[:, j]
+        k = n
+        s = 0.0
+        for i in range(x):
+            cur = a[i]
+            if cur != cur:  # 用来判断NaN
+                continue
+            s += cur
+            a[i] = np.nan
+            k -= 1
+            if k <= 0:
+                a[i] = s / n
+                break
+    return arr
+
+
+def ma_1st(arr, n=1):
+    """前部分数据求平均，之前的设置成np.nan"""
+    if n < 1:
+        return arr
+    arr = pd_to_np(arr, copy=True)
+    return _ma_1st_nb(arr, n)
+
+
+def sum_1st(arr, n=1):
+    """前部分数据求平均，之前的设置成np.nan"""
+    if n < 1:
+        return arr
+    arr = pd_to_np(arr, copy=True)
+    return _sum_1st_nb(arr, n)
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
 def ewm_mean_1d_nb(a, out, alpha, minp: int = 0, adjust: bool = False):
     """Return exponential weighted average.
     Numba equivalent to `pd.Series(a).ewm(span=span, min_periods=minp, adjust=adjust).mean()`.

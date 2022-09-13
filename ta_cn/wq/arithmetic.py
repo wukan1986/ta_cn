@@ -36,7 +36,10 @@ def ceiling(x):
 
 
 def divide(*args):
-    """x / y"""
+    """x / y
+
+    RuntimeWarning: invalid value encountered in true_divide
+    """
     with np.errstate(divide='ignore', invalid='ignore'):
         return reduce(np.true_divide, args)
 
@@ -142,7 +145,7 @@ def reverse(x):
     return -x
 
 
-def round(x):
+def round_(x):
     """Round input to closest integer."""
     return np.around(x)
 
@@ -215,7 +218,12 @@ def densify(x):
 
 
 # ----------------
+def log10(x):
+    return np.log10(np.where(x > 0, x, np.nan))
+
+
 # 过于简单，直接添加于此
 def mean(*args, filter=True):
     """多个均值"""
     return add(*args, filter=filter) / len(args)
+

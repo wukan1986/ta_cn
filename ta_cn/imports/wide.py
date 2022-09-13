@@ -10,7 +10,7 @@ from ta_cn.tdx.reference import SUMIF
 from .. import talib as ta
 from ..alpha import CUMPROD
 from ..alpha import FILTER
-from ..ema import SMA
+from ..ema import SMA_CN
 from ..regress import REGRESI
 from ..regress import SLOPE_YX_NB
 from ..utils_wide import wide_wraps
@@ -81,7 +81,7 @@ CUMPROD = wide_wraps(CUMPROD, to_kwargs={})
 FILTER = wide_wraps(FILTER, input_num=2, to_kwargs={})
 
 #
-SMA = wide_wraps(SMA, to_kwargs={1: 'timeperiod', 2: 'M'})
+SMA_CN = wide_wraps(SMA_CN, to_kwargs={1: 'timeperiod', 2: 'M'})
 
 # 通达信导入
 SUMIF = wide_wraps(SUMIF, input_num=2, to_kwargs={2: 'timeperiod'})

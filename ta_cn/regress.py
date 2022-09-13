@@ -1,10 +1,10 @@
 import warnings
 
 import numba
-import numpy as _np
-import pandas as _pd
+import numpy as np
+import pandas as pd
 
-from . import bn_wraps as _bn
+from . import bn_wraps as bn
 from . import talib as ta
 from .nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb
 from .utils import pd_to_np
@@ -16,16 +16,16 @@ _ta2d = ta.init(mode=2, skipna=False)
 @numba.jit(nopython=True, cache=True, nogil=True)
 def _slope_nb(y, x, m_x):
     """slope线性回归斜率。由于x固定，所以提前在外部计算，加快速度"""
-    m_y = _np.mean(y)
-    return _np.sum((x - m_x) * (y - m_y)) / _np.sum((x - m_x) ** 2)
+    m_y = np.mean(y)
+    return np.sum((x - m_x) * (y - m_y)) / np.sum((x - m_x) ** 2)
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
 def _slope_yx_nb(y, x):
     """slope线性回归斜率。y与x是一直变化的"""
-    m_x = _np.mean(x)
-    m_y = _np.mean(y)
-    return _np.sum((x - m_x) * (y - m_y)) / _np.sum((x - m_x) ** 2)
+    m_x = np.mean(x)
+    m_y = np.mean(y)
+    return np.sum((x - m_x) * (y - m_y)) / np.sum((x - m_x) ** 2)
 
 
 def FORCAST(real, timeperiod):
@@ -69,8 +69,8 @@ def SLOPE_NB(real, timeperiod):
 
     SLOPE_NB(real, timeperiod=14)
     """
-    x = _np.arange(timeperiod)
-    m_x = _np.mean(x)
+    x = np.arange(timeperiod)
+    m_x = np.mean(x)
     return numpy_rolling_apply([pd_to_np(real)], timeperiod, _rolling_func_1_nb, _slope_nb, x, m_x)
 
 
@@ -107,16 +107,16 @@ def ts_simple_regress(y, x, window=10):
         回归残差项
 
     """
-    xy_ts_sum = _bn.move_sum(_np.multiply(x, y), window=window, axis=0)
-    xx_ts_sum = _bn.move_sum(_np.multiply(x, x), window=window, axis=0)
-    x_bar = _bn.move_mean(x, window=window, axis=0)
-    y_bar = _bn.move_mean(y, window=window, axis=0)
+    xy_ts_sum = bn.move_sum(np.multiply(x, y), window=window, axis=0)
+    xx_ts_sum = bn.move_sum(np.multiply(x, x), window=window, axis=0)
+    x_bar = bn.move_mean(x, window=window, axis=0)
+    y_bar = bn.move_mean(y, window=window, axis=0)
 
-    up = xy_ts_sum - _np.multiply(x_bar, y_bar) * window
-    down = xx_ts_sum - _np.multiply(x_bar, x_bar) * window
+    up = xy_ts_sum - np.multiply(x_bar, y_bar) * window
+    down = xx_ts_sum - np.multiply(x_bar, x_bar) * window
     beta_hat = up / down
-    intercept_hat = y_bar - _np.multiply(beta_hat, x_bar)
-    residual_hat = y - intercept_hat - _np.multiply(beta_hat, x)
+    intercept_hat = y_bar - np.multiply(beta_hat, x_bar)
+    residual_hat = y - intercept_hat - np.multiply(beta_hat, x)
 
     return intercept_hat, beta_hat, residual_hat
 
@@ -127,7 +127,7 @@ def _ts_ols_nb(y, x):
 
     由于sliding_window_view后的形状再enumerate后比较特殊，所以原公式的转置进行了调整
     """
-    return _np.dot((_np.dot(_np.linalg.inv(_np.dot(x, x.T)), x)), y)
+    return np.dot((np.dot(np.linalg.inv(np.dot(x, x.T)), x)), y)
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
@@ -136,19 +136,19 @@ def _cs_ols_nb(y, x):
 
     标准的多元回归
     """
-    return _np.dot((_np.dot(_np.linalg.inv(_np.dot(x.T, x)), x.T)), y)
+    return np.dot((np.dot(np.linalg.inv(np.dot(x.T, x)), x.T)), y)
 
 
 def yx_rolling_apply(y, x, window, func1, func2, *args):
     """滚动应用方法。目前用于计算时序上的滚动回归"""
-    out = _np.empty_like(x)
+    out = np.empty_like(x)
     try:
         # 可能出现类似int无法设置nan的情况
-        out[:window] = _np.nan
+        out[:window] = np.nan
     except:
         out[:window] = 0
 
-    arrs = [_np.lib.stride_tricks.sliding_window_view(i, window, axis=0) for i in (y, x)]
+    arrs = [np.lib.stride_tricks.sliding_window_view(i, window, axis=0) for i in (y, x)]
 
     return func1(*arrs, out, window, func2, *args)
 
@@ -193,11 +193,11 @@ def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
     _y = pd_to_np(y)
     _x = pd_to_np(x)
     if add_constant:
-        tmp = _np.ones(shape=(_x.shape[0], _x.shape[1] + 1))
+        tmp = np.ones(shape=(_x.shape[0], _x.shape[1] + 1))
         tmp[:, 1:] = _x
         _x = tmp
     coef = yx_rolling_apply(_y, _x, timeperiod, _rolling_func_yx_nb, _ts_ols_nb)
-    residual = _y - _np.sum(_x * coef, axis=1)
+    residual = _y - np.sum(_x * coef, axis=1)
     return coef, residual
 
 
@@ -209,18 +209,18 @@ def multiple_regress(y, x, add_constant=True):
     _y = pd_to_np(y)
     _x = pd_to_np(x)
     if add_constant:
-        tmp = _np.ones(shape=(_x.shape[0], _x.shape[1] + 1))
+        tmp = np.ones(shape=(_x.shape[0], _x.shape[1] + 1))
         tmp[:, 1:] = _x
         _x = tmp
     coef = _cs_ols_nb(_y, _x)
-    residual = _y - _np.sum(_x * coef, axis=1)
+    residual = _y - np.sum(_x * coef, axis=1)
     return coef, residual
 
 
 def REGRESI(y, *args, timeperiod=60):
-    if isinstance(y, _pd.Series):
-        x = _pd.concat(args, axis=1)
+    if isinstance(y, pd.Series):
+        x = pd.concat(args, axis=1)
     else:
-        x = _np.concatenate(args, axis=1)
+        x = np.concatenate(args, axis=1)
     coef, resi = ts_multiple_regress(y, x, timeperiod=timeperiod, add_constant=True)
     return resi

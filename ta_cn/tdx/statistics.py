@@ -1,9 +1,10 @@
 import numba
 import numpy as np
 
-from ta_cn import talib as ta, bn_wraps as bn
-from ta_cn.nb import numpy_rolling_apply, _rolling_func_1_nb
-from ta_cn.utils import pd_to_np
+from .. import bn_wraps as bn
+from .. import talib as ta
+from ..nb import numpy_rolling_apply, _rolling_func_1_nb
+from ..utils import pd_to_np
 
 _ta1d = ta.init(mode=1, skipna=False)
 _ta2d = ta.init(mode=2, skipna=False)

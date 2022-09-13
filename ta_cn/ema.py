@@ -1,8 +1,7 @@
-import pandas as _pd
+import pandas as pd
 
 from . import talib as ta
-from .ewm_nb import ewm_mean
-from .nb import ma_1st, sum_1st
+from .ewm_nb import ewm_mean, ma_1st, sum_1st
 from .talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 from .utils import np_to_pd
 
@@ -63,7 +62,7 @@ def EMA_1_PD(real, timeperiod):
     return ewm_mean(real, span=timeperiod, min_periods=timeperiod, adjust=False)
 
 
-def SMA(real, timeperiod, M):
+def SMA_CN(real, timeperiod, M):
     """EMA第一个值用MA
 
     SMA(real, timeperiod=24, M=1)
@@ -83,7 +82,7 @@ def DMA(real, alpha):
     return ewm_mean(real, alpha=alpha, min_periods=0, adjust=False)
 
 
-def WS_SUM(real: _pd.DataFrame, timeperiod):
+def WS_SUM(real: pd.DataFrame, timeperiod):
     """Wilder Smooth 威尔德平滑求和
 
     WS_SUM(real: _pd.DataFrame, timeperiod: int = 5)

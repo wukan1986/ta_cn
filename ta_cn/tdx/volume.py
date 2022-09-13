@@ -1,6 +1,6 @@
-from ta_cn.tdx.logical import IF
-from ta_cn.tdx.maths import SGN
-from ta_cn.tdx.reference import SUM, DIFF, REF
+from . import IF
+from . import SGN
+from . import SUM, DIFF, REF
 
 
 def OBV(real, volume, scale):  # 能量潮指标

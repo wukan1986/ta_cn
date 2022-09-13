@@ -33,7 +33,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from . import bn_wraps as _bn
+from . import bn_wraps as bn
 from .utils import np_to_pd
 
 
@@ -178,6 +178,7 @@ def equal_weighted_index(prices=None, returns=None, need_one=False) -> pd.Series
 
     """
     if returns is None:
+        need_one = False
         returns = to_simple_returns(prices, need_one)
     # 不进行加1减1的操作，加快速度
     # 虽然是累乘，但由于只计算一列，所以速度还能接受
@@ -205,6 +206,7 @@ def weighted_index(weights, prices=None, returns=None, need_one=False):
 
     """
     if returns is None:
+        need_one = False
         returns = to_simple_returns(prices, need_one)
     else:
         returns = np_to_pd(returns)
@@ -239,16 +241,16 @@ def ic(factor, returns, rank=True):
     y = factor
     if y.ndim == 1:
         if rank:
-            y = _bn.nanrankdata(y)
-            x = _bn.nanrankdata(x)
+            y = bn.nanrankdata(y)
+            x = bn.nanrankdata(x)
         return np.corrcoef(y, x)[0, 1]
     else:
         if rank:
-            y = _bn.nanrankdata(y, axis=1)
-            x = _bn.nanrankdata(x, axis=1)
+            y = bn.nanrankdata(y, axis=1)
+            x = bn.nanrankdata(x, axis=1)
 
-        up = _bn.nanmean(x * y, axis=1) - _bn.nanmean(x, axis=1) * _bn.nanmean(y, axis=1)
-        down = _bn.nanstd(x, axis=1) * _bn.nanstd(y, axis=1)
+        up = bn.nanmean(x * y, axis=1) - bn.nanmean(x, axis=1) * bn.nanmean(y, axis=1)
+        down = bn.nanstd(x, axis=1) * bn.nanstd(y, axis=1)
         return up / down
 
 
@@ -275,7 +277,7 @@ def ir(ics):
 
 
     """
-    return _bn.nanmean(ics) / _bn.nanstd(ics)
+    return bn.nanmean(ics) / bn.nanstd(ics)
 
 
 def ic_decay(factor, returns, rank=True, lag=[1, 2, 3, 4]):

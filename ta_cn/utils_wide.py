@@ -232,6 +232,22 @@ class WArr(np.ndarray):
         else:
             return self.from_array(other / self.raw(), self.direction)
 
+    def __floordiv__(self, other):
+        if isinstance(other, (int, float)):
+            return self.from_args(self.arr // other, self.row, self.col, self.direction)
+        if isinstance(other, WArr):
+            return self.from_array(self.raw() // other.raw(), self.direction)
+        else:
+            return self.from_array(self.raw() // other, self.direction)
+
+    def __mod__(self, other):
+        if isinstance(other, (int, float)):
+            return self.from_args(self.arr % other, self.row, self.col, self.direction)
+        if isinstance(other, WArr):
+            return self.from_array(self.raw() % other.raw(), self.direction)
+        else:
+            return self.from_array(self.raw() % other, self.direction)
+
     def __pow__(self, power, modulo=None):
         if isinstance(power, (int, float)):
             return self.from_args(self.arr ** power, self.row, self.col, self.direction)

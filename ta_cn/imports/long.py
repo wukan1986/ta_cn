@@ -11,7 +11,7 @@ from .. import talib as ta
 from ..aggregate import A_div_AB
 from ..alpha import CUMPROD
 from ..alpha import FILTER
-from ..ema import SMA
+from ..ema import SMA_CN
 from ..preprocess import demean
 from ..regress import REGRESI
 from ..regress import SLOPE_YX_NB
@@ -100,7 +100,7 @@ FILTER = dataframe_groupby_apply(FILTER, by=BY_ASSET, to_kwargs={}, dropna=False
 
 
 #
-SMA = series_groupby_apply(SMA, by=BY_ASSET, to_kwargs={1: 'timeperiod', 2: 'M'})
+SMA_CN = series_groupby_apply(SMA_CN, by=BY_ASSET, to_kwargs={1: 'timeperiod', 2: 'M'})
 
 #
 

@@ -1,5 +1,5 @@
 """
-通达信公式转alpha101
+公式转alpha101
 
 101 Formulaic Alphas
 文档质量一般

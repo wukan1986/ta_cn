@@ -1,11 +1,12 @@
 """
-通达信公式转alpha191
+公式转alpha191
 
 国泰君安－基于短周期价量特征的多因子选股
 """
 
 from ..imports import long as L
 
+CORR = L.ts_corr
 REGSLOPE = L.LINEARREG_SLOPE
 MEAN = L.SMA_TA
 WMA = L.SMA_TA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
@@ -24,7 +25,7 @@ MAX = L.MAX2
 MIN = L.MIN2
 SIGN = L.sign
 
-SMA = L.SMA
+SMA = L.SMA_CN
 
 COUNT = L.ts_count
 DELTA = L.ts_delta

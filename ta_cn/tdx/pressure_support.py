@@ -1,5 +1,5 @@
-from ta_cn.tdx.statistics import STDP
-from ta_cn.wq.time_series import ts_mean as MA
+from . import MA
+from .statistics import STDP
 
 
 def BOLL(real, timeperiod, nbdevup, nbdevdn):

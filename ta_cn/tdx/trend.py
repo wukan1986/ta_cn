@@ -1,9 +1,8 @@
 from talib import MA_Type
 
-from ta_cn import talib as ta
-from ta_cn.tdx.maths import MEAN
-from ta_cn.tdx.reference import COUNT, REF, DIFF, MA
-from ta_cn.talib import set_compatibility, TA_COMPATIBILITY_METASTOCK
+from . import COUNT, REF, DIFF, MA, MEAN
+from .. import talib as ta
+from ..talib import set_compatibility, TA_COMPATIBILITY_METASTOCK
 
 _ta1d = ta.init(mode=1, skipna=False)
 _ta2d = ta.init(mode=2, skipna=False)
