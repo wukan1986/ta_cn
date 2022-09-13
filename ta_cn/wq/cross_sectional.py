@@ -5,6 +5,7 @@ import numpy as np
 
 from .arithmetic import add, abs_
 from .. import bn_wraps as bn
+from ..regress import multiple_regress
 from ..utils import pd_to_np
 
 
@@ -64,12 +65,12 @@ def generalized_rank(open, m=1):
 
 def regression_neut(y, x):
     """Conducts the cross-sectional regression on the stocks with Y as target and X as the independent variable."""
-    pass
+    return multiple_regress(y, x, add_constant=True)[0]
 
 
 def regression_proj(y, x):
     """Conducts the cross-sectional regression on the stocks with Y as target and X as the independent variable."""
-    pass
+    return multiple_regress(y, x, add_constant=True)[1]
 
 
 def scale(x, scale=1, longscale=1, shortscale=1):

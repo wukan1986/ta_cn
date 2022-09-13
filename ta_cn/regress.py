@@ -141,7 +141,8 @@ def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
         _x = tmp
 
     coef = numpy_rolling_apply([_x, _y], timeperiod, _rolling_func_xy_nb, _ts_ols_nb)
-    residual = _y - np.sum(_x * coef, axis=1)
+    y_hat = np.sum(_x * coef, axis=1)
+    residual = _y - y_hat
     return coef, residual
 
 
@@ -162,12 +163,16 @@ def multiple_regress(y, x, add_constant=True):
     _y = pd_to_np(y)
     _x = pd_to_np(x)
     if add_constant:
+        if _x.ndim == 1:
+            # 一维数据转成二维数据
+            _x = _x.reshape(-1, 1)
         tmp = np.ones(shape=(_x.shape[0], _x.shape[1] + 1))
         tmp[:, 1:] = _x
         _x = tmp
     coef = _cs_ols_nb(_y, _x)
-    residual = _y - np.sum(_x * coef, axis=1)
-    return coef, residual
+    y_hat = np.sum(_x * coef, axis=1)
+    residual = _y - y_hat
+    return residual, y_hat, coef
 
 
 def REGRESI(y, *args, timeperiod=60):
