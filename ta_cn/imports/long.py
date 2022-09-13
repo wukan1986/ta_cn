@@ -14,7 +14,7 @@ from ..alpha import FILTER
 from ..ema import SMA_CN
 from ..preprocess import demean
 from ..regress import REGRESI
-from ..regress import SLOPE_YX_NB
+from ..regress import SLOPE_YX
 from ..utils import to_pd
 from ..utils_long import dataframe_groupby_apply, series_groupby_apply
 from ..wq.arithmetic import abs_
@@ -106,7 +106,7 @@ SMA_CN = series_groupby_apply(SMA_CN, by=BY_ASSET, to_kwargs={1: 'timeperiod', 2
 
 SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET)
 
-SLOPE_YX_NB = dataframe_groupby_apply(SLOPE_YX_NB, by=BY_ASSET)
+SLOPE_YX = dataframe_groupby_apply(SLOPE_YX, by=BY_ASSET)
 REGRESI4 = dataframe_groupby_apply(REGRESI, by=BY_ASSET, to_df=[0, 1, 2, 3], to_kwargs={4: 'timeperiod'})
 
 # 行业中性。demean法

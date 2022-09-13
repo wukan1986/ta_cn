@@ -39,7 +39,7 @@ DELAY = L.ts_delay
 SUM = L.ts_sum
 SUMIF = L.SUMIF  # 注意，SUMIF参数的位置常用的方式不同
 
-REGBETA = L.SLOPE_YX_NB
+REGBETA = L.SLOPE_YX
 REGRESI = L.REGRESI4
 
 COVIANCE = L.ts_covariance

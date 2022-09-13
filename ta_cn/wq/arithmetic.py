@@ -113,7 +113,7 @@ def nan_mask(x, y):
 
 def nan_out(x, lower=0, upper=0):
     """If x < lower or x > upper return NaN, else return x. At least one of "lower", "upper" is required."""
-    return np.clip(x, a_min=lower, a_max=upper)
+    return np.where((x < lower) | (x > upper), np.nan, x)
 
 
 def power(x, y):
@@ -226,4 +226,3 @@ def log10(x):
 def mean(*args, filter=True):
     """多个均值"""
     return add(*args, filter=filter) / len(args)
-

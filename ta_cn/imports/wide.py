@@ -12,7 +12,7 @@ from ..alpha import CUMPROD
 from ..alpha import FILTER
 from ..ema import SMA_CN
 from ..regress import REGRESI
-from ..regress import SLOPE_YX_NB
+from ..regress import SLOPE_YX
 from ..utils_wide import wide_wraps
 from ..wq.arithmetic import abs_
 from ..wq.arithmetic import log
@@ -86,7 +86,7 @@ SMA_CN = wide_wraps(SMA_CN, to_kwargs={1: 'timeperiod', 2: 'M'})
 # 通达信导入
 SUMIF = wide_wraps(SUMIF, input_num=2, to_kwargs={2: 'timeperiod'})
 
-SLOPE_YX_NB = wide_wraps(SLOPE_YX_NB, input_num=2, to_kwargs={2: 'timeperiod'})
+SLOPE_YX = wide_wraps(SLOPE_YX, input_num=2, to_kwargs={2: 'timeperiod'})
 REGRESI4 = wide_wraps(REGRESI, input_num=4, to_kwargs={4: 'timeperiod'})
 
 from .wide_long import indneutralize

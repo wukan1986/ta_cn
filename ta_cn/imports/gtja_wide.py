@@ -39,7 +39,7 @@ DELAY = W.ts_delay
 SUM = W.ts_sum
 SUMIF = W.SUMIF  # 注意，SUMIF参数的位置常用的方式不同
 
-REGBETA = W.SLOPE_YX_NB
+REGBETA = W.SLOPE_YX
 REGRESI = W.REGRESI4
 
 COVIANCE = W.ts_covariance

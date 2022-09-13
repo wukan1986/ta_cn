@@ -137,6 +137,7 @@ def _rolling_func_1_nb(arr, out, timeperiod, func, *args):
 
 def numpy_rolling_apply(inputs, window, func1, func2, *args):
     """滚动应用方法 处理两个"""
+    # 输出只与第一个的形状相同
     out = np.empty_like(inputs[0])
     try:
         # 可能出现类似int无法设置nan的情况

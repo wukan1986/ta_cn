@@ -178,7 +178,7 @@ def equal_weighted_index(prices=None, returns=None, need_one=False) -> pd.Series
 
     """
     if returns is None:
-        need_one = False
+        need_one = False  # 可以加快计算
         returns = to_simple_returns(prices, need_one)
     # 不进行加1减1的操作，加快速度
     # 虽然是累乘，但由于只计算一列，所以速度还能接受
@@ -206,7 +206,7 @@ def weighted_index(weights, prices=None, returns=None, need_one=False):
 
     """
     if returns is None:
-        need_one = False
+        need_one = False  # 可以加快计算
         returns = to_simple_returns(prices, need_one)
     else:
         returns = np_to_pd(returns)
@@ -239,18 +239,17 @@ def ic(factor, returns, rank=True):
     """
     x = returns
     y = factor
+    axis = x.ndim - 1
+
+    if rank:
+        y = bn.nanrankdata(y, axis=axis)
+        x = bn.nanrankdata(x, axis=axis)
+
     if y.ndim == 1:
-        if rank:
-            y = bn.nanrankdata(y)
-            x = bn.nanrankdata(x)
         return np.corrcoef(y, x)[0, 1]
     else:
-        if rank:
-            y = bn.nanrankdata(y, axis=1)
-            x = bn.nanrankdata(x, axis=1)
-
-        up = bn.nanmean(x * y, axis=1) - bn.nanmean(x, axis=1) * bn.nanmean(y, axis=1)
-        down = bn.nanstd(x, axis=1) * bn.nanstd(y, axis=1)
+        up = bn.nanmean(x * y, axis=axis) - bn.nanmean(x, axis=axis) * bn.nanmean(y, axis=axis)
+        down = bn.nanstd(x, axis=axis) * bn.nanstd(y, axis=axis)
         return up / down
 
 

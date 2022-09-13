@@ -1,6 +1,5 @@
 import numpy as np
 
-from . import bn_wraps as bn
 from .utils import pd_to_np
 from .wq.cross_sectional import winsorize, zscore, scale
 
@@ -30,17 +29,13 @@ def winsorize_mad(x, n=3, constant=1.4826):
 
 
     """
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        _median = bn.nanmedian(x_, axis=1)[:, None]
-        _mad = bn.nanmedian(abs(x - _median), axis=1)[:, None]
-    else:
-        _median = bn.nanmedian(x_)
-        _mad = bn.nanmedian(abs(x - _median))
-
+    x = pd_to_np(x, copy=False)
+    axis = x.ndim - 1
+    _median = np.nanmedian(x, axis=axis, keepdims=True)
+    _mad = np.nanmedian(abs(x - _median), axis=axis, keepdims=True)
     _mad = _mad * constant * n
 
-    return np.clip(x_, _median - _mad, _median + _mad)
+    return np.clip(x, _median - _mad, _median + _mad)
 
 
 def winsorize_quantile(x, min_=0.1, max_=0.9):
@@ -61,14 +56,10 @@ def winsorize_quantile(x, min_=0.1, max_=0.9):
         `x` 经过分位数法缩尾去极值处理后的新数据
 
     """
-
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        q = np.nanquantile(x_, [min_, max_], axis=1)
-        return np.clip(x_, q[0][:, None], q[1][:, None])
-    else:
-        q = np.nanquantile(x_, [min_, max_])
-        return np.clip(x_, q[0], q[1])
+    x = pd_to_np(x, copy=False)
+    axis = x.ndim - 1
+    q = np.nanquantile(x, [min_, max_], axis=axis, keepdims=True)
+    return np.clip(x, q[0], q[1])
 
 
 """
@@ -94,18 +85,12 @@ def drop_quantile(x, min_=0.1, max_=0.9):
         `x` 经过分位数法删除去极值处理后的新数据
 
     """
+    x = pd_to_np(x, copy=False)
+    axis = x.ndim - 1
 
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        q = np.nanquantile(x_, [min_, max_], axis=1)
-        x_ = np.where(x_ < q[0][:, None], np.nan, x_)
-        x_ = np.where(x_ > q[1][:, None], np.nan, x_)
-    else:
-        q = np.nanquantile(x_, [min_, max_])
-        x_ = np.where(x_ < q[0], np.nan, x_)
-        x_ = np.where(x_ > q[1], np.nan, x_)
-
-    return x_
+    q = np.nanquantile(x, [min_, max_], axis=axis, keepdims=True)
+    x = np.where((x < q[0]) | (x > q[1]), np.nan, x)
+    return x
 
 
 """

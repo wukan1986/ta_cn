@@ -74,17 +74,18 @@ def regression_proj(y, x):
 
 def scale(x, scale=1, longscale=1, shortscale=1):
     """Scales input to booksize. We can also scale the long positions and short positions to separate scales by mentioning additional parameters to the operator."""
+    axis = x.ndim - 1
     if longscale != 1 or shortscale != 1:
         L = np.where(x > 0, x, np.nan)
         S = np.where(x < 0, x, np.nan)
 
-        sum_l = np.nansum(abs_(L), axis=x.ndim - 1, keepdims=True)
-        sum_s = np.nansum(abs_(S), axis=x.ndim - 1, keepdims=True)
+        sum_l = np.nansum(abs_(L), axis=axis, keepdims=True)
+        sum_s = np.nansum(abs_(S), axis=axis, keepdims=True)
 
         with np.errstate(divide='ignore', invalid='ignore'):
             return add(L / sum_l * longscale, S / sum_s * shortscale, filter=True)
     else:
-        sum_x = np.nansum(abs_(x), axis=x.ndim - 1, keepdims=True)
+        sum_x = np.nansum(abs_(x), axis=axis, keepdims=True)
         with np.errstate(divide='ignore', invalid='ignore'):
             return x / sum_x * scale
 

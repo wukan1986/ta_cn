@@ -17,14 +17,8 @@ def FILTER(A, condition):
 
 
 def CUMPROD(A):
-    if A.ndim == 2:
-        return np.cumprod(A, axis=0)
-    else:
-        return np.cumprod(A)
+    return np.cumprod(A, axis=0)
 
 
 def CUMSUM(A):
-    if A.ndim == 2:
-        return np.cumsum(A, axis=0)
-    else:
-        return np.cumsum(A)
+    return np.cumsum(A, axis=0)
