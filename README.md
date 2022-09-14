@@ -20,10 +20,21 @@
 3. 为了行数短牺牲了可读性
 4. 部分函数直接复制于股票软件，代码没有优化，有重复计算
 
+## 再次大迭代，仿WorldQuant
+1. 2022年9月初，知道WorldQuant Websim重新开放为WorldQuant BRAIN后，开始研究国外的平台
+2. WQ公式更加科学。例如：
+    1. WQ时序有`ts_`前缀
+    2. WQ有横截面函数和分组函数，通达信没有
+    3. 通达信将大量不相关的指标都归类为引用函数
+    4. WQ公式为Alpha因子而设计，有大量的权重处理等函数
+
 ## 目标
-1. 按通达信等国内常用软件命名和分类各指标
-2. 支持二维矩阵计算
-3. 国内外计算方法区别很大时，两个版本都提供，同时说明区别处
+1. 优先实现WorldQuant公式，然后实现通达信公式
+2. 通过在通达信中导入WQ公式并别名，来实现通达信公式覆盖
+3. 支持二维矩阵计算
+4. 支持长表和宽表，支持NaN跳过
+5. 最终实现WQ的本地版
+
 
 ## 实现方案优先级
 1. bottleneck。支持二维数据，优先使用
@@ -50,9 +61,12 @@ pip install ta_cn[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 3. 直接调用包中定义的指标，如KDJ等
     - 优点：符合中国习惯的技术指标
     - 缺点：指标数目前比较少。一般没有跳过空值功能
-4. 输入为复合索引时序，分组计算
+4. 输入为长表，分组计算
     - 优点：使用简单，可进行指标嵌套
     - 缺点：速度会慢一些。准备工作偏复杂
+5. 输入为宽表
+    - 优点：计算快
+    - 缺点：计算前需要准备数据为指定格式，占大量内存
     
 ## 跳过空值
 1. TA-Lib遇到空值后面结果全为NaN
@@ -98,20 +112,20 @@ rr = ta.SMA(arr, timeperiod=10)
 r = pullna(rr, row, col)
 print(r)
 
-
 ```
 
 ### 使用ta_cn中定义的公式
 ```python
 import numpy as np
 
-# ta_cn.talib库底层是循环调用talib，部分计算效率不高
-# 可导入ta_cn中的公式，只加这一句即导入多个文件中的函数
-# 准备数据
-from ta_cn.over_bought_over_sold import ATR_CN
 from ta_cn.talib import init, set_compatibility_enable, set_compatibility
-from ta_cn.trend import MACD
+from ta_cn.tdx.over_bought_over_sold import ATR_CN
+from ta_cn.tdx.trend import MACD
 
+# ta_cn.talib库底层是循环调用talib，部分计算效率不高
+# 可导入ta_cn中的公式
+
+# 准备数据
 h = np.random.rand(10000000).reshape(-1, 50000) + 10
 l = np.random.rand(10000000).reshape(-1, 50000)
 c = np.random.rand(10000000).reshape(-1, 50000)
@@ -183,6 +197,7 @@ import pandas as pd
 
 from ta_cn.imports.wide import ATR
 from ta_cn.utils import np_to_pd
+from ta_cn.utils_wide import WArr
 
 pd._testing._N = 250
 pd._testing._K = 30
@@ -190,13 +205,19 @@ h = pd._testing.makeTimeDataFrame() + 10
 l = pd._testing.makeTimeDataFrame()
 c = pd._testing.makeTimeDataFrame()
 
-r = ATR(h, l, c, 10)
-# 返回的数据可能是np
+# 数据需要封装成特殊对象，实现NaN的堆叠和还原
+h_ = WArr.from_array(h, direction='down')
+l_ = WArr.from_array(l, direction='down')
+c_ = WArr.from_array(c, direction='down')
+
+r = ATR(h_, l_, c_, 10)
+# 返回的数据可能是np.ndarray
 print(r.raw())
 
 # 可以再封装回pd.DataFrame
 d = np_to_pd(r.raw(), copy=False, index=c.index, columns=c.columns)
 print(d.iloc[-5:])
+
 
 ```
 
@@ -218,6 +239,8 @@ print(d.iloc[-5:])
 4. [funcat](https://github.com/cedricporter/funcat) 公式移植
 5. [pandas-ta](https://github.com/twopirllc/pandas-ta) 支持Pandas扩展的技术指标
 6. [ta](https://github.com/bukosabino/ta) 通过类实现的技术指标
+7. [WorldQuant算子](https://platform.worldquantbrain.com/learn/data-and-operators/operators)
+8. [WorldQuant算子详情](https://platform.worldquantbrain.com/learn/data-and-operators/detailed-operator-descriptions)
 
 ## 交流群
 ta_cn技术指标交流群: 601477228

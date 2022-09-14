@@ -9,8 +9,8 @@
 from ta_cn.tdx.reference import SUMIF
 from .. import talib as ta
 from ..aggregate import A_div_AB
-from ..alpha import CUMPROD
-from ..alpha import FILTER
+from ta_cn.alphas.alpha import CUMPROD
+from ta_cn.alphas.alpha import FILTER
 from ..ema import SMA_CN
 from ..preprocess import demean
 from ..regress import REGRESI
@@ -88,11 +88,11 @@ signed_power = to_pd(signed_power)
 if_else = to_pd(if_else)
 abs_ = to_pd(abs_)
 log = to_pd(log)
-MAX2 = to_pd(max_)
-MIN2 = to_pd(min_)
+max_ = to_pd(max_)
+min_ = to_pd(min_)
 sign = to_pd(sign)
 
-#
+# 特殊
 CUMPROD = series_groupby_apply(CUMPROD, by=BY_ASSET, to_kwargs={})
 FILTER = dataframe_groupby_apply(FILTER, by=BY_ASSET, to_kwargs={}, dropna=False)
 

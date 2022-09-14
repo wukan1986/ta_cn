@@ -2,7 +2,7 @@ import pandas as pd
 from pandas._testing import assert_series_equal
 
 from ta_cn.imports.long import A_div_AB_1, A_div_AB_2
-from ta_cn.imports.wide import MA
+from ta_cn.imports.wide import ts_mean
 from ta_cn.utils import np_to_pd
 
 if __name__ == '__main__':
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     group = close.copy() * 500 // 1 % 5
 
     # 移动平均需要处理一下
-    sma20 = MA(close, 20)
+    sma20 = ts_mean(close, 20)
     sma20 = np_to_pd(sma20.raw(), index=close.index, columns=close.columns)
 
     df = {

@@ -21,8 +21,8 @@ SignedPower = L.signed_power
 IF = L.if_else
 abs = L.abs_
 log = L.log  # 这里是用的自然对数
-MAX = L.MAX2
-MIN = L.MIN2
+MAX = L.max_
+MIN = L.min_
 sign = L.sign
 
 delta = round_a_i(L.ts_delta)

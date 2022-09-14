@@ -21,8 +21,8 @@ LessThan = L.less
 IF = L.if_else
 ABS = L.abs_
 LOG = L.log  # 这里是用的自然对数
-MAX = L.MAX2
-MIN = L.MIN2
+MAX = L.max_
+MIN = L.min_
 SIGN = L.sign
 
 SMA = L.SMA_CN

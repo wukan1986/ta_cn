@@ -3,6 +3,7 @@ Time Series Operators
 """
 import numba
 import numpy as np
+from numba.typed import List
 
 from .. import bn_wraps as bn
 from .. import talib as ta
@@ -15,7 +16,32 @@ _ta2d = ta.init(mode=2, skipna=False)
 
 def days_from_last_change(x):
     """Amount of days since last change of x"""
-    pass
+
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _days_from_last_change_nb(arr, out):
+        is_1d = arr.ndim == 1
+        x = arr.shape[0]
+        y = 1 if is_1d else arr.shape[1]
+
+        for j in range(y):
+            a = arr if is_1d else arr[:, j]
+            b = out if is_1d else out[:, j]
+            last = a[0]
+            k = 0
+            for i in range(1, x):
+                cur = a[i]
+                if cur == last:
+                    k += 1
+                else:
+                    last = cur
+                    k = 0
+                b[i] = k
+
+        return out
+
+    x = pd_to_np(x, copy=False)
+    out = np.zeros_like(x, dtype=int)
+    return _days_from_last_change_nb(x, out)
 
 
 def ts_weighted_delay(x, k=0.5):
@@ -28,32 +54,69 @@ def hump(x, hump=0.01):
     pass
 
 
-def hump_decay(x, p=0):
+def hump_decay(x, p=0, relative=False):
     """This operator helps to ignore the values that changed too little corresponding to previous ones."""
-    pass
-
+    t1 = ts_delay(x, 1)
+    t2 = abs(x - t1)
+    if relative:
+        t3 = abs(x + t1)
+        return np.where(t2 > (p * t3), x, t1)
+    else:
+        return np.where(t2 > p, x, t1)
 
 def inst_tvr(x, d):
     """Total trading value / Total holding value in the past d days"""
     pass
 
 
-def jump_decay(x, d, sensitivity=0.5, force=0.1):
+def jump_decay(x, d, stddev=False, sensitivity=0.5, force=0.1):
     """If there is a huge jump in current data compare to previous one"""
-    pass
+    std = 1 if not stddev else ts_std_dev(x, d)
+    t0 = ts_delay(x, 1)
+    t1 = abs(x - t0) > sensitivity * std
+    t2 = t0 + (x - t0) * force
+
+    return np.where(t1, t2, x)
 
 
-def kth_element(x, d, k=1):
+def kth_element(x, d, k=1, ignore=[]):
     """Returns K-th value of input by looking through lookback days. This operator can be used to backfill missing data if k=1"""
+
     # 由于原文档中数据需要[::-1]，所以backfill其实是ffill
     # ignore参数用来计数时跳过，文档不对应
-    # TODO:
-    return df.rolling(d).nth(k)
+    # TODO: 需要再验证
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _kth_element_nb(arr, k, ignore):
+        for a in arr[-1 - k::-1]:
+            if a == a:
+                for i in ignore:
+                    if a == i:
+                        continue
+                    else:
+                        return a
+            else:
+                for i in ignore:
+                    if i != i:
+                        continue
+
+    return numpy_rolling_apply([pd_to_np(x)],
+                               d, _rolling_func_1_nb, _kth_element_nb,
+                               k, List(ignore))
 
 
 def last_diff_value(x, d):
     """Returns last x value not equal to current x value from last d days"""
-    pass
+
+    @numba.jit(nopython=True, cache=True, nogil=True)
+    def _last_diff_value_nb(arr):
+        l = arr[-1]
+        for a in arr[::-1]:
+            if a != l:
+                return a
+        return l
+
+    return numpy_rolling_apply([pd_to_np(x)],
+                               d, _rolling_func_1_nb, _last_diff_value_nb)
 
 
 def ts_arg_max(x, d):
@@ -260,12 +323,12 @@ def ts_partial_corr(x, y, z, d):
     @numba.jit(nopython=True, cache=True, nogil=True)
     def _partial_corr_nb(arr0, arr1, arr2):
         c = np.corrcoef(np.vstack((arr0, arr1, arr2)))
-        pxy = c[0, 1]
-        pxz = c[0, 2]
-        pyz = c[1, 2]
-        t1 = pxy - pxz * pyz
-        t2 = (1 - pxz ** 2) ** 0.5
-        t3 = (1 - pyz ** 2) ** 0.5
+        rxy = c[0, 1]
+        rxz = c[0, 2]
+        ryz = c[1, 2]
+        t1 = rxy - rxz * ryz
+        t2 = (1 - rxz ** 2) ** 0.5
+        t3 = (1 - ryz ** 2) ** 0.5
         return t1 / (t2 * t3)
 
     return numpy_rolling_apply([pd_to_np(x), pd_to_np(y), pd_to_np(z)],
@@ -339,7 +402,12 @@ def ts_skewness(x, d):
 
 def ts_std_dev(x, d):
     """Returns standard deviation of x for the past d days"""
-    return bn.move_std(x, window=d, axis=0, ddof=0)
+    # 长表与宽表计算居然结果有微小差异
+    # return bn.move_std(x, window=d, axis=0, ddof=0)
+    if x.ndim == 2:
+        return _ta2d.STDDEV(x, timeperiod=d)
+    else:
+        return _ta1d.STDDEV(x, timeperiod=d)
 
 
 def ts_step(d):

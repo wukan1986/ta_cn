@@ -8,8 +8,8 @@
 """
 from ta_cn.tdx.reference import SUMIF
 from .. import talib as ta
-from ..alpha import CUMPROD
-from ..alpha import FILTER
+from ta_cn.alphas.alpha import CUMPROD
+from ta_cn.alphas.alpha import FILTER
 from ..ema import SMA_CN
 from ..regress import REGRESI
 from ..regress import SLOPE_YX
@@ -72,8 +72,8 @@ signed_power = wide_wraps(signed_power, direction=None, input_num=2, to_kwargs={
 if_else = wide_wraps(if_else, direction=None, input_num=3, to_kwargs={})
 abs_ = wide_wraps(abs_, direction=None, to_kwargs={})
 log = wide_wraps(log, direction=None, to_kwargs={})
-MAX2 = wide_wraps(max_, direction=None, input_num=2, to_kwargs={})
-MIN2 = wide_wraps(min_, direction=None, input_num=2, to_kwargs={})
+max_ = wide_wraps(max_, direction=None, input_num=2, to_kwargs={})
+min_ = wide_wraps(min_, direction=None, input_num=2, to_kwargs={})
 sign = wide_wraps(sign, direction=None, to_kwargs={})
 
 #
