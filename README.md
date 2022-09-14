@@ -52,6 +52,13 @@ pip install ta_cn -i https://mirrors.aliyun.com/pypi/simple --upgrade
 pip install ta_cn[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 ```
 
+3. 开发人员安装。开发迭代很快，只有版本稳定才会发布到`PyPI`，需要时效更高的安装方法
+    1. 从github下载zip文件
+    2. 解压zip, 进入解压后目录，输入以下命令
+```commandline
+pip install .[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
+```
+
 ## 常见使用方法
 1. 转发原生talib，输入一维向量
     - 优点: 本库提供了跳过空值的功能
@@ -68,7 +75,7 @@ pip install ta_cn[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
     - 优点：计算快
     - 缺点：计算前需要准备数据为指定格式，占大量内存
     
-## 跳过空值
+## 停牌处理，跳过空值
 1. TA-Lib遇到空值后面结果全为NaN
 2. 跳过NaN后，导致数据长度不够，部分函数可能报错
 3. 方案一：将所有数据进行移动，时序指标移动到最后，横截面指标移动到最右。
@@ -228,7 +235,7 @@ print(d.iloc[-5:])
 本项目，试着用公式系统实现`Alpha101`、`Alpha191`，请参考examples文件下的测试示例。它最大的特点是尽量保持原公式的形式，
 少改动，防止乱中出错。然后再优化代码提高效率。
 
-## 停牌处理2
+## 停牌处理，空值填充
 1. 板块指数，停牌了也要最近的行情进行计算，否则指数过小
 2. 停牌期的开高低收都是最近的收盘价，收盘价可以ffill
 
