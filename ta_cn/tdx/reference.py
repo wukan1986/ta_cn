@@ -32,7 +32,6 @@ def FILTER(S, N):
 
     @numba.jit(nopython=True, cache=True, nogil=True)
     def _filter_nb(arr, n):
-        """内部函数，请勿直接调用，请参考"""
         is_1d = arr.ndim == 1
         x = arr.shape[0]
         y = 1 if is_1d else arr.shape[1]

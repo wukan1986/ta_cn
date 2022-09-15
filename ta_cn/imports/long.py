@@ -6,15 +6,16 @@
 
 !!!函数太多，又想要智能提示，只能手工按需补充
 """
-from ta_cn.tdx.reference import SUMIF
 from .. import talib as ta
 from ..aggregate import A_div_AB
-from ta_cn.alphas.alpha import CUMPROD
-from ta_cn.alphas.alpha import FILTER
+from ..alphas.alpha import CUMPROD
+from ..alphas.alpha import FILTER_191
 from ..ema import SMA_CN
 from ..preprocess import demean
 from ..regress import REGRESI
 from ..regress import SLOPE_YX
+from ..tdx.reference import FILTER as FILTER_TDX
+from ..tdx.reference import SUMIF
 from ..utils import to_pd
 from ..utils_long import dataframe_groupby_apply, series_groupby_apply
 from ..wq.arithmetic import abs_
@@ -94,8 +95,8 @@ sign = to_pd(sign)
 
 # 特殊
 CUMPROD = series_groupby_apply(CUMPROD, by=BY_ASSET, to_kwargs={})
-FILTER = dataframe_groupby_apply(FILTER, by=BY_ASSET, to_kwargs={}, dropna=False)
-
+FILTER_191 = dataframe_groupby_apply(FILTER_191, by=BY_ASSET, to_kwargs={}, dropna=False)
+FILTER_TDX = series_groupby_apply(FILTER_TDX, by=BY_ASSET, to_kwargs={1: 'N'})
 #
 
 

@@ -6,13 +6,14 @@
 
 !!!函数太多，又想要智能提示，只能手工按需补充
 """
-from ta_cn.tdx.reference import SUMIF
 from .. import talib as ta
-from ta_cn.alphas.alpha import CUMPROD
-from ta_cn.alphas.alpha import FILTER
+from ..alphas.alpha import CUMPROD
+from ..alphas.alpha import FILTER_191
 from ..ema import SMA_CN
 from ..regress import REGRESI
 from ..regress import SLOPE_YX
+from ..tdx.reference import FILTER_191 as FILTER_TDX
+from ..tdx.reference import SUMIF
 from ..utils_wide import wide_wraps
 from ..wq.arithmetic import abs_
 from ..wq.arithmetic import log
@@ -78,7 +79,8 @@ sign = wide_wraps(sign, direction=None, to_kwargs={})
 
 #
 CUMPROD = wide_wraps(CUMPROD, to_kwargs={})
-FILTER = wide_wraps(FILTER, input_num=2, to_kwargs={})
+FILTER_191 = wide_wraps(FILTER_191, input_num=2, to_kwargs={})
+FILTER_TDX = wide_wraps(FILTER_TDX, input_num=2, to_kwargs={1: 'N'})
 
 #
 SMA_CN = wide_wraps(SMA_CN, to_kwargs={1: 'timeperiod', 2: 'M'})

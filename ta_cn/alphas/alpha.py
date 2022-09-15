@@ -4,7 +4,8 @@
 import numpy as np
 
 
-def FILTER(A, condition):
+def FILTER_191(A, condition):
+    """注意：与TDX中的FILTER不同"""
     return np.where(condition, A, 0)
 
 

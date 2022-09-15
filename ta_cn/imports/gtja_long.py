@@ -13,7 +13,7 @@ WMA = L.SMA_TA  # !!!WMA的公式没看懂，所以用另一个替代，以后�
 DECAYLINEAR = L.ts_decay_linear
 
 CUMPROD = L.CUMPROD
-FILTER = L.FILTER
+FILTER = L.FILTER_191
 RANK = L.rank
 TSRANK = L.ts_rank
 LessThan = L.less
