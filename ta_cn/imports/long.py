@@ -44,6 +44,7 @@ from ..wq.time_series import ts_rank
 from ..wq.time_series import ts_std_dev
 from ..wq.time_series import ts_sum
 
+# 一维TALIB
 _ta1d = ta.init(mode=1, skipna=False, to_globals=False)
 
 # 按股票分组，计算时序指标。注意，组内时序需要已经排序

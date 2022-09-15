@@ -2,7 +2,7 @@ import numba
 import numpy as np
 
 from . import ABS, MAX, REF
-from .. import bn_wraps as bn
+from .. import bn_wraps as bn, numba_cache
 from .. import talib as ta
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb
 from ..utils import pd_to_np
@@ -30,7 +30,7 @@ def TR(high, low, close):
 def FILTER(S, N):
     """FILTER函数，S满足条件后，将其后N周期内的数据置为0"""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _filter_nb(arr, n):
         is_1d = arr.ndim == 1
         x = arr.shape[0]
@@ -89,7 +89,7 @@ def BARSLASTCOUNT(S):
     成立第一天输出1
     """
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _bars_last_count_nb(arr, out):
         """
 
@@ -128,7 +128,7 @@ def BARSLASTCOUNT(S):
 def BARSSINCEN(cond, timeperiod):
     """BARSSINCEN(X,N):N周期内第一次X不为0到现在的天数"""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _bars_since_n_nb(a, n):
         """BARSSINCEN(X,N):N周期内第一次X不为0到现在的天数"""
         for i, x in enumerate(a):

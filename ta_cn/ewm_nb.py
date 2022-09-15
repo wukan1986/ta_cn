@@ -1,10 +1,11 @@
 import numba
 import numpy as np
 
+from . import numba_cache
 from .utils import pd_to_np
 
 
-@numba.jit(nopython=True, cache=True, nogil=True)
+@numba.jit(nopython=True, cache=numba_cache, nogil=True)
 def _sum_1st_nb(arr, n):
     """前部分数据求和，之前的设置成0"""
     is_1d = arr.ndim == 1
@@ -33,7 +34,7 @@ def _sum_1st_nb(arr, n):
     return arr
 
 
-@numba.jit(nopython=True, cache=True, nogil=True)
+@numba.jit(nopython=True, cache=numba_cache, nogil=True)
 def _ma_1st_nb(arr, n):
     """前部分数据求和，之前的设置成0"""
     is_1d = arr.ndim == 1
@@ -73,7 +74,7 @@ def sum_1st(arr, n=1):
     return _sum_1st_nb(arr, n)
 
 
-@numba.jit(nopython=True, cache=True, nogil=True)
+@numba.jit(nopython=True, cache=numba_cache, nogil=True)
 def ewm_mean_1d_nb(a, out, alpha, minp: int = 0, adjust: bool = False):
     """Return exponential weighted average.
     Numba equivalent to `pd.Series(a).ewm(span=span, min_periods=minp, adjust=adjust).mean()`.
@@ -109,7 +110,7 @@ def ewm_mean_1d_nb(a, out, alpha, minp: int = 0, adjust: bool = False):
     return out
 
 
-@numba.jit(nopython=True, cache=True, nogil=True)
+@numba.jit(nopython=True, cache=numba_cache, nogil=True)
 def ewm_mean_nb(a, out, alpha, minp: int = 0, adjust: bool = False):
     """2-dim version of `ewm_mean_1d_nb`."""
     for col in range(a.shape[1]):

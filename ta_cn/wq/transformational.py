@@ -4,6 +4,7 @@ Transformational Operators
 import numba
 import numpy as np
 
+from .. import numba_cache
 from ..utils import pd_to_np
 from ..wq.logical import if_else
 from ..wq.time_series import days_from_last_change
@@ -91,7 +92,7 @@ def tanh(x):
 def trade_when(x, y, z):
     """Used in order to change Alpha values only under a specified condition and to hold Alpha values in other cases. It also allows to close Alpha positions (assign NaN values) under a specified condition."""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _trade_when_nb(xx, yy, zz, out):
         is_1d = xx.ndim == 1
         x = xx.shape[0]

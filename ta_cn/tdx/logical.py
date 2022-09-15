@@ -2,6 +2,7 @@ import numba
 import numpy as np
 
 from . import SUM
+from .. import numba_cache
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb
 from ..utils import np_to_pd, num_to_np, pd_to_np
 
@@ -49,7 +50,7 @@ def LAST(real, n, m):
     LAST(real, n=20, m=10)
     """
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _last_nb(arr, n, m):
         """LAST(X,A,B)，A>B，表示从前A日到前B日一致满足X条件"""
         return np.all(arr[:n - m])

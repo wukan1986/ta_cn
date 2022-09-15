@@ -6,15 +6,16 @@
 
 !!!函数太多，又想要智能提示，只能手工按需补充
 """
+from .long import indneutralize
 from .. import talib as ta
 from ..alphas.alpha import CUMPROD
 from ..alphas.alpha import FILTER_191
 from ..ema import SMA_CN
 from ..regress import REGRESI
 from ..regress import SLOPE_YX
-from ..tdx.reference import FILTER_191 as FILTER_TDX
+from ..tdx.reference import FILTER as FILTER_TDX
 from ..tdx.reference import SUMIF
-from ..utils_wide import wide_wraps
+from ..utils_wide import wide_wraps, long_wraps
 from ..wq.arithmetic import abs_
 from ..wq.arithmetic import log
 from ..wq.arithmetic import max_
@@ -25,16 +26,23 @@ from ..wq.cross_sectional import rank
 from ..wq.cross_sectional import scale
 from ..wq.logical import if_else
 from ..wq.logical import less
-from ..wq.time_series import (
-    ts_arg_max, ts_arg_min,
-    ts_corr, ts_count, ts_covariance,
-    ts_decay_linear, ts_delay, ts_delta,
-    ts_max, ts_mean, ts_min,
-    ts_product,
-    ts_rank,
-    ts_std_dev, ts_sum
-)
+from ..wq.time_series import ts_arg_max
+from ..wq.time_series import ts_arg_min
+from ..wq.time_series import ts_corr
+from ..wq.time_series import ts_count
+from ..wq.time_series import ts_covariance
+from ..wq.time_series import ts_decay_linear
+from ..wq.time_series import ts_delay
+from ..wq.time_series import ts_delta
+from ..wq.time_series import ts_max
+from ..wq.time_series import ts_mean
+from ..wq.time_series import ts_min
+from ..wq.time_series import ts_product
+from ..wq.time_series import ts_rank
+from ..wq.time_series import ts_std_dev
+from ..wq.time_series import ts_sum
 
+# 二维TALIB
 _ta2d = ta.init(mode=2, skipna=False, to_globals=False)
 
 # TALIB, 多输入
@@ -91,6 +99,6 @@ SUMIF = wide_wraps(SUMIF, input_num=2, to_kwargs={2: 'timeperiod'})
 SLOPE_YX = wide_wraps(SLOPE_YX, input_num=2, to_kwargs={2: 'timeperiod'})
 REGRESI4 = wide_wraps(REGRESI, input_num=4, to_kwargs={4: 'timeperiod'})
 
-from .wide_long import indneutralize
-
-indneutralize = indneutralize
+# 长表转宽表
+# 行业中性化
+indneutralize = long_wraps(indneutralize, direction='right')

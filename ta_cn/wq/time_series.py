@@ -5,7 +5,7 @@ import numba
 import numpy as np
 from numba.typed import List
 
-from .. import bn_wraps as bn
+from .. import bn_wraps as bn, numba_cache
 from .. import talib as ta
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb, _rolling_func_3_nb
 from ..utils import pd_to_np
@@ -17,7 +17,7 @@ _ta2d = ta.init(mode=2, skipna=False)
 def days_from_last_change(x):
     """Amount of days since last change of x"""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _days_from_last_change_nb(arr, out):
         is_1d = arr.ndim == 1
         x = arr.shape[0]
@@ -85,7 +85,7 @@ def kth_element(x, d, k=1, ignore=[]):
     # 由于原文档中数据需要[::-1]，所以backfill其实是ffill
     # ignore参数用来计数时跳过，文档不对应
     # TODO: 需要再验证
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _kth_element_nb(arr, k, ignore):
         for a in arr[-1 - k::-1]:
             if a == a:
@@ -107,7 +107,7 @@ def kth_element(x, d, k=1, ignore=[]):
 def last_diff_value(x, d):
     """Returns last x value not equal to current x value from last d days"""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _last_diff_value_nb(arr):
         l = arr[-1]
         for a in arr[::-1]:
@@ -152,7 +152,7 @@ def ts_backfill(x, lookback=10, k=1, ignore="NAN"):
 def ts_co_kurtosis(y, x, d):
     """Returns cokurtosis of y and x for the past d days."""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _co_kurtosis_nb(arr0, arr1):
         t1 = arr0 - np.nanmean(arr0)
         t2 = arr1 - np.nanmean(arr1)
@@ -169,7 +169,7 @@ def ts_corr(x, y, d):
     if True:
         return _ta2d.CORREL(x, y, timeperiod=d)
     else:
-        @numba.jit(nopython=True, cache=True, nogil=True)
+        @numba.jit(nopython=True, cache=numba_cache, nogil=True)
         def _corr_nb(arr0, arr1):
             return np.corrcoef(arr0, arr1)[0, 1]
 
@@ -180,7 +180,7 @@ def ts_corr(x, y, d):
 def ts_co_skewness(y, x, d):
     """Returns coskewness of y and x for the past d days."""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _co_skewness_nb(arr0, arr1):
         t1 = arr0 - np.nanmean(arr0)
         t2 = arr1 - np.nanmean(arr1)
@@ -200,7 +200,7 @@ def ts_count_nans(x, d):
 def ts_covariance(y, x, d):
     """Returns covariance of y and x for the past d days"""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _covariance_nb(arr0, arr1):
         """协方差矩阵"""
         return np.cov(arr0, arr1)[0, 1]
@@ -253,7 +253,7 @@ def ts_kurtosis(x, d):
     """Returns kurtosis of x for the last d days."""
 
     # # 与scipy.stats.kurtosis结果相同，与pd.rolling.kurt结果不同, bias的问题
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _kurtosis_nb(arr):
         t1 = arr - np.nanmean(arr)
         return np.nanmean(t1 ** 4) / (np.nanmean(t1 ** 2) ** 2)
@@ -304,7 +304,7 @@ def ts_min_max_diff(x, d, f=0.5):
 def ts_moment(x, d, k=0):
     """Returns K-th central moment of x for the past d days."""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _moment_nb(arr, k):
         """中心矩阵"""
         return np.nanmean((arr - np.nanmean(arr)) ** k)
@@ -320,7 +320,7 @@ def ts_partial_corr(x, y, z, d):
     """Returns partial correlation of x, y, z for the past d days."""
 
     # TODO: 不知道是否写正确，需要check
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _partial_corr_nb(arr0, arr1, arr2):
         c = np.corrcoef(np.vstack((arr0, arr1, arr2)))
         rxy = c[0, 1]
@@ -338,7 +338,7 @@ def ts_partial_corr(x, y, z, d):
 def ts_percentage(x, d, percentage=0.5):
     """Returns percentile value of x for the past d days."""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _percentage_nb(a, percentage):
         return np.quantile(a, percentage)
 
@@ -353,7 +353,7 @@ def ts_poly_regression(y, x, d, k=1):
 def ts_product(x, d):
     """Returns product of x for the past d days"""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _product_nb(a):
         return np.nanprod(a)
 
@@ -392,7 +392,7 @@ def ts_skewness(x, d):
     """Return skewness of x for the past d days."""
 
     # 与scipy.stats.skew结果相同，与pd.rolling.skew结果不同, bias的问题
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _skewness_nb(arr):
         t1 = arr - np.nanmean(arr)
         return np.nanmean(t1 ** 3) / (np.nanmean(t1 ** 2) ** 1.5)
@@ -433,7 +433,7 @@ def ts_theilsen(x, y, d):
 def ts_triple_corr(x, y, z, d):
     """Returns triple correlation of x, y, z for the past d days."""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _triple_corr_nb(arr0, arr1, arr2):
         t1 = arr0 - np.nanmean(arr0)
         t2 = arr1 - np.nanmean(arr1)
@@ -476,7 +476,7 @@ def ts_quantile(x, d, driver="gaussian"):
     """It calculates ts_rank and apply to its value an inverse cumulative density function from driver distribution. Possible values of driver (optional ) are "gaussian", "uniform", "cauchy" distribution where "gaussian" is the default."""
 
     # 与ts_percentage区别是什么，缺失一个参数是什么？
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _quantile_nb(a, q):
         return np.quantile(a, q)
 

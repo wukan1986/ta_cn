@@ -1,7 +1,7 @@
 import numba
 import numpy as np
 
-from .. import bn_wraps as bn
+from .. import bn_wraps as bn, numba_cache
 from .. import talib as ta
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb
 from ..utils import pd_to_np
@@ -16,7 +16,7 @@ def AVEDEV(real, timeperiod: int):
     AVEDEV(real, timeperiod=20)
     """
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _avedev_nb(a):
         """avedev平均绝对偏差"""
         return np.mean(np.abs(a - np.mean(a)))
