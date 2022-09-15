@@ -108,15 +108,6 @@ def fill_na(x):
     return x
 
 
-def demean(x):
-    """行业中性化，需要与groupby配合使用
-
-    RuntimeWarning: Mean of empty slice
-    nanmean在全nan时报此警告。这个警告还不好屏蔽
-    """
-    return x - np.nanmean(x)
-
-
 # worldquant中函数的别名
 winsorize_3sigma = winsorize
 standardize_zscore = zscore

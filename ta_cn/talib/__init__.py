@@ -9,6 +9,8 @@ Examples
 只要替换导入即可直接支持二维矩阵
 >>> import talib as ta
 >>> import ta_cn.talib as ta
+>>> _ta1d = ta.init(mode=1, skipna=False, to_globals=False)
+>>> _ta2d = ta.init(mode=2, skipna=False, to_globals=False)
 
 """
 from functools import wraps, reduce

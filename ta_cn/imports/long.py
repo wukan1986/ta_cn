@@ -6,12 +6,11 @@
 
 !!!函数太多，又想要智能提示，只能手工按需补充
 """
-from .. import talib as ta
+from .. import talib as ta, BY_ASSET, BY_DATE, BY_GROUP
 from ..aggregate import A_div_AB
 from ..alphas.alpha import CUMPROD
 from ..alphas.alpha import FILTER_191
 from ..ema import SMA_CN
-from ..preprocess import demean
 from ..regress import REGRESI
 from ..regress import SLOPE_YX
 from ..tdx.reference import FILTER as FILTER_TDX
@@ -26,6 +25,7 @@ from ..wq.arithmetic import sign
 from ..wq.arithmetic import signed_power
 from ..wq.cross_sectional import rank
 from ..wq.cross_sectional import scale
+from ..wq.group import group_neutralize
 from ..wq.logical import if_else
 from ..wq.logical import less
 from ..wq.time_series import ts_arg_max
@@ -47,12 +47,6 @@ from ..wq.time_series import ts_sum
 # 一维TALIB
 _ta1d = ta.init(mode=1, skipna=False, to_globals=False)
 
-# 按股票分组，计算时序指标。注意，组内时序需要已经排序
-BY_ASSET = 'asset'
-# 按时间分组。计算横截面
-BY_DATE = 'date'
-# 横截面上进行行业中性化
-BY_GROUP = ['date', 'group']
 
 ## TALIB, 多输入
 CORREL = dataframe_groupby_apply(_ta1d.CORREL, by=BY_ASSET)
@@ -111,8 +105,8 @@ SUMIF = dataframe_groupby_apply(SUMIF, by=BY_ASSET)
 SLOPE_YX = dataframe_groupby_apply(SLOPE_YX, by=BY_ASSET)
 REGRESI4 = dataframe_groupby_apply(REGRESI, by=BY_ASSET, to_df=[0, 1, 2, 3], to_kwargs={4: 'timeperiod'})
 
-# 行业中性。demean法
-indneutralize = dataframe_groupby_apply(demean, by=BY_GROUP, to_df=[0, 'group'], to_kwargs={})
+# 行业中性
+indneutralize = group_neutralize
 
 # 可用于 全部市场宽度
 A_div_AB_1 = series_groupby_apply(A_div_AB, by=BY_DATE, to_kwargs={})

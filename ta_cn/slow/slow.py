@@ -3,11 +3,12 @@ import numpy as np
 import pandas as pd
 
 from .. import talib as ta
-from ..ema import EMA_1_PD, WS_SUM, SMA
+from ..ema import EMA_1_PD, WS_SUM, SMA_CN
 from ..nb import fill_notna
 from ..tdx import HHV, LLV, MA, REF, SUM, MAX, ABS
 from ..tdx.over_bought_over_sold import ROC, TYPPRICE
 from ..tdx.reference import TR
+from ..tdx.statistics import AVEDEV
 from ..utils import np_to_pd
 
 _ta1d = ta.init(mode=1, skipna=False)
@@ -19,7 +20,7 @@ def ATR_TA(high, low, close, timeperiod=14):
 
     talib的ATR算法类似于SMA，所以要重写此处才与中国ATR相同
     """
-    return SMA(TR(high, low, close), timeperiod)
+    return SMA_CN(TR(high, low, close), timeperiod)
 
 
 def ATR_CN(high, low, close, timeperiod=14):
@@ -74,7 +75,7 @@ def CCI(high, low, close, timeperiod=14):
 def RSI(real, timeperiod=24):
     """RSI指标"""
     DIF = real - REF(real, 1)
-    return SMA(MAX(DIF, 0), timeperiod, 1) / SMA(ABS(DIF), timeperiod, 1) * 100
+    return SMA_CN(MAX(DIF, 0), timeperiod, 1) / SMA_CN(ABS(DIF), timeperiod, 1) * 100
 
 
 def WMA(real, timeperiod=5):
@@ -162,7 +163,7 @@ def DI_CN(high, low, close, timeperiod=14):
 def DMI(high, low, close, timeperiod=14):
     """趋向指标"""
     PDI, MDI = DI(high, low, close, timeperiod=timeperiod)
-    ADX = SMA(ABS(PDI - MDI) / (PDI + MDI) * 100, timeperiod)
+    ADX = SMA_CN(ABS(PDI - MDI) / (PDI + MDI) * 100, timeperiod)
     # 这里timeperiod-1，才正好与talib对应
     ADXR = (ADX + REF(ADX, timeperiod - 1)) / 2
     return PDI, MDI, ADX, ADXR

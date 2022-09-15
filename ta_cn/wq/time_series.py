@@ -10,8 +10,8 @@ from .. import talib as ta
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb, _rolling_func_3_nb
 from ..utils import pd_to_np
 
-_ta1d = ta.init(mode=1, skipna=False)
-_ta2d = ta.init(mode=2, skipna=False)
+_ta1d = ta.init(mode=1, skipna=False, to_globals=False)
+_ta2d = ta.init(mode=2, skipna=False, to_globals=False)
 
 
 def days_from_last_change(x):
