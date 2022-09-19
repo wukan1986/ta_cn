@@ -6,7 +6,7 @@
 
 !!!函数太多，又想要智能提示，只能手工按需补充
 """
-from .long import indneutralize
+from .long import group_neutralize
 from .. import talib as ta
 from ..alphas.alpha import CUMPROD
 from ..alphas.alpha import FILTER_191
@@ -101,4 +101,4 @@ REGRESI4 = wide_wraps(REGRESI, input_num=4, to_kwargs={4: 'timeperiod'})
 
 # 长表转宽表
 # 行业中性化
-indneutralize = long_wraps(indneutralize, direction='right')
+group_neutralize = long_wraps(group_neutralize, direction='right')

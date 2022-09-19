@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from ta_cn.over_bought_over_sold import ATR_CN as ATR_CN1
+from ta_cn.tdx.over_bought_over_sold import ATR_CN as ATR_CN1
 from ta_cn.slow import ATR_CN as ATR_CN2
 
 if __name__ == '__main__':

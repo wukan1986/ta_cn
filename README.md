@@ -165,7 +165,7 @@ print(z)
 import pandas as pd
 
 from ta_cn.imports.gtja_long import RANK
-from ta_cn.imports.long import SMA_TA, ATR, indneutralize
+from ta_cn.imports.long import SMA_TA, ATR, group_neutralize
 
 pd._testing._N = 500
 pd._testing._K = 30
@@ -196,7 +196,7 @@ print(r.unstack())
 # 横截面
 r = RANK(df['close'])
 print(r.unstack())
-r = indneutralize(df['close'], df['group'])
+r = group_neutralize(df['close'], df['group'])
 
 print(r.unstack())
 

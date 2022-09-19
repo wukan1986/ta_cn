@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 import ta_cn.talib as ta
-from ta_cn.reference import TR
+from ta_cn.tdx.reference import TR
 
 if __name__ == '__main__':
     # 准备数据

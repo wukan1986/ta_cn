@@ -38,7 +38,7 @@ sum = round_a_i(W.ts_sum)
 covariance = round_a_a_i(W.ts_covariance)
 stddev = round_a_i(W.ts_std_dev)  # 引入的是全体标准差
 
-indneutralize = W.indneutralize
+indneutralize = W.group_neutralize
 
 # 部分别名，这样官方公式可以减少改动
 Ts_Rank = ts_rank

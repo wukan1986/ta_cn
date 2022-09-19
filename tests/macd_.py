@@ -6,7 +6,7 @@ import pandas as pd
 
 from ta_cn.slow import MACD_CN
 from ta_cn.talib import set_compatibility_enable, TA_COMPATIBILITY_METASTOCK, set_compatibility
-from ta_cn.trend import MACD
+from ta_cn.tdx.trend import MACD
 
 if __name__ == '__main__':
     set_compatibility_enable(True)

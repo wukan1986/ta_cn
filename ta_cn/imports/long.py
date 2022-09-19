@@ -106,7 +106,7 @@ SLOPE_YX = dataframe_groupby_apply(SLOPE_YX, by=BY_ASSET)
 REGRESI4 = dataframe_groupby_apply(REGRESI, by=BY_ASSET, to_df=[0, 1, 2, 3], to_kwargs={4: 'timeperiod'})
 
 # 行业中性
-indneutralize = group_neutralize
+group_neutralize = group_neutralize
 
 # 可用于 全部市场宽度
 A_div_AB_1 = series_groupby_apply(A_div_AB, by=BY_DATE, to_kwargs={})
