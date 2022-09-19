@@ -1,6 +1,6 @@
-from .logical import IF
-from .maths import SGN
-from .reference import SUM, DIFF, REF
+from . import IF
+from . import SGN
+from . import SUM, DIFF, REF
 
 
 def OBV(real, volume, scale):  # 能量潮指标

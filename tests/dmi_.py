@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from ta_cn.slow import DMI as DMI2
-from ta_cn.trend import DMI as DMI1
+from ta_cn.tdx.trend import DMI as DMI1
 
 if __name__ == '__main__':
     # 准备数据

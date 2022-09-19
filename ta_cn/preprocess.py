@@ -1,7 +1,7 @@
-import numpy as _np
+import numpy as np
 
-from . import bn_wraps as _bn
 from .utils import pd_to_np
+from .wq.cross_sectional import winsorize, zscore, scale
 
 
 def winsorize_mad(x, n=3, constant=1.4826):
@@ -29,49 +29,13 @@ def winsorize_mad(x, n=3, constant=1.4826):
 
 
     """
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        _median = _bn.nanmedian(x_, axis=1)[:, None]
-        _mad = _bn.nanmedian(abs(x - _median), axis=1)[:, None]
-    else:
-        _median = _bn.nanmedian(x_)
-        _mad = _bn.nanmedian(abs(x - _median))
-
+    x = pd_to_np(x, copy=False)
+    axis = x.ndim - 1
+    _median = np.nanmedian(x, axis=axis, keepdims=True)
+    _mad = np.nanmedian(abs(x - _median), axis=axis, keepdims=True)
     _mad = _mad * constant * n
 
-    return _np.clip(x_, _median - _mad, _median + _mad)
-
-
-def winsorize_3sigma(x, min_=-3, max_=3, ddof=0):
-    """缩尾去极值，三倍标准差法
-
-    Parameters
-    ----------
-    x: array
-        需要缩尾去极值的数据
-    min_: float
-        设置下界标准差倍数
-    max_: float
-        设置上界标准差倍数
-    ddof: int
-        计算标准差的过程中分母为N - ddof：求标准差时默认除以 n 的，即是有偏的，ddof = 0；计算无偏样本标准差方式为除以 n-1 ，加入参数 ddof = 1
-
-    Returns
-    -------
-    array
-        `x` 经过三倍标准差法缩尾去极值处理后的新数据
-
-    """
-
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        _mean = _bn.nanmean(x_, axis=1)[:, None]
-        _std = _bn.nanstd(x_, axis=1, ddof=ddof)[:, None]
-    else:
-        _mean = _bn.nanmean(x_)
-        _std = _bn.nanstd(x_, ddof=ddof)
-
-    return _np.clip(x_, _mean + _std * min_, _mean + _std * max_)
+    return np.clip(x, _median - _mad, _median + _mad)
 
 
 def winsorize_quantile(x, min_=0.1, max_=0.9):
@@ -92,14 +56,10 @@ def winsorize_quantile(x, min_=0.1, max_=0.9):
         `x` 经过分位数法缩尾去极值处理后的新数据
 
     """
-
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        q = _np.nanquantile(x_, [min_, max_], axis=1)
-        return _np.clip(x_, q[0][:, None], q[1][:, None])
-    else:
-        q = _np.nanquantile(x_, [min_, max_])
-        return _np.clip(x_, q[0], q[1])
+    x = pd_to_np(x, copy=False)
+    axis = x.ndim - 1
+    q = np.nanquantile(x, [min_, max_], axis=axis, keepdims=True)
+    return np.clip(x, q[0], q[1])
 
 
 """
@@ -125,82 +85,17 @@ def drop_quantile(x, min_=0.1, max_=0.9):
         `x` 经过分位数法删除去极值处理后的新数据
 
     """
+    x = pd_to_np(x, copy=False)
+    axis = x.ndim - 1
 
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        q = _np.nanquantile(x_, [min_, max_], axis=1)
-        x_ = _np.where(x_ < q[0][:, None], _np.nan, x_)
-        x_ = _np.where(x_ > q[1][:, None], _np.nan, x_)
-    else:
-        q = _np.nanquantile(x_, [min_, max_])
-        x_ = _np.where(x_ < q[0], _np.nan, x_)
-        x_ = _np.where(x_ > q[1], _np.nan, x_)
-
-    return x_
+    q = np.nanquantile(x, [min_, max_], axis=axis, keepdims=True)
+    x = np.where((x < q[0]) | (x > q[1]), np.nan, x)
+    return x
 
 
 """
 标准化
 """
-
-
-def standardize_zscore(x, ddof=0):
-    """zscore标准化
-
-    Parameters
-    ----------
-    x: 2d array
-        需要进行zscore标准化的数据
-    ddof: int
-        计算标准差的过程中分母为N - ddof：求标准差时默认ddof = 0；计算无偏样本标准差时ddof = 1
-
-    Returns
-    -------
-    2d array
-        `x` 经过zscore标准化后的新数据
-
-    """
-
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        _mean = _bn.nanmean(x_, axis=1)[:, None]
-        _std = _bn.nanstd(x_, axis=1, ddof=ddof)[:, None]
-    else:
-        _mean = _bn.nanmean(x_)
-        _std = _bn.nanstd(x_, ddof=ddof)
-
-    return (x_ - _mean) / _std
-
-
-def standardize_minmax(x, min_=0, max_=1):
-    """MinMax归一化
-
-    Parameters
-    ----------
-    x: array
-        需要进行MinMax归一化的数据
-    min_: float
-        归一化范围的下界
-    max_: float
-        归一化范围的上界
-
-    Returns
-    -------
-    array
-        `x` 经过MinMax归一化后的新数据
-
-
-    """
-    x_ = pd_to_np(x, copy=False)
-    if x_.ndim == 2:
-        _min = _bn.nanmin(x_, axis=1)[:, None]
-        _max = _bn.nanmax(x_, axis=1)[:, None]
-    else:
-        _min = _bn.nanmin(x_)
-        _max = _bn.nanmax(x_)
-
-    _std = (x_ - _min) / (_max - _min)
-    return (max_ - min_) * _std + min_
 
 
 def fill_na(x):
@@ -209,14 +104,11 @@ def fill_na(x):
     -1到1归一化的值，用0填充也行吧？
     """
     x = x.copy()
-    x[_np.isnan(x)] = _np.nanmedian(x)
+    x[np.isnan(x)] = np.nanmedian(x)
     return x
 
 
-def demean(x):
-    """行业中性化，需要与groupby配合使用
-
-    RuntimeWarning: Mean of empty slice
-    nanmean在全nan时报此警告。这个警告还不好屏蔽
-    """
-    return x - _np.nanmean(x)
+# worldquant中函数的别名
+winsorize_3sigma = winsorize
+standardize_zscore = zscore
+standardize_minmax = scale

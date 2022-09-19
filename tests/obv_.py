@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 import ta_cn.talib as ta
-from ta_cn.volume import OBV
+from ta_cn.tdx.volume import OBV
 
 if __name__ == '__main__':
     # 准备数据

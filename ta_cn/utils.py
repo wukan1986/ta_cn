@@ -342,3 +342,10 @@ def resample_agg_1d(df, index_func='last', agg_func='sum', groupby_agg_func='sum
     if floor_date:
         df_1d.index = pd.to_datetime(df_1d.index.date)
     return df_1d
+
+def split_adjust(real):
+    """将后复权因子转成前复权"""
+    if isinstance(real, np.ndarray):
+        return real / real[-1]
+    else:
+        return real / real.iloc[-1]

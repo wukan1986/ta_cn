@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 import ta_cn.talib as ta
-from ta_cn.pressure_support import BOLL
+from ta_cn.tdx.pressure_support import BOLL
 
 if __name__ == '__main__':
     # 准备数据

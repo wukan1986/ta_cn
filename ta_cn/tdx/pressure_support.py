@@ -1,4 +1,4 @@
-from .reference import MA
+from . import MA
 from .statistics import STDP
 
 

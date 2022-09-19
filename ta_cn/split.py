@@ -1,6 +1,6 @@
 import numpy as np
 
-from .alpha import RANK
+from .wq.cross_sectional import rank as RANK
 
 
 def cut(x, bins=[0, 10, 100, 1000, 10000], rank=True, pct=False):

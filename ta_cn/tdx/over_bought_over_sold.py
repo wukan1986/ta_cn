@@ -1,12 +1,12 @@
 from talib import MA_Type
 
-from . import talib as ta
-from .maths import MEAN
-from .reference import LLV, HHV, REF, MA, TR
-from .talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
+from . import MA, REF, HHV, LLV, MEAN
+from .reference import TR
+from .. import talib as ta
+from ..talib import set_compatibility, TA_COMPATIBILITY_DEFAULT, TA_COMPATIBILITY_METASTOCK
 
-_ta1d = ta.init(mode=1, skipna=False)
-_ta2d = ta.init(mode=2, skipna=False)
+_ta1d = ta.init(mode=1, skipna=False, to_globals=False)
+_ta2d = ta.init(mode=2, skipna=False, to_globals=False)
 
 
 def ATR_CN(high, low, close, timeperiod):

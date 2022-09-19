@@ -1,5 +1,5 @@
 """
-通达信公式转alpha101
+公式转alpha101
 
 101 Formulaic Alphas
 文档质量一般
@@ -9,35 +9,35 @@
 from ..imports import long as L
 from ..utils import round_a_i, round_a_a_i
 
-correlation = round_a_a_i(L.CORREL)
-decay_linear = round_a_i(L.WMA)
+correlation = round_a_a_i(L.ts_corr)
+decay_linear = round_a_i(L.ts_decay_linear)
 
-LessThan = L.LessThan
-rank = L.RANK
-ts_rank = round_a_i(L.TS_RANK)
+LessThan = L.less
+rank = L.rank
+ts_rank = round_a_i(L.ts_rank)
 scale = L.scale
-SignedPower = L.signedpower
+SignedPower = L.signed_power
 
-IF = L.IF
-abs = L.ABS
-log = L.LN  # 这里是用的自然对数
-MAX = L.MAX2
-MIN = L.MIN2
-sign = L.SGN
+IF = L.if_else
+abs = L.abs_
+log = L.log  # 这里是用的自然对数
+MAX = L.max_
+MIN = L.min_
+sign = L.sign
 
-delta = round_a_i(L.DIFF)
-ts_max = round_a_i(L.HHV)
-ts_argmax = round_a_i(L.HHVBARS)
-ts_min = round_a_i(L.LLV)
-ts_argmin = round_a_i(L.LLVBARS)
-product = round_a_i(L.PRODUCT)
-delay = round_a_i(L.REF)
-sum = round_a_i(L.SUM)
+delta = round_a_i(L.ts_delta)
+ts_max = round_a_i(L.ts_max)
+ts_argmax = round_a_i(L.ts_arg_max)
+ts_min = round_a_i(L.ts_min)
+ts_argmin = round_a_i(L.ts_arg_min)
+product = round_a_i(L.ts_product)
+delay = round_a_i(L.ts_delay)
+sum = round_a_i(L.ts_sum)
 
-covariance = round_a_a_i(L.COVAR)
-stddev = round_a_i(L.STDP)  # 引入的是全体标准差
+covariance = round_a_a_i(L.ts_covariance)
+stddev = round_a_i(L.ts_std_dev)  # 引入的是全体标准差
 
-indneutralize = L.indneutralize
+indneutralize = L.group_neutralize
 
 # 部分别名，这样官方公式可以减少改动
 Ts_Rank = ts_rank

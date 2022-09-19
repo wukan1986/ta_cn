@@ -3,11 +3,11 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import talib as ta
+import ta_cn.talib as ta
 
 # def FORCAST(S, N=14):  # 返回S序列N周期回线性回归后的预测值， jqz1226改进成序列出
 #     return pd.DataFrame(S).rolling(N).apply(lambda x: np.polyval(np.polyfit(range(N), x, deg=1), N - 1), raw=True)
-from ta_cn.statistics import FORCAST
+from ta_cn.regress import FORCAST
 
 if __name__ == '__main__':
     # 准备数据
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     t1 = time.time()
     z1 = ta.LINEARREG(c)
     t2 = time.time()
-    z2 = FORCAST(c).values
+    z2 = FORCAST(c)
     t3 = time.time()
 
     print(t2 - t1, t3 - t2)

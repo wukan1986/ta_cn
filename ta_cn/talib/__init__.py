@@ -9,6 +9,8 @@ Examples
 只要替换导入即可直接支持二维矩阵
 >>> import talib as ta
 >>> import ta_cn.talib as ta
+>>> _ta1d = ta.init(mode=1, skipna=False, to_globals=False)
+>>> _ta2d = ta.init(mode=2, skipna=False, to_globals=False)
 
 """
 from functools import wraps, reduce
@@ -167,13 +169,6 @@ def init(mode=1, skipna=False, to_globals=False):
 
     """
     assert mode in (1, 2)
-
-    # print(f'ta_cn mode: {mode}, skipna: {skipna}')
-    #
-    # if mode == 1:
-    #     print(f'\t1. 输入一维数据，支持skipna跳过空值。必须使用命名参数传入周期，使用位置参数传入数据。')
-    # if mode == 2:
-    #     print(f'\t2. 输入二维数据，支持skipna跳过空值。必须使用命名参数传入周期，使用位置参数传入数据。周期参数由只支持标量升级为一维向量')
 
     class TA_CN_LIB:
         pass
