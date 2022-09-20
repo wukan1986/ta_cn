@@ -8,6 +8,7 @@ from numba.typed import List
 from .. import bn_wraps as bn, numba_cache
 from .. import talib as ta
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb, _rolling_func_3_nb
+from ..regress import ts_simple_regress
 from ..utils import pd_to_np
 
 _ta1d = ta.init(mode=1, skipna=False, to_globals=False)
@@ -63,6 +64,7 @@ def hump_decay(x, p=0, relative=False):
         return np.where(t2 > (p * t3), x, t1)
     else:
         return np.where(t2 > p, x, t1)
+
 
 def inst_tvr(x, d):
     """Total trading value / Total holding value in the past d days"""
@@ -368,7 +370,7 @@ def ts_rank(x, d, constant=0):
 
 def ts_regression(y, x, d, lag=0, rettype=0):
     """Returns various parameters related to regression function."""
-    pass
+    return ts_simple_regress(y, x, d, lag=lag, rettype=rettype)
 
 
 def ts_returns(x, d, mode=1):

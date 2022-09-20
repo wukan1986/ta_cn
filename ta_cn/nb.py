@@ -148,3 +148,13 @@ def numpy_rolling_apply(inputs, window, func1, func2, *args):
     arrs = [np.lib.stride_tricks.sliding_window_view(i, window, axis=0) for i in inputs]
 
     return func1(*arrs, out, window, func2, *args)
+
+
+def extend_shape(x, d, fill_value=np.nan):
+    """扩展矩阵，在前部添加空值，用于sliding_window_view后还是保持形状"""
+    shape = list(x.shape)
+    shape[0] += d
+    y = np.empty(shape=tuple(shape))
+    y[:d] = fill_value
+    y[d:] = x
+    return y

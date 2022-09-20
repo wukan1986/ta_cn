@@ -6,7 +6,7 @@ import pandas as pd
 
 from . import bn_wraps as bn
 from . import talib as ta
-from .nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb
+from .nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb, extend_shape
 from .utils import pd_to_np
 
 _ta1d = ta.init(mode=1, skipna=False)
@@ -52,7 +52,7 @@ def SLOPE_YX(real0, real1, timeperiod):
                                timeperiod, _rolling_func_2_nb, _slope_yx_nb)
 
 
-def ts_simple_regress(y, x, window=10):
+def ts_simple_regress(y, x, d, lag=0, rettype=0):
     """滚动一元线性回归。
 
     由于利用了bottleneck的滚动功能，比SLOPE_YX_NB快一些，但精度有少量差异，后期需再验证
@@ -63,8 +63,10 @@ def ts_simple_regress(y, x, window=10):
         回归因变量
     x: array_like
         回归自变量
-    window
+    d
         移动计算窗口长度
+    lag
+    rettype
 
     Returns
     -------
@@ -76,18 +78,58 @@ def ts_simple_regress(y, x, window=10):
         回归残差项
 
     """
-    xy_ts_sum = bn.move_sum(np.multiply(x, y), window=window, axis=0)
-    xx_ts_sum = bn.move_sum(np.multiply(x, x), window=window, axis=0)
-    x_bar = bn.move_mean(x, window=window, axis=0)
-    y_bar = bn.move_mean(y, window=window, axis=0)
+    # 准备
+    outputs = {}
+    if not isinstance(rettype, list):
+        rettype = [rettype]
 
-    up = xy_ts_sum - np.multiply(x_bar, y_bar) * window
-    down = xx_ts_sum - np.multiply(x_bar, x_bar) * window
+    # 计算
+    xy_ts_sum = bn.move_sum(np.multiply(x, y), window=d, axis=0)
+    xx_ts_sum = bn.move_sum(np.multiply(x, x), window=d, axis=0)
+    x_bar = bn.move_mean(x, window=d, axis=0)
+    y_bar = bn.move_mean(y, window=d, axis=0)
+
+    up = xy_ts_sum - np.multiply(x_bar, y_bar) * d
+    down = xx_ts_sum - np.multiply(x_bar, x_bar) * d
     beta_hat = up / down
     intercept_hat = y_bar - np.multiply(beta_hat, x_bar)
-    residual_hat = y - intercept_hat - np.multiply(beta_hat, x)
+    y_hat = intercept_hat + np.multiply(beta_hat, x)
+    residual_hat = y - y_hat
 
-    return intercept_hat, beta_hat, residual_hat
+    def _sse(x, y, d):
+        x1 = extend_shape(x, d - 1)
+        x2 = np.lib.stride_tricks.sliding_window_view(x1, d, axis=0)
+        z = x2 - np.expand_dims(y, axis=-1)
+        z = np.sum(z ** 2, axis=-1)
+        return z
+
+    # 残差
+    outputs[0] = residual_hat
+    # 截距
+    outputs[1] = intercept_hat
+    # 系数
+    outputs[2] = beta_hat
+    # 预测值
+    outputs[3] = y_hat
+
+    s = set([4, 5, 6]) & set(rettype)
+    if len(s) > 0:
+        # 残差平方和
+        outputs[4] = _sse(y, y_hat, d)
+        # 总平方和
+        outputs[5] = _sse(y, y_bar, d)
+
+        # 决定系数
+        # 从“残差平方和的补”的角度来看
+        # outputs[6] = 1 - outputs[4] / outputs[5]  # 可能有负数
+        # 从“可解释方差”的角度来看
+        outputs[6] = _sse(y_hat, y_bar, d) / outputs[5]  # 没有负数
+
+    # 输出
+    if len(rettype) == 1:
+        return outputs[rettype[0]]
+    else:
+        return tuple([outputs[r] for r in rettype])
 
 
 warnings.filterwarnings("ignore", category=numba.NumbaPerformanceWarning)
