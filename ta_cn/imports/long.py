@@ -13,6 +13,7 @@ from ..alphas.alpha import FILTER_191
 from ..ema import SMA_CN
 from ..regress import REGRESI
 from ..regress import SLOPE_YX
+from ..tdx.logical import CROSS
 from ..tdx.reference import FILTER as FILTER_TDX
 from ..tdx.reference import SUMIF
 from ..utils import to_pd
@@ -112,3 +113,5 @@ group_neutralize = group_neutralize
 A_div_AB_1 = series_groupby_apply(A_div_AB, by=BY_DATE, to_kwargs={})
 # 可用于 板块市场宽度
 A_div_AB_2 = dataframe_groupby_apply(A_div_AB, by=BY_GROUP, to_df=[0, 'group'], to_kwargs={})
+
+CROSS = dataframe_groupby_apply(CROSS, by=BY_ASSET, to_kwargs={})

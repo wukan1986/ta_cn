@@ -13,6 +13,7 @@ from ..alphas.alpha import FILTER_191
 from ..ema import SMA_CN
 from ..regress import REGRESI
 from ..regress import SLOPE_YX
+from ..tdx.logical import CROSS
 from ..tdx.reference import FILTER as FILTER_TDX
 from ..tdx.reference import SUMIF
 from ..utils_wide import wide_wraps, long_wraps
@@ -102,3 +103,5 @@ REGRESI4 = wide_wraps(REGRESI, input_num=4, to_kwargs={4: 'timeperiod'})
 # 长表转宽表
 # 行业中性化
 group_neutralize = long_wraps(group_neutralize, direction='right')
+
+CROSS = wide_wraps(CROSS, input_num=2, to_kwargs={})
