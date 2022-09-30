@@ -177,7 +177,7 @@ def init(mode=1, skipna=False, to_globals=False):
     for i, func_name in enumerate(_talib.get_functions()):
         """talib遍历"""
         _ta_func = getattr(_talib, func_name)
-        info = _abstract.Function(func_name)._Function__info
+        info = _abstract.Function(func_name).info
         output_names = info['output_names']
         input_names = info['input_names']
 
