@@ -119,18 +119,23 @@ from .long_wq import ts_count as COUNT
 from .long_wq import ts_delay as REF
 from .long_wq import ts_delta as DIFF
 from .long_wq import ts_max as HHV
+from .long_wq import ts_arg_max as HHVBARS
 from .long_wq import ts_mean as MA
 from .long_wq import ts_min as LLV
+from .long_wq import ts_arg_min as LLVBARS
 from .long_wq import ts_sum as SUM
 from .long_wq import rank as RANK
+from .long_wq import power as POW
 
 ABS
 MAX
 MIN
 REF
 HHV
+HHVBARS
 MA
 LLV
+LLVBARS
 SUM
 ADD
 SUB
@@ -145,3 +150,4 @@ DIFF
 IF
 COUNT
 RANK
+POW
