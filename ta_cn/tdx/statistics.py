@@ -2,12 +2,8 @@ import numba
 import numpy as np
 
 from .. import bn_wraps as bn, numba_cache
-from .. import talib as ta
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb
 from ..utils import pd_to_np
-
-_ta1d = ta.init(mode=1, skipna=False)
-_ta2d = ta.init(mode=2, skipna=False)
 
 
 def AVEDEV(real, timeperiod: int):

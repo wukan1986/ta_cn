@@ -5,42 +5,45 @@
 """
 
 from ..imports import long as L
+from ..imports import long_ta as L_TA
+from ..imports import long_tdx as L_TDX
+from ..imports import long_wq as L_WQ
 
-CORR = L.ts_corr
-REGSLOPE = L.LINEARREG_SLOPE
-MEAN = L.SMA_TA
-WMA = L.SMA_TA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
-DECAYLINEAR = L.ts_decay_linear
+CORR = L_WQ.ts_corr
+REGSLOPE = L_TA.LINEARREG_SLOPE
+MEAN = L_TA.SMA
+WMA = L_TA.SMA  # !!!WMA的公式没看懂，所以用另一个替代，以后再改
+DECAYLINEAR = L_WQ.ts_decay_linear
 
 CUMPROD = L.CUMPROD
 FILTER = L.FILTER_191
-RANK = L.rank
-TSRANK = L.ts_rank
-LessThan = L.less
+RANK = L_WQ.rank
+TSRANK = L_WQ.ts_rank
+LessThan = L_WQ.less
 
-IF = L.if_else
-ABS = L.abs_
-LOG = L.log  # 这里是用的自然对数
-MAX = L.max_
-MIN = L.min_
-SIGN = L.sign
+IF = L_WQ.if_else
+ABS = L_WQ.abs_
+LOG = L_WQ.log  # 这里是用的自然对数
+MAX = L_WQ.max_
+MIN = L_WQ.min_
+SIGN = L_WQ.sign
 
-SMA = L.SMA_CN
+SMA = L_TDX.SMA_CN
 
-COUNT = L.ts_count
-DELTA = L.ts_delta
-TSMAX = L.ts_max
-HIGHDAY = L.ts_arg_max
-TSMIN = L.ts_min
-LOWDAY = L.ts_arg_min
-MA = L.ts_mean
-PROD = L.ts_product
-DELAY = L.ts_delay
-SUM = L.ts_sum
-SUMIF = L.SUMIF  # 注意，SUMIF参数的位置常用的方式不同
+COUNT = L_WQ.ts_count
+DELTA = L_WQ.ts_delta
+TSMAX = L_WQ.ts_max
+HIGHDAY = L_WQ.ts_arg_max
+TSMIN = L_WQ.ts_min
+LOWDAY = L_WQ.ts_arg_min
+MA = L_WQ.ts_mean
+PROD = L_WQ.ts_product
+DELAY = L_WQ.ts_delay
+SUM = L_WQ.ts_sum
+SUMIF = L_TDX.SUMIF  # 注意，SUMIF参数的位置常用的方式不同
 
 REGBETA = L.SLOPE_YX
 REGRESI = L.REGRESI4
 
-COVIANCE = L.ts_covariance
-STD = L.ts_std_dev  # 引入的是全体标准差
+COVIANCE = L_WQ.ts_covariance
+STD = L_WQ.ts_std_dev  # 引入的是全体标准差

@@ -285,7 +285,7 @@ class WArr(np.ndarray):
             return self.from_array(self.raw() | other, self.direction)
 
 
-def wide_wraps(func, direction='down', input_num=1, output_num=1, to_kwargs={1: 'timeperiod'}):
+def wide_wraps(func, direction='down', input_num=1, to_kwargs={1: 'timeperiod'}, output_num=1):
     """将二维函数包装成堆叠函数
 
     Parameters
@@ -297,10 +297,10 @@ def wide_wraps(func, direction='down', input_num=1, output_num=1, to_kwargs={1: 
         数据堆叠方向。时序堆叠到最后。
     input_num: int
         入参数量。二维数据个数
-    output_num: int
-        输出数量
     to_kwargs: dict
         第几个入参转成命名参数
+    output_num: int
+        输出数量
 
     """
 
@@ -321,7 +321,7 @@ def wide_wraps(func, direction='down', input_num=1, output_num=1, to_kwargs={1: 
         if output_num == 1:
             return WArr.from_args(outputs, arg0.row, arg0.col, direction)
         else:
-            return [WArr(v, arg0.row, arg0.col, direction) for v in outputs]
+            return tuple([WArr.from_args(v, arg0.row, arg0.col, direction) for v in outputs])
 
     return decorated
 

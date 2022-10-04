@@ -2,7 +2,7 @@ import pandas as pd
 from pandas._testing import assert_series_equal
 
 from ta_cn.imports.long import A_div_AB_1, A_div_AB_2
-from ta_cn.imports.wide import ts_mean
+from ta_cn.imports.wide_wq import ts_mean
 from ta_cn.utils import np_to_pd
 
 if __name__ == '__main__':

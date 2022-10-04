@@ -1,6 +1,8 @@
 """
 优先实现WorldQuant BRAIN中Fast Expression的函数
 然后再实现通达信的函数
+
+此文件中不跳过空值
 """
 
 from ..wq.arithmetic import abs_ as ABS

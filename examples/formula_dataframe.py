@@ -1,6 +1,6 @@
 import pandas as pd
 
-from ta_cn.imports.wide import ATR
+from ta_cn.imports.wide_ta import ATR
 from ta_cn.utils import np_to_pd
 from ta_cn.utils_wide import WArr
 

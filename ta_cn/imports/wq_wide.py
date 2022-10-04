@@ -6,39 +6,38 @@
 1. 部分函数即有全小写，又有大小写混合
 2. 很多参数应当是整数，但输入是小数，不得不做修正
 """
-
-from ..imports import wide as W
+from ..imports import wide_wq as W_WQ
 from ..utils import round_a_i, round_a_a_i
 
-correlation = round_a_a_i(W.CORREL)
-decay_linear = round_a_i(W.ts_decay_linear)
+correlation = round_a_a_i(W_WQ.ts_corr)
+decay_linear = round_a_i(W_WQ.ts_decay_linear)
 
-LessThan = W.less
-rank = W.rank
-ts_rank = round_a_i(W.ts_rank)
-scale = W.scale
-SignedPower = W.signed_power
+LessThan = W_WQ.less
+rank = W_WQ.rank
+ts_rank = round_a_i(W_WQ.ts_rank)
+scale = W_WQ.scale
+SignedPower = W_WQ.signed_power
 
-IF = W.if_else
-abs = W.abs_
-log = W.log  # 这里是用的自然对数
-MAX = W.max_
-MIN = W.min_
-sign = W.sign
+IF = W_WQ.if_else
+abs = W_WQ.abs_
+log = W_WQ.log  # 这里是用的自然对数
+MAX = W_WQ.max_
+MIN = W_WQ.min_
+sign = W_WQ.sign
 
-delta = round_a_i(W.ts_delta)
-ts_max = round_a_i(W.ts_max)
-ts_argmax = round_a_i(W.ts_arg_max)
-ts_min = round_a_i(W.ts_min)
-ts_argmin = round_a_i(W.ts_arg_min)
-product = round_a_i(W.ts_product)
-delay = round_a_i(W.ts_delay)
-sum = round_a_i(W.ts_sum)
+delta = round_a_i(W_WQ.ts_delta)
+ts_max = round_a_i(W_WQ.ts_max)
+ts_argmax = round_a_i(W_WQ.ts_arg_max)
+ts_min = round_a_i(W_WQ.ts_min)
+ts_argmin = round_a_i(W_WQ.ts_arg_min)
+product = round_a_i(W_WQ.ts_product)
+delay = round_a_i(W_WQ.ts_delay)
+sum = round_a_i(W_WQ.ts_sum)
 
-covariance = round_a_a_i(W.ts_covariance)
-stddev = round_a_i(W.ts_std_dev)  # 引入的是全体标准差
+covariance = round_a_a_i(W_WQ.ts_covariance)
+stddev = round_a_i(W_WQ.ts_std_dev)  # 引入的是全体标准差
 
-indneutralize = W.group_neutralize
+indneutralize = W_WQ.group_neutralize
 
 # 部分别名，这样官方公式可以减少改动
 Ts_Rank = ts_rank

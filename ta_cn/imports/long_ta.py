@@ -1,0 +1,221 @@
+"""
+TALIB库，长表模式，跳过空值
+"""
+import talib as _talib
+from talib import abstract as _abstract
+
+from .. import BY_ASSET
+from ..utils_long import dataframe_groupby_apply, series_groupby_apply
+
+__FUNCS__ = {}
+for i, func_name in enumerate(_talib.get_functions()):
+    """talib遍历"""
+
+
+    def _input_names_len(kvs):
+        cnt = 0
+        for k, v in kvs.items():
+            if isinstance(v, list):
+                cnt += len(v)
+            else:
+                cnt += 1
+        return cnt
+
+
+    # 导入原版talib
+    _ta_func = getattr(_talib, func_name)
+    info = _abstract.Function(func_name).info
+
+    input_num = _input_names_len(info['input_names'])
+    para_num = len(info['parameters'])
+    output_num = len(info['output_names'])
+
+    to_kwargs = {i + input_num: p for i, p in enumerate(info['parameters'])}
+    dropna = True if info['group'] in ('Math Transform',) else False
+
+    if input_num == 1:
+        _ta_long = series_groupby_apply(_ta_func, by=BY_ASSET, dropna=dropna,
+                                        to_kwargs=to_kwargs, output_num=output_num)
+    else:
+        _ta_long = dataframe_groupby_apply(_ta_func, by=BY_ASSET, dropna=dropna,
+                                           to_df=range(input_num), to_kwargs=to_kwargs, output_num=output_num)
+
+    __FUNCS__[func_name] = _ta_long
+
+# Overlap Studies
+BBANDS = __FUNCS__['BBANDS']
+DEMA = __FUNCS__['DEMA']
+EMA = __FUNCS__['EMA']
+HT_TRENDLINE = __FUNCS__['HT_TRENDLINE']
+KAMA = __FUNCS__['KAMA']
+MA = __FUNCS__['MA']
+MAMA = __FUNCS__['MAMA']
+MAVP = __FUNCS__['MAVP']
+MIDPOINT = __FUNCS__['MIDPOINT']
+MIDPRICE = __FUNCS__['MIDPRICE']
+SAR = __FUNCS__['SAR']
+SAREXT = __FUNCS__['SAREXT']
+SMA = __FUNCS__['SMA']
+T3 = __FUNCS__['T3']
+TEMA = __FUNCS__['TEMA']
+TRIMA = __FUNCS__['TRIMA']
+WMA = __FUNCS__['WMA']
+
+# Momentum Indicators
+ADX = __FUNCS__['ADX']
+ADXR = __FUNCS__['ADXR']
+APO = __FUNCS__['APO']
+AROON = __FUNCS__['AROON']
+AROONOSC = __FUNCS__['AROONOSC']
+BOP = __FUNCS__['BOP']
+CCI = __FUNCS__['CCI']
+CMO = __FUNCS__['CMO']
+DX = __FUNCS__['DX']
+MACD = __FUNCS__['MACD']
+MACDEXT = __FUNCS__['MACDEXT']
+MACDFIX = __FUNCS__['MACDFIX']
+MFI = __FUNCS__['MFI']
+MINUS_DI = __FUNCS__['MINUS_DI']
+MINUS_DM = __FUNCS__['MINUS_DM']
+MOM = __FUNCS__['MOM']
+PLUS_DI = __FUNCS__['PLUS_DI']
+PLUS_DM = __FUNCS__['PLUS_DM']
+PPO = __FUNCS__['PPO']
+ROC = __FUNCS__['ROC']
+ROCP = __FUNCS__['ROCP']
+ROCR = __FUNCS__['ROCR']
+ROCR100 = __FUNCS__['ROCR100']
+RSI = __FUNCS__['RSI']
+STOCH = __FUNCS__['STOCH']
+STOCHF = __FUNCS__['STOCHF']
+STOCHRSI = __FUNCS__['STOCHRSI']
+TRIX = __FUNCS__['TRIX']
+ULTOSC = __FUNCS__['ULTOSC']
+WILLR = __FUNCS__['WILLR']
+
+# Volume Indicators
+AD = __FUNCS__['AD']
+ADOSC = __FUNCS__['ADOSC']
+OBV = __FUNCS__['OBV']
+
+# Volatility Indicators
+ATR = __FUNCS__['ATR']
+NATR = __FUNCS__['NATR']
+TRANGE = __FUNCS__['TRANGE']
+
+# Price Transform
+AVGPRICE = __FUNCS__['AVGPRICE']
+MEDPRICE = __FUNCS__['MEDPRICE']
+TYPPRICE = __FUNCS__['TYPPRICE']
+WCLPRICE = __FUNCS__['WCLPRICE']
+
+# Cycle Indicators
+HT_DCPERIOD = __FUNCS__['HT_DCPERIOD']
+HT_DCPHASE = __FUNCS__['HT_DCPHASE']
+HT_PHASOR = __FUNCS__['HT_PHASOR']
+HT_SINE = __FUNCS__['HT_SINE']
+HT_TRENDMODE = __FUNCS__['HT_TRENDMODE']
+
+# Pattern Recognition
+CDL2CROWS = __FUNCS__['CDL2CROWS']
+CDL3BLACKCROWS = __FUNCS__['CDL3BLACKCROWS']
+CDL3INSIDE = __FUNCS__['CDL3INSIDE']
+CDL3LINESTRIKE = __FUNCS__['CDL3LINESTRIKE']
+CDL3OUTSIDE = __FUNCS__['CDL3OUTSIDE']
+CDL3STARSINSOUTH = __FUNCS__['CDL3STARSINSOUTH']
+CDL3WHITESOLDIERS = __FUNCS__['CDL3WHITESOLDIERS']
+CDLABANDONEDBABY = __FUNCS__['CDLABANDONEDBABY']
+CDLADVANCEBLOCK = __FUNCS__['CDLADVANCEBLOCK']
+CDLBELTHOLD = __FUNCS__['CDLBELTHOLD']
+CDLBREAKAWAY = __FUNCS__['CDLBREAKAWAY']
+CDLCLOSINGMARUBOZU = __FUNCS__['CDLCLOSINGMARUBOZU']
+CDLCONCEALBABYSWALL = __FUNCS__['CDLCONCEALBABYSWALL']
+CDLCOUNTERATTACK = __FUNCS__['CDLCOUNTERATTACK']
+CDLDARKCLOUDCOVER = __FUNCS__['CDLDARKCLOUDCOVER']
+CDLDOJI = __FUNCS__['CDLDOJI']
+CDLDOJISTAR = __FUNCS__['CDLDOJISTAR']
+CDLDRAGONFLYDOJI = __FUNCS__['CDLDRAGONFLYDOJI']
+CDLENGULFING = __FUNCS__['CDLENGULFING']
+CDLEVENINGDOJISTAR = __FUNCS__['CDLEVENINGDOJISTAR']
+CDLEVENINGSTAR = __FUNCS__['CDLEVENINGSTAR']
+CDLGAPSIDESIDEWHITE = __FUNCS__['CDLGAPSIDESIDEWHITE']
+CDLGRAVESTONEDOJI = __FUNCS__['CDLGRAVESTONEDOJI']
+CDLHAMMER = __FUNCS__['CDLHAMMER']
+CDLHANGINGMAN = __FUNCS__['CDLHANGINGMAN']
+CDLHARAMI = __FUNCS__['CDLHARAMI']
+CDLHARAMICROSS = __FUNCS__['CDLHARAMICROSS']
+CDLHIGHWAVE = __FUNCS__['CDLHIGHWAVE']
+CDLHIKKAKE = __FUNCS__['CDLHIKKAKE']
+CDLHIKKAKEMOD = __FUNCS__['CDLHIKKAKEMOD']
+CDLHOMINGPIGEON = __FUNCS__['CDLHOMINGPIGEON']
+CDLIDENTICAL3CROWS = __FUNCS__['CDLIDENTICAL3CROWS']
+CDLINNECK = __FUNCS__['CDLINNECK']
+CDLINVERTEDHAMMER = __FUNCS__['CDLINVERTEDHAMMER']
+CDLKICKING = __FUNCS__['CDLKICKING']
+CDLKICKINGBYLENGTH = __FUNCS__['CDLKICKINGBYLENGTH']
+CDLLADDERBOTTOM = __FUNCS__['CDLLADDERBOTTOM']
+CDLLONGLEGGEDDOJI = __FUNCS__['CDLLONGLEGGEDDOJI']
+CDLLONGLINE = __FUNCS__['CDLLONGLINE']
+CDLMARUBOZU = __FUNCS__['CDLMARUBOZU']
+CDLMATCHINGLOW = __FUNCS__['CDLMATCHINGLOW']
+CDLMATHOLD = __FUNCS__['CDLMATHOLD']
+CDLMORNINGDOJISTAR = __FUNCS__['CDLMORNINGDOJISTAR']
+CDLMORNINGSTAR = __FUNCS__['CDLMORNINGSTAR']
+CDLONNECK = __FUNCS__['CDLONNECK']
+CDLPIERCING = __FUNCS__['CDLPIERCING']
+CDLRICKSHAWMAN = __FUNCS__['CDLRICKSHAWMAN']
+CDLRISEFALL3METHODS = __FUNCS__['CDLRISEFALL3METHODS']
+CDLSEPARATINGLINES = __FUNCS__['CDLSEPARATINGLINES']
+CDLSHOOTINGSTAR = __FUNCS__['CDLSHOOTINGSTAR']
+CDLSHORTLINE = __FUNCS__['CDLSHORTLINE']
+CDLSPINNINGTOP = __FUNCS__['CDLSPINNINGTOP']
+CDLSTALLEDPATTERN = __FUNCS__['CDLSTALLEDPATTERN']
+CDLSTICKSANDWICH = __FUNCS__['CDLSTICKSANDWICH']
+CDLTAKURI = __FUNCS__['CDLTAKURI']
+CDLTASUKIGAP = __FUNCS__['CDLTASUKIGAP']
+CDLTHRUSTING = __FUNCS__['CDLTHRUSTING']
+CDLTRISTAR = __FUNCS__['CDLTRISTAR']
+CDLUNIQUE3RIVER = __FUNCS__['CDLUNIQUE3RIVER']
+CDLUPSIDEGAP2CROWS = __FUNCS__['CDLUPSIDEGAP2CROWS']
+CDLXSIDEGAP3METHODS = __FUNCS__['CDLXSIDEGAP3METHODS']
+
+# Statistic Functions
+BETA = __FUNCS__['BETA']
+CORREL = __FUNCS__['CORREL']
+LINEARREG = __FUNCS__['LINEARREG']
+LINEARREG_ANGLE = __FUNCS__['LINEARREG_ANGLE']
+LINEARREG_INTERCEPT = __FUNCS__['LINEARREG_INTERCEPT']
+LINEARREG_SLOPE = __FUNCS__['LINEARREG_SLOPE']
+STDDEV = __FUNCS__['STDDEV']
+TSF = __FUNCS__['TSF']
+VAR = __FUNCS__['VAR']
+
+# Math Transform
+ACOS = __FUNCS__['ACOS']
+ASIN = __FUNCS__['ASIN']
+ATAN = __FUNCS__['ATAN']
+CEIL = __FUNCS__['CEIL']
+COS = __FUNCS__['COS']
+COSH = __FUNCS__['COSH']
+EXP = __FUNCS__['EXP']
+FLOOR = __FUNCS__['FLOOR']
+LN = __FUNCS__['LN']
+LOG10 = __FUNCS__['LOG10']
+SIN = __FUNCS__['SIN']
+SINH = __FUNCS__['SINH']
+SQRT = __FUNCS__['SQRT']
+TAN = __FUNCS__['TAN']
+TANH = __FUNCS__['TANH']
+
+# Math Operator
+ADD = __FUNCS__['ADD']
+DIV = __FUNCS__['DIV']
+MAX = __FUNCS__['MAX']
+MAXINDEX = __FUNCS__['MAXINDEX']
+MIN = __FUNCS__['MIN']
+MININDEX = __FUNCS__['MININDEX']
+MINMAX = __FUNCS__['MINMAX']
+MINMAXINDEX = __FUNCS__['MINMAXINDEX']
+MULT = __FUNCS__['MULT']
+SUB = __FUNCS__['SUB']
+SUM = __FUNCS__['SUM']

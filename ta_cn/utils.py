@@ -11,7 +11,8 @@ def to_pd(func):
     @wraps(func)
     def decorated(*args, **kwargs):
         real = args[0]
-        return np_to_pd(func(*args, **kwargs),
+        ret = func(*args, **kwargs)
+        return np_to_pd(ret,
                         index=getattr(real, 'index', None),
                         columns=getattr(real, 'columns', None))
 
@@ -342,6 +343,7 @@ def resample_agg_1d(df, index_func='last', agg_func='sum', groupby_agg_func='sum
     if floor_date:
         df_1d.index = pd.to_datetime(df_1d.index.date)
     return df_1d
+
 
 def split_adjust(real):
     """将后复权因子转成前复权"""

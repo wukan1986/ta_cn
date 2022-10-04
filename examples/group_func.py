@@ -1,8 +1,7 @@
 import pandas as pd
 from pandas._testing import assert_series_equal
 
-from ta_cn.wq.group import group_percentage, group_neutralize, group_min, group_count, group_scale, group_rank, \
-    group_normalize, group_mean
+from ta_cn.wq.group import group_mean
 
 if __name__ == '__main__':
     pd._testing._N = 500
@@ -29,5 +28,5 @@ if __name__ == '__main__':
     # print(r)
     # r = group_normalize(kwargs_l['close'], kwargs_l['sector'])
     # print(r)
-    r = group_mean(kwargs_l['close'], kwargs_l['close'],kwargs_l['sector'])
+    r = group_mean(kwargs_l['close'], kwargs_l['close'], kwargs_l['sector'])
     print(r)

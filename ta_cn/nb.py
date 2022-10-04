@@ -1,13 +1,14 @@
 import numba
 import numpy as np
 
+from . import numba_cache
 from .utils import pd_to_np
 
 
 def fill_notna(arr, fill_value, n=1):
     """查找第一个非nan,将其改成fill_value"""
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _fill_notna_nb(arr, fill_value, n: int):
         is_1d = arr.ndim == 1
         x = arr.shape[0]
@@ -33,7 +34,7 @@ def fill_notna(arr, fill_value, n=1):
     return _fill_notna_nb(arr, fill_value, n)
 
 
-@numba.jit(nopython=True, cache=True, nogil=True)
+@numba.jit(nopython=True, cache=numba_cache, nogil=True)
 def _rolling_func_3_nb(arr0, arr1, arr2, out, timeperiod, func, *args):
     """滚动函数，在二维或三维数上遍历，三组输入
 
@@ -67,7 +68,7 @@ def _rolling_func_3_nb(arr0, arr1, arr2, out, timeperiod, func, *args):
     return out
 
 
-@numba.jit(nopython=True, cache=True, nogil=True)
+@numba.jit(nopython=True, cache=numba_cache, nogil=True)
 def _rolling_func_2_nb(arr0, arr1, out, timeperiod, func, *args):
     """滚动函数，在二维或三维数上遍历，二组输入
 
@@ -101,7 +102,7 @@ def _rolling_func_2_nb(arr0, arr1, out, timeperiod, func, *args):
     return out
 
 
-@numba.jit(nopython=True, cache=True, nogil=True)
+@numba.jit(nopython=True, cache=numba_cache, nogil=True)
 def _rolling_func_1_nb(arr, out, timeperiod, func, *args):
     """滚动函数，在二维或三维数上遍历，一组输入
 

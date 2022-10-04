@@ -6,6 +6,7 @@ import pandas as pd
 
 from . import bn_wraps as bn
 from . import talib as ta
+from . import numba_cache
 from .nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb, extend_shape
 from .utils import pd_to_np
 
@@ -24,7 +25,7 @@ def SLOPE_Y(real, timeperiod):
     SLOPE_Y(real, timeperiod=14)
     """
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _slope_y_nb(y, x, m_x):
         """slope线性回归斜率。由于x固定，所以提前在外部计算，加快速度"""
         m_y = np.mean(y)
@@ -41,7 +42,7 @@ def SLOPE_YX(real0, real1, timeperiod):
     SLOPE_YX(real0, real1, timeperiod=30)
     """
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _slope_yx_nb(y, x):
         """slope线性回归斜率。y与x是一直变化的"""
         m_x = np.mean(x)
@@ -158,7 +159,7 @@ def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
 
     """
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _rolling_func_xy_nb(x, y, out, timeperiod, func, *args):
         """滚动多元"""
         if x.ndim == 3:
@@ -167,7 +168,7 @@ def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
 
         return out
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _ts_ols_nb(y, x):
         """使用可逆矩阵计算多元回归。
 
@@ -194,7 +195,7 @@ def multiple_regress(y, x, add_constant=True):
     需要先按日期进行groupby，然后再应用回归函数
     """
 
-    @numba.jit(nopython=True, cache=True, nogil=True)
+    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
     def _cs_ols_nb(y, x):
         """使用可逆矩阵计算多元回归。
 

@@ -3,9 +3,9 @@
 """
 import numpy as np
 
-import ta_cn.imports.wide as W
-
 # 准备数据
+import ta_cn.imports.wide_ta as W_TA
+
 o = np.random.rand(1000000).reshape(-1, 5000)
 h = np.random.rand(1000000).reshape(-1, 5000) + 10
 l = np.random.rand(1000000).reshape(-1, 5000)
@@ -48,8 +48,8 @@ def func(open_, high, low, close, factor,
     close *= f
 
     # 计算指标
-    ma = W.SMA_TA(close, timeperiod=period1).raw()
-    atr = W.ATR(high, low, close, timeperiod=period2).raw()
+    ma = W_TA.SMA(close, timeperiod=period1).raw()
+    atr = W_TA.ATR(high, low, close, timeperiod=period2).raw()
 
     # 每天记录新值
     return (ma + atr), (ma - atr)
