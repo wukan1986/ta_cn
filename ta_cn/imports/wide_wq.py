@@ -52,6 +52,10 @@ from ..wq.time_series import ts_product
 from ..wq.time_series import ts_rank
 from ..wq.time_series import ts_std_dev
 from ..wq.time_series import ts_sum
+from ..wq.arithmetic import cos_
+from ..wq.arithmetic import mod_
+from ..wq.arithmetic import sin_
+from ..wq.arithmetic import tan_
 
 # Arithmetic Operators
 abs_ = wide_wraps(abs_, direction=None, to_kwargs={})
@@ -71,22 +75,30 @@ mean = wide_wraps(mean, direction=None, input_num=2, to_kwargs={})
 min_ = wide_wraps(min_, direction=None, input_num=2, to_kwargs={})
 multiply = wide_wraps(multiply, direction=None, input_num=2, to_kwargs={})
 nan_mask = wide_wraps(nan_mask, direction=None, input_num=2, to_kwargs={})
-nan_out = wide_wraps(nan_out, direction=None, to_kwargs={2: 'lower', 3: 'upper'})
+nan_out = wide_wraps(nan_out, direction=None,
+                     to_kwargs={2: 'lower', 3: 'upper'})
 power = wide_wraps(power, direction=None, input_num=2, to_kwargs={})
 purify = wide_wraps(purify, direction=None, to_kwargs={})
-replace = wide_wraps(replace, direction=None, to_kwargs={2: 'target', 3: 'dest'})
+replace = wide_wraps(replace, direction=None,
+                     to_kwargs={2: 'target', 3: 'dest'})
 reverse = wide_wraps(reverse, direction=None, to_kwargs={})
 round_ = wide_wraps(round_, direction=None, to_kwargs={})
 round_down = wide_wraps(round_down, direction=None, to_kwargs={})
 sign = wide_wraps(sign, direction=None, to_kwargs={})
-signed_power = wide_wraps(signed_power, direction=None, input_num=2, to_kwargs={})
+signed_power = wide_wraps(signed_power, direction=None,
+                          input_num=2, to_kwargs={})
 s_log_1p = wide_wraps(s_log_1p, direction=None, to_kwargs={})
 sqrt = wide_wraps(sqrt, direction=None, to_kwargs={})
 subtract = wide_wraps(subtract, direction=None, input_num=2, to_kwargs={})
-to_nan = wide_wraps(to_nan, direction=None, to_kwargs={2: 'value', 3: 'reverse'})
+to_nan = wide_wraps(to_nan, direction=None, to_kwargs={
+                    2: 'value', 3: 'reverse'})
 densify = wide_wraps(densify, direction=None, to_kwargs={})
 log10 = wide_wraps(log10, direction=None, to_kwargs={})
 mean = wide_wraps(mean, direction=None, input_num=2, to_kwargs={})
+cos_ = wide_wraps(cos_, direction=None, to_kwargs={})
+mod_ = wide_wraps(mod_, direction=None, to_kwargs={})
+sin_ = wide_wraps(sin_, direction=None, to_kwargs={})
+tan_ = wide_wraps(tan_, direction=None, to_kwargs={})
 
 # Vector Operators
 # Logical Operators

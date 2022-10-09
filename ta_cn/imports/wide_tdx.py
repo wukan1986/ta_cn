@@ -2,6 +2,7 @@
 通达信公式，宽表模式，跳过空值
 """
 from ..ema import SMA_CN
+from ..ema import DMA
 from ..tdx.logical import BETWEEN
 from ..tdx.logical import CROSS
 from ..tdx.logical import EVERY
@@ -23,11 +24,18 @@ from ..tdx.reference import CONST
 from ..tdx.reference import FILTER
 from ..tdx.reference import SUMIF
 from ..tdx.reference import TR
+from ..tdx.reference import FINDHIGH
+from ..tdx.reference import FINDHIGHBARS
+from ..tdx.reference import FINDLOW
+from ..tdx.reference import FINDLOWBARS
 from ..tdx.statistics import AVEDEV
 from ..tdx.statistics import STD
 from ..tdx.statistics import STDP
 from ..tdx.statistics import VAR
 from ..tdx.statistics import VARP
+from ..tdx.statistics import DEVSQ
+from ..tdx.statistics import FORCAST
+from ..tdx.statistics import SLOPE
 from ..tdx.trend import BBI
 from ..tdx.trend import DI
 from ..tdx.trend import DM
@@ -70,6 +78,10 @@ FILTER = wide_wraps(FILTER, to_kwargs={1: 'N'})
 BARSLAST = wide_wraps(BARSLAST, to_kwargs={})
 BARSLASTCOUNT = wide_wraps(BARSLASTCOUNT, to_kwargs={})
 BARSSINCEN = wide_wraps(BARSSINCEN)
+FINDHIGH = wide_wraps(FINDHIGH, input_num=4)
+FINDHIGHBARS = wide_wraps(FINDHIGHBARS, input_num=4)
+FINDLOW = wide_wraps(FINDLOW, input_num=4)
+FINDLOWBARS = wide_wraps(FINDLOWBARS, input_num=4)
 
 # 统计
 AVEDEV = wide_wraps(AVEDEV)
@@ -77,6 +89,9 @@ STD = wide_wraps(STD, to_kwargs={1: 'd'})
 STDP = wide_wraps(STDP, to_kwargs={1: 'd'})
 VAR = wide_wraps(VAR, to_kwargs={1: 'd'})
 VARP = wide_wraps(VARP, to_kwargs={1: 'd'})
+DEVSQ = wide_wraps(DEVSQ, to_kwargs={1: 'd'})
+FORCAST = wide_wraps(FORCAST, to_kwargs={1: 'timeperiod'})
+SLOPE = wide_wraps(SLOPE, to_kwargs={1: 'timeperiod'})
 
 # 趋势
 BBI = wide_wraps(BBI, to_kwargs={1: 'timeperiod1', 2: 'timeperiod2', 3: 'timeperiod3', 4: 'timeperiod4'})
@@ -95,10 +110,14 @@ VR = wide_wraps(VR, input_num=2, to_kwargs={2: 'timeperiod'})
 
 # EMA系列
 SMA_CN = wide_wraps(SMA_CN, to_kwargs={1: 'timeperiod', 2: 'M'})
+SMA=SMA_CN
+DMA = wide_wraps(DMA, to_kwargs={1: 'alpha'})
 
 # WQ已经定义过的公式，通达信中别名
 from .wide_wq import abs_ as ABS
 from .wide_wq import add as ADD
+from .wide_wq import cos_ as COS
+from .wide_wq import exp as EXP
 from .wide_wq import divide as DIV
 from .wide_wq import log as LN  # 自然对数
 from .wide_wq import log10 as LOG  # 10为底的对数
@@ -123,6 +142,8 @@ from .wide_wq import rank as RANK
 from .wide_wq import power as POW
 
 ABS
+COS
+EXP
 MAX
 MIN
 REF

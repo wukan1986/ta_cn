@@ -4,6 +4,7 @@ import numpy as np
 from .. import bn_wraps as bn, numba_cache
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb
 from ..utils import pd_to_np
+from ..regress import FORCAST, SLOPE
 
 
 def AVEDEV(real, timeperiod: int):
@@ -38,3 +39,12 @@ def VAR(x, d):
 def VARP(x, d):
     """总体方差"""
     return bn.move_var(x, window=d, axis=0, ddof=0)
+
+
+def DEVSQ(x, d):
+    """数据偏差平方和"""
+    return bn.move_var(x, window=d)*len(x)
+
+
+FORCAST
+SLOPE
