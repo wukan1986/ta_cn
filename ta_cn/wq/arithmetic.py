@@ -217,7 +217,28 @@ def densify(x):
     return x
 
 
+def cos_(x):
+    """Cos value of x"""
+    return np.cos(x)
+
+
+def mod_(m, n):
+    """取模"""
+    return np.mod(m, n)
+
+
+def sin_(x):
+    """sin"""
+    return np.sin(x)
+
+
+def tan_(x):
+    """tan"""
+    return np.tan(x)
+
 # ----------------
+
+
 def log10(x):
     return np.log10(np.where(x > 0, x, np.nan))
 

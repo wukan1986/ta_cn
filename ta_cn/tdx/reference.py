@@ -137,3 +137,35 @@ def BARSSINCEN(cond, timeperiod):
         return 0
 
     return numpy_rolling_apply([pd_to_np(cond)], timeperiod, _rolling_func_1_nb, _bars_since_n_nb, timeperiod)
+
+
+def FINDHIGH(var, n, m, t):
+    """var在N日前的M天内第T个最高价"""
+    t = var[-n-m:-n]
+    t = np.unique(t)
+    return t[-t]
+
+
+def FINDHIGHBARS(var, n, m, t):
+    """var在N日前的M天内第T个最高价到当前周期的周期数"""
+    temp = var[-n-m:-n]
+    temp = np.unique(temp)
+    value = temp[-t]
+    index = len(var)-np.where(var == value)[0][0]
+    return index
+
+
+def FINDLOW(var, n, m, t):
+    """寻找指定周期内的特定最小值"""
+    t = var[-n-m:-n]
+    t = np.unique(t)
+    return t[t]
+
+
+def FINDLOWBARS(var, n, m, t):
+    """寻找指定周期内的特定最小值到当前周期的周期数"""
+    temp = var[-n-m:-n]
+    temp = np.unique(temp)
+    value = temp[t]
+    index = len(var)-np.where(var == value)[0][0]
+    return index
