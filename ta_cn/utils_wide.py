@@ -130,6 +130,9 @@ class WArr(np.ndarray):
                 return obj
             # 不一样就还原数据
             return cls.from_array(obj.raw(), direction)
+        elif isinstance(obj, (int, float)):
+            # 处理某一个参数为纯数字的问题
+            return cls.from_args(obj, None, None, None)
         else:
             return cls.from_array(obj, direction)
 
