@@ -231,12 +231,13 @@ def ts_delay(x, d):
         # 该不该复制呢？
         return x
     arr = np.empty_like(x)
+    fill_value = 0 if np.issubdtype(arr.dtype, np.integer) else np.nan
     if d > 0:
-        arr[:d] = np.nan
+        arr[:d] = fill_value
         arr[d:] = x[:-d]
     if d < 0:
         # 为了复刻shift(-n)
-        arr[d:] = np.nan
+        arr[d:] = fill_value
         arr[:d] = x[-d:]
     return arr
 
