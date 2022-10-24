@@ -14,6 +14,7 @@ def CROSS(S1, S2):
     S2 = num_to_np(S2, S1)
 
     arr = np.zeros_like(S1, dtype=bool)
+    # 输入为Series时计算有差异，前面需转成numpy
     arr[1:] = (S1 <= S2)[:-1] & (S1 > S2)[1:]
     return arr
 
