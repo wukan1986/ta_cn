@@ -10,3 +10,8 @@ BY_ASSET = 'asset'
 BY_DATE = 'date'
 # 横截面上进行行业中性化
 BY_GROUP = ['date', 'group']
+
+# 浮点数比较精度
+# 实测遇到了1.6518123e-06这种实际为0的情况
+# 再考虑到np.allclose(rtol=1e-05, atol=1e-08),所以将EPSILON改成1e-05
+EPSILON = 1e-05

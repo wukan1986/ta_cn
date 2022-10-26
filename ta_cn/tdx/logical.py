@@ -2,11 +2,10 @@ import numba
 import numpy as np
 
 from . import SUM
+from .. import EPSILON
 from .. import numba_cache
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb
 from ..utils import np_to_pd, num_to_np, pd_to_np
-
-EPSILON = 1e-8
 
 
 def CROSS(S1, S2):
