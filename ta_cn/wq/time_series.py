@@ -365,6 +365,7 @@ def ts_product(x, d):
 
 def ts_rank(x, d, constant=0):
     """Rank the values of x for each instrument over the past d days, then return the rank of the current value + constant. If not specified, by default, constant = 0."""
+    # 取值范围是闭区间[0,1]
     t1 = bn.move_rank(x, window=d, axis=0)
     return (t1 + 1) / 2 + constant
 
