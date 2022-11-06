@@ -3,6 +3,8 @@
 """
 import os
 import pathlib
+import time
+from functools import wraps
 from typing import Union, List, Tuple, Dict, Any
 
 import pandas as pd
@@ -84,11 +86,9 @@ def dataframe_save(df: pd.DataFrame, i, j, *args):
         exclude = arg.get('exclude', [])
         include = arg.get('include', [])
         if include:
-            columns = list(set(include) | set([AXIS_I, AXIS_J]))
-            _df = df[columns]
+            _df = df[include]
         elif exclude:
-            columns = list(set(df.columns) - set(exclude) | set([AXIS_I, AXIS_J]))
-            _df = df[columns]
+            _df = df.drop(columns=exclude)
         else:
             _df = df
 
@@ -261,7 +261,8 @@ def load_parquet_two(left_path, right_path,
 def func_load_index_column(i, j,
                            left_path, right_path,
                            left_pattern, right_pattern,
-                           left_on, right_on):
+                           left_on=None, right_on=None,
+                           left_index=False, right_index=False):
     """加载两路径下的数据，先纵向合并，再横向合并
 
     Parameters
@@ -274,6 +275,8 @@ def func_load_index_column(i, j,
     right_pattern
     left_on
     right_on
+    left_index
+    right_index
 
     Returns
     -------
@@ -281,7 +284,8 @@ def func_load_index_column(i, j,
     """
     return load_parquet_two(left_path, right_path,
                             left_pattern.format(i, j), right_pattern.format(i, j),
-                            left_on=left_on, right_on=right_on)
+                            left_on=left_on, right_on=right_on,
+                            left_index=left_index, right_index=right_index)
 
 
 def func_load_index(i, j, path, columns=None):
@@ -304,3 +308,28 @@ def func_load_index(i, j, path, columns=None):
 
     """
     return load_parquet_index(path, f'{i}__{j}.parquet', columns)
+
+
+def describe_win(df: pd.DataFrame):
+    """统计胜率"""
+    desc = df.describe()
+    # 为正的概率，False为亏，True为挣
+    counts = (df > 0).apply(pd.value_counts)
+    x = counts / counts.sum(axis=0)
+    y = pd.concat([counts.tail(1), x.tail(1)])
+    y.index = ['win_count', 'win_ratio']
+    return pd.concat([desc, y])
+
+
+# time装饰器
+def timer(func):
+    @wraps(func)
+    def wrap(*args, **kwargs):
+        begin_time = time.perf_counter()
+        logger.info('Start call func:%r args:[%r, %r]' % (func.__name__, args, kwargs))
+        result = func(*args, **kwargs)
+        start_time = time.perf_counter()
+        logger.info('End call func:%r args:[%r, %r] took: %2.4f sec' % (func.__name__, args, kwargs, start_time - begin_time))
+        return result
+
+    return wrap

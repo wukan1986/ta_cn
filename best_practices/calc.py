@@ -56,8 +56,8 @@ def func_prepare(df, i, j):
     df[AXIS_I] = df[AXIS_I].astype(np.uint16)  # 请按数据情况填写
     df[AXIS_J] = df[AXIS_J].astype(np.uint8)
 
-    # 整理排序
-    df = df.set_index(['asset', 'date']).sort_index()
+    # 整理排序，加入了两个特殊列, 这样在后面的文件划分时处理更方便
+    df = df.set_index(['asset', 'date', AXIS_I, AXIS_J]).sort_index()
 
     return df
 

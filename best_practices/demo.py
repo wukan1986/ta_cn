@@ -7,7 +7,7 @@ from loguru import logger
 
 from best_practices.calc import calc_ts, calc_cs, calc_col, calc_cs2, func_prepare
 from best_practices.utils import load_parquet_index, func_load_calc_save, dataframe_calc, dataframe_save, \
-    func_load_index_column, func_load_index
+    func_load_index_column, func_load_index, describe_win, timer
 
 # 行范围，字符串，只用在文件名上
 # 分钟数据太大，可改为按月划分
@@ -29,7 +29,19 @@ PATH_STEP3_OUTPUT_CS = r'data\step3_cs'
 # 演示将分离出的数据再合并
 PATH_STEP4_OUTPUT = r'data\step4'
 
+# 数据源路径
+PATH_STEP1_INPUT1 = r'D:\Users\Kan\Documents\GitHub\ddump\data\jqresearch\get_price_stock_daily'
+PATH_STEP1_INPUT2 = r'D:\Users\Kan\Documents\GitHub\ddump\data\jqresearch\get_price_stock_factor'
+# 中间过程路径。可以考虑这部分保存到共享内存或内存盘中，加快速度
+PATH_STEP1_OUTPUT = r'D:\Users\Kan\Documents\GitHub\ddump\data3\step1'
+PATH_STEP2_OUTPUT_TS = r'D:\Users\Kan\Documents\GitHub\ddump\data3\step2_ts'
+PATH_STEP2_OUTPUT_CS = r'D:\Users\Kan\Documents\GitHub\ddump\data3\step2_cs'
+PATH_STEP3_OUTPUT_CS = r'D:\Users\Kan\Documents\GitHub\ddump\data3\step3_cs'
+# 演示将分离出的数据再合并
+PATH_STEP4_OUTPUT = r'D:\Users\Kan\Documents\GitHub\ddump\data3\step4'
 
+
+@timer
 def step1():
     """计算技术指标，并提取用来算横截面的字段"""
 
@@ -56,6 +68,7 @@ def step1():
                pm_parallel=True)
 
 
+@timer
 def step2():
     """计算技术指标，并提取用来算横截面的字段"""
 
@@ -78,6 +91,7 @@ def step2():
                pm_parallel=True)
 
 
+@timer
 def step3():
     """计算截面指标"""
 
@@ -104,6 +118,7 @@ def step3():
                pm_parallel=True)
 
 
+@timer
 def step4():
     """试着将TS与CS数据合并，可以不合，看需求，这里只是为了做演示
 
@@ -121,8 +136,8 @@ def step4():
                    'left_pattern': '{0}__{1}.*',
                    'right_pattern': '{0}__{1}.*',
                    # 内部已经统一了股票代码和时间日期
-                   'left_on': ['asset', 'date'],
-                   'right_on': ['asset', 'date'],
+                   'left_index': True,
+                   'right_index': True,
                },
                calc_func=None, calc_args=[],
                save_func=dataframe_save, save_args=
@@ -133,27 +148,22 @@ def step4():
                pm_parallel=True)
 
 
+# @timer
 def step5():
     """统计部分指标"""
     df = load_parquet_index(PATH_STEP2_OUTPUT_TS,
                             '*__00.*',  # 先只加载第0组，看看结果如何，之后需要全看
                             columns=None)
-
-    x = df[df['MA金叉']]
-    desc = x[['returns_1', 'returns_5', 'returns_10']].describe()
-    print(desc)
-    x = df[df['MA金叉']].copy()
+    label = ['returns_1', 'returns_5', 'returns_10']
+    y = describe_win(df[df['MA金叉']][label])
+    print(y)
 
     # 可以在多进程部分处理，但那里是比较固定的模式，因为生成东西多
-    # 这里测试临时相法，稳定后移动到那
-    x['rank_20'] = x['收盘价20日排序'] * 10 // 2
+    # 这里测试临时想法，稳定后移动到那
+    df['rank_20'] = df['收盘价20日排序'] * 10 // 2
 
-    def func(xx):
-        # 结论：高位金叉还要再涨
-        desc = xx[['returns_1', 'returns_5', 'returns_10']].describe()
-        return desc
-
-    y = x.groupby(by='rank_20').apply(func)
+    # 结论：高位金叉还要再涨
+    y = df[df['MA金叉']].groupby(by='rank_20').apply(lambda x: describe_win(x[label]))
     print(y)
 
 
@@ -182,13 +192,14 @@ def step6():
 if __name__ == '__main__':
     # # 原始数据合并
     step1()
-    # # # 计算技术指标
+    # 计算技术指标
     step2()
-    # # 计算截面
+    # 计算截面
     step3()
     step4()
     # 查看结果
-    # step5()
+    step5()
+    #
     # step6()
 
     logger.info('done')
