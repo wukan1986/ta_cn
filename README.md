@@ -59,6 +59,11 @@ pip install ta_cn[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 pip install .[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 ```
 
+4. 库维护者安装。可修改本地文件
+```commandline
+pip install -e .
+```
+
 ## 常见使用方法
 1. 转发原生talib，输入一维向量
     - 优点: 本库提供了跳过空值的功能
