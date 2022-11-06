@@ -140,11 +140,8 @@ def numpy_rolling_apply(inputs, window, func1, func2, *args):
     """滚动应用方法 处理两个"""
     # 输出只与第一个的形状相同
     out = np.empty_like(inputs[0])
-    try:
-        # 可能出现类似int无法设置nan的情况
-        out[:window] = np.nan
-    except:
-        out[:window] = 0
+    fill_value = 0 if np.issubdtype(out.dtype, np.integer) else np.nan
+    out[:window] = fill_value
 
     arrs = [np.lib.stride_tricks.sliding_window_view(i, window, axis=0) for i in inputs]
 

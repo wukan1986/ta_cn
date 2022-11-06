@@ -2,6 +2,7 @@ import numba
 import numpy as np
 
 from . import SUM
+from .. import EPSILON
 from .. import numba_cache
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb
 from ..utils import np_to_pd, num_to_np, pd_to_np
@@ -11,9 +12,13 @@ def CROSS(S1, S2):
     """向上金叉"""
     # 可能输入单个数字，需预处理
     S1 = num_to_np(S1, S2)
-    S2 = num_to_np(S2, S1)
+    # 处理精度问题
+    # 1. S1<=S2时，需要给S2范围大一点，表示等于
+    # 2. S1>S2时，同样要给S2范围大一点，排除等于
+    S2 = num_to_np(S2, S1) + EPSILON
 
     arr = np.zeros_like(S1, dtype=bool)
+    # 输入为Series时对齐有差异，前面需转成numpy
     arr[1:] = (S1 <= S2)[:-1] & (S1 > S2)[1:]
     return arr
 

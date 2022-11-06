@@ -231,12 +231,13 @@ def ts_delay(x, d):
         # 该不该复制呢？
         return x
     arr = np.empty_like(x)
+    fill_value = 0 if np.issubdtype(arr.dtype, np.integer) else np.nan
     if d > 0:
-        arr[:d] = np.nan
+        arr[:d] = fill_value
         arr[d:] = x[:-d]
     if d < 0:
         # 为了复刻shift(-n)
-        arr[d:] = np.nan
+        arr[d:] = fill_value
         arr[:d] = x[-d:]
     return arr
 
@@ -364,6 +365,7 @@ def ts_product(x, d):
 
 def ts_rank(x, d, constant=0):
     """Rank the values of x for each instrument over the past d days, then return the rank of the current value + constant. If not specified, by default, constant = 0."""
+    # 取值范围是闭区间[0,1]
     t1 = bn.move_rank(x, window=d, axis=0)
     return (t1 + 1) / 2 + constant
 
@@ -375,11 +377,17 @@ def ts_regression(y, x, d, lag=0, rettype=0):
 
 def ts_returns(x, d, mode=1):
     """Returns the relative change in the x value ."""
-    t1 = ts_delay(x, d)
-    if mode == 1:
-        return (x - t1) / t1
-    if mode == 2:
-        return (x - t1) / ((x + t1) / 2)
+    if d >= 0:
+        t1 = ts_delay(x, d)
+        if mode == 1:
+            return x / t1 - 1.
+        if mode == 2:
+            return (x - t1) / ((x + t1) / 2)
+    else:
+        # 负数相当于pct_change(d).shfit(-d),用于机器学习打标签
+        t1 = ts_delay(x, d)
+        if mode == 1:
+            return t1 / x - 1
 
 
 def ts_scale(x, d, constant=0):

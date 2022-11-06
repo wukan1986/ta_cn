@@ -34,9 +34,10 @@ def num_to_np(x, like):
 
     """
     if isinstance(x, (pd.DataFrame, pd.Series, np.ndarray)):
-        return x
+        # 避免Series错位时计算有问题
+        return pd_to_np(x)
     if not isinstance(like, (pd.DataFrame, pd.Series, np.ndarray)):
-        return x
+        return pd_to_np(x)
     return np.full_like(like, fill_value=x)
 
 
