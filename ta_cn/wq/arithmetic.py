@@ -219,6 +219,7 @@ def densify(x):
 
 # ----------------
 def log10(x):
+    """10为底对数收益率"""
     return np.log10(np.where(x > 0, x, np.nan))
 
 

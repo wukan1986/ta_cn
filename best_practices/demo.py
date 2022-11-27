@@ -84,8 +84,12 @@ def step2():
                ],
                save_func=dataframe_save, save_args=
                [
-                   {'split_axis': 0, 'path': PATH_STEP2_OUTPUT_TS, 'exclude': ['close', 'amount']},
-                   {'split_axis': 0, 'path': PATH_STEP2_OUTPUT_CS, 'include': ['close', 'amount']},
+                   {'split_axis': 0, 'path': PATH_STEP2_OUTPUT_TS, 'exclude': [
+                       'close', 'amount', 'returns_1', 'returns_5', 'returns_10'
+                   ]},
+                   {'split_axis': 0, 'path': PATH_STEP2_OUTPUT_CS, 'include': [
+                       'close', 'amount', 'returns_1', 'returns_5', 'returns_10'
+                   ]},
                ],
                pm_processes=len(jj) // 3,  # IO瓶颈，内存不足
                pm_parallel=True)
@@ -148,7 +152,7 @@ def step4():
                pm_parallel=True)
 
 
-# @timer
+@timer
 def step5():
     """统计部分指标"""
     df = load_parquet_index(PATH_STEP2_OUTPUT_TS,
@@ -163,8 +167,17 @@ def step5():
     df['rank_20'] = df['收盘价20日排序'] * 10 // 2
 
     # 结论：高位金叉还要再涨
-    y = df[df['MA金叉']].groupby(by='rank_20').apply(lambda x: describe_win(x[label]))
+    y = df[df['MA金叉']].groupby(by='rank_20').apply(lambda x: describe_win(x[label])).swaplevel(0, 1).sort_index()
     print(y)
+
+    def func(x):
+        title = x.index.get_level_values(0)[0]
+        x = x.droplevel(0)
+        x.plot(kind='bar', title=title)
+
+        plt.show()
+
+    y.groupby(level=0).apply(func)
 
 
 def step6():
@@ -190,7 +203,7 @@ def step6():
 
 
 if __name__ == '__main__':
-    # # 原始数据合并
+    # 原始数据合并
     step1()
     # 计算技术指标
     step2()
@@ -198,7 +211,7 @@ if __name__ == '__main__':
     step3()
     step4()
     # 查看结果
-    step5()
+    # step5()
     #
     # step6()
 

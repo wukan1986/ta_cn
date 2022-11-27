@@ -53,8 +53,8 @@ def func_prepare(df, i, j):
 
     # 内存优化
     df['paused'] = df['paused'].astype(bool)
-    df[AXIS_I] = df[AXIS_I].astype(np.uint16)  # 请按数据情况填写
-    df[AXIS_J] = df[AXIS_J].astype(np.uint8)
+    df[AXIS_I] = df[AXIS_I].astype(np.uint16)  # 请按数据情况填写，因为可能是2022年，又有可能是202211月，也可能是20221121日
+    df[AXIS_J] = df[AXIS_J].astype(np.uint8)  # 划分数量一般小时CPU真核数量
 
     # 整理排序，加入了两个特殊列, 这样在后面的文件划分时处理更方便
     df = df.set_index(['asset', 'date', AXIS_I, AXIS_J]).sort_index()
@@ -76,6 +76,7 @@ def calc_col(df: pd.DataFrame):
     df['low_adj'] = df['low'] * df['factor']
     df['close_adj'] = df['close'] * df['factor']
 
+    # 浮点数比较要小心
     df['涨停'] = df['close'] >= df['high_limit'] - EPSILON
     df['曾涨停'] = df['high'] >= df['high_limit'] - EPSILON
     df['跌停'] = df['close'] <= df['low_limit'] + EPSILON
@@ -96,10 +97,10 @@ def calc_ts(df: pd.DataFrame):
     """
     # 计算指标，输入已经按股票分好了，所以直接调用talib更快
 
-    # 收益率标签，注意：由于移动了位置，这是未来数据，只能做标签用
-    df['returns_1'] = ts_returns(df['close_adj'], -1)
-    df['returns_5'] = ts_returns(df['close_adj'], -5)
-    df['returns_10'] = ts_returns(df['close_adj'], -10)
+    # 动量
+    df['mom_1'] = ts_returns(df['close_adj'], 1)
+    df['mom_5'] = ts_returns(df['close_adj'], 5)
+    df['mom_10'] = ts_returns(df['close_adj'], 10)
 
     # SMA
     df['sma_5'] = SMA(df['close_adj'], timeperiod=5)
@@ -162,6 +163,12 @@ def calc_ts(df: pd.DataFrame):
     df['N天'] = df['N天'].astype(np.int16)
     df['M板'] = df['M板'].astype(np.uint8)
 
+    # 收益率标签，注意：由于移动了位置，这是未来数据，只能做标签用
+    # 在机器学习时，训练数据中，这几例都要提前drop
+    df['returns_1'] = ts_returns(df['close_adj'], -1)
+    df['returns_5'] = ts_returns(df['close_adj'], -5)
+    df['returns_10'] = ts_returns(df['close_adj'], -10)
+
     return df
 
 
@@ -175,6 +182,11 @@ def calc_cs(df: pd.DataFrame):
 
     # 目前没有行情业数据，只能模拟行业分组
     df['industry'] = df['close_rank'] * 10 // 2
+
+    #
+    df['label_1'] = rank(df['returns_1'])
+    df['label_5'] = rank(df['returns_5'])
+    df['label_10'] = rank(df['returns_10'])
 
     return df
 

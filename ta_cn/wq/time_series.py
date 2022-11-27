@@ -384,7 +384,7 @@ def ts_returns(x, d, mode=1):
         if mode == 2:
             return (x - t1) / ((x + t1) / 2)
     else:
-        # 负数相当于pct_change(d).shfit(-d),用于机器学习打标签
+        # 负数相当于pct_change(d).shift(-d),用于机器学习打标签
         t1 = ts_delay(x, d)
         if mode == 1:
             return t1 / x - 1
@@ -498,3 +498,14 @@ def ts_quantile(x, d, driver="gaussian"):
 
 # 其它功能别名
 ts_count = ts_sum
+
+
+def ts_log_returns(x, d):
+    """数收益率"""
+    if d >= 0:
+        t1 = ts_delay(x, d)
+        return np.log(x / t1)
+    else:
+        # 负数相当于最后shift(-d)
+        t1 = ts_delay(x, d)
+        return np.log(t1 / x)
