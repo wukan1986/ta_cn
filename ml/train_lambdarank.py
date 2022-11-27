@@ -1,12 +1,10 @@
 # %%
 import lightgbm as lgb
 import matplotlib.pyplot as plt
-import numpy as np
-from loguru import logger
-from sklearn.metrics import r2_score
-from sklearn.model_selection import train_test_split
-
 from best_practices.utils import load_parquet_index
+from loguru import logger
+from sklearn.metrics import ndcg_score
+from sklearn.model_selection import train_test_split
 
 plt.rcParams["font.sans-serif"] = ["SimHei"]  # 设置字体
 plt.rcParams["axes.unicode_minus"] = False  # 该语句解决图像中的“-”负号的乱码问题
@@ -14,7 +12,7 @@ plt.rcParams["axes.unicode_minus"] = False  # 该语句解决图像中的“-”
 # %%
 # 加载数据
 PATH_STEP4_OUTPUT = r'D:\Users\Kan\Documents\GitHub\ddump\data3\step4'
-df = load_parquet_index(PATH_STEP4_OUTPUT, '2021*.parquet')
+df = load_parquet_index(PATH_STEP4_OUTPUT, '2021__01.parquet')
 
 # %%
 # X中要排除的特征。
@@ -34,38 +32,25 @@ df = df.sort_index(level=[1])
 
 # 特征与标签
 X = df.drop(columns=drop_columns)
-y = df['label_5'].fillna(0)
+y = df['label_5'].fillna(0) * 10 // 1
 
 # %%
 # 划分测试集与验证集
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, shuffle=False)
 
-
 # %%
-# https://copyfuture.com/blogs-details/202201121444001793
-# Define the objective function
-def rmspe(y_true, y_pred):
-    return np.sqrt(np.mean(np.square((y_true - y_pred) / y_true)))
-
-
-def feval_RMSPE(preds, lgbm_train):
-    labels = lgbm_train.get_label()
-    return 'RMSPE', round(rmspe(y_true=labels, y_pred=preds), 5), False
-
-
-# RMSPE weight，不知道为何加这个，需要再查
-weights = 1 / np.square(y_train)
-lgb_train = lgb.Dataset(X_train, y_train, categorical_feature=categorical_feature, weight=weights)
-weights = 1 / np.square(y_test)
-lgb_valid = lgb.Dataset(X_test, y_test, categorical_feature=categorical_feature, weight=weights, reference=lgb_train)
+lgb_train = lgb.Dataset(X_train, y_train, categorical_feature=categorical_feature,
+                        group=y_train.groupby(level=[1]).count())
+lgb_valid = lgb.Dataset(X_test, y_test, categorical_feature=categorical_feature, reference=lgb_train,
+                        group=y_test.groupby(level=[1]).count())
 
 # %%
 params = {
     'boosting_type': 'gbdt',
 
     # 回归
-    'objective': 'regression',
-    'metric': 'l2',
+    'objective': 'lambdarank',
+    'metric': 'ndcg',
 
     'max_depth': 10,
     'num_leaves': 255,
@@ -78,6 +63,7 @@ params = {
     'lambda_l2': 0,  # reg_lambda。推荐0~1000。如果有非常强势的特征，可以人为加大一些reg_lambda使得整体特征效果平均一些，一般会比reg_alpha的数值略大一些
     'verbose': -1,
     'device_type': 'cpu',  # 看情况，有可能gpu更慢
+    'eval_at': [1, 3, 5],
 }
 
 # %%
@@ -97,7 +83,7 @@ gbm = lgb.train(params,
                 categorical_feature=categorical_feature,
                 callbacks=[
                     lgb.log_evaluation(10),
-                    lgb.early_stopping(stopping_rounds=20),  # 一般设成num_boost_round的10%
+                    #lgb.early_stopping(stopping_rounds=20),  # 一般设成num_boost_round的10%
                     lgb.record_evaluation(results),
                     lgb.reset_parameter(learning_rate=lambda iter: max(0.3 * (0.99 ** iter), 0.005))
                 ],
@@ -118,13 +104,9 @@ gbm.save_model('model.txt')
 y_pred_train = gbm.predict(X_train, num_iteration=gbm.best_iteration)
 y_pred_test = gbm.predict(X_test, num_iteration=gbm.best_iteration)
 
-# 回归时，评价
-logger.info(f'train r2:{r2_score(y_train, y_pred_train):.5f}')
-logger.info(f'valid r2:{r2_score(y_test, y_pred_test):.5f}')
-
-# 应当看每天的IC才对，而不是全体IC，这里偷懒
-logger.info(f'train ic:{np.corrcoef(np.vstack((y_train, y_pred_train)))[0, 1]:.5f}')
-logger.info(f'valid ic:{np.corrcoef(np.vstack((y_test, y_pred_test)))[0, 1]:.5f}')
+# 评价
+logger.info(f'train ndcg:{ndcg_score([y_train], [y_pred_train]):.5f}')
+logger.info(f'valid ndcg:{ndcg_score([y_test], [y_pred_test]):.5f}')
 
 # %%
 lgb.plot_metric(results)

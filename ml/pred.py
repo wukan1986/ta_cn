@@ -26,6 +26,10 @@ drop_columns = ['high_limit', 'low_limit', 'pre_close', 'paused', 'factor', 'pct
 categorical_feature = ['涨停', '曾涨停', '跌停', '曾跌停', '一字板', 'T字板',
                        'industry', 'MA金叉', ]
 
+
+# 根据时间排序
+df = df.sort_index(level=[1])
+
 # 特征与标签，需要按情况进行调整
 X = df.drop(columns=drop_columns)
 y = df['label_5'].copy()
