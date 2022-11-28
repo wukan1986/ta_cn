@@ -1,6 +1,7 @@
 # %%
 import lightgbm as lgb
 import matplotlib.pyplot as plt
+import pandas as pd
 from best_practices.utils import load_parquet_index
 from loguru import logger
 from sklearn.metrics import ndcg_score
@@ -32,7 +33,8 @@ df = df.sort_index(level=[1])
 
 # 特征与标签
 X = df.drop(columns=drop_columns)
-y = df['label_5'].fillna(0) * 10 // 1
+# rank默认是升序，ndcg是降序，数值越大表示相关性越高
+y = pd.qcut((0 + df['label_5']).fillna(0), 31).cat.codes
 
 # %%
 # 划分测试集与验证集
@@ -83,7 +85,7 @@ gbm = lgb.train(params,
                 categorical_feature=categorical_feature,
                 callbacks=[
                     lgb.log_evaluation(10),
-                    #lgb.early_stopping(stopping_rounds=20),  # 一般设成num_boost_round的10%
+                    lgb.early_stopping(stopping_rounds=20),  # 一般设成num_boost_round的10%
                     lgb.record_evaluation(results),
                     lgb.reset_parameter(learning_rate=lambda iter: max(0.3 * (0.99 ** iter), 0.005))
                 ],
@@ -105,8 +107,10 @@ y_pred_train = gbm.predict(X_train, num_iteration=gbm.best_iteration)
 y_pred_test = gbm.predict(X_test, num_iteration=gbm.best_iteration)
 
 # 评价
-logger.info(f'train ndcg:{ndcg_score([y_train], [y_pred_train]):.5f}')
-logger.info(f'valid ndcg:{ndcg_score([y_test], [y_pred_test]):.5f}')
+logger.info(f'train ndcg@5:{ndcg_score([y_train], [y_pred_train], k=5):.5f}'
+            f' ndcg@10:{ndcg_score([y_train], [y_pred_train], k=10):.5f}')
+logger.info(f'valid ndcg@5:{ndcg_score([y_test], [y_pred_test], k=5):.5f}'
+            f' ndcg@10:{ndcg_score([y_test], [y_pred_test], k=10):.5f}')
 
 # %%
 lgb.plot_metric(results)
