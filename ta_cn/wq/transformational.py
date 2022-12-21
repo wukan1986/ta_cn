@@ -4,7 +4,6 @@ Transformational Operators
 import numba
 import numpy as np
 
-from .. import numba_cache
 from ..utils import pd_to_np
 from ..wq.logical import if_else
 from ..wq.time_series import days_from_last_change
@@ -89,32 +88,32 @@ def tanh(x):
     return np.tanh(x)
 
 
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _trade_when_nb(xx, yy, zz, out):
+    is_1d = xx.ndim == 1
+    x = xx.shape[0]
+    y = 1 if is_1d else xx.shape[1]
+
+    for j in range(y):
+        a = xx if is_1d else xx[:, j]
+        b = yy if is_1d else yy[:, j]
+        c = zz if is_1d else zz[:, j]
+        d = out if is_1d else out[:, j]
+        last = np.nan
+        for i in range(x):
+            if c[i] > 0:
+                d[i] = np.nan
+            elif a[i] > 0:
+                d[i] = b[i]
+            else:
+                d[i] = last
+            last = d[i]
+
+    return out
+
+
 def trade_when(x, y, z):
     """Used in order to change Alpha values only under a specified condition and to hold Alpha values in other cases. It also allows to close Alpha positions (assign NaN values) under a specified condition."""
-
-    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
-    def _trade_when_nb(xx, yy, zz, out):
-        is_1d = xx.ndim == 1
-        x = xx.shape[0]
-        y = 1 if is_1d else xx.shape[1]
-
-        for j in range(y):
-            a = xx if is_1d else xx[:, j]
-            b = yy if is_1d else yy[:, j]
-            c = zz if is_1d else zz[:, j]
-            d = out if is_1d else out[:, j]
-            last = np.nan
-            for i in range(x):
-                if c[i] > 0:
-                    d[i] = np.nan
-                elif a[i] > 0:
-                    d[i] = b[i]
-                else:
-                    d[i] = last
-                last = d[i]
-
-        return out
-
     x = pd_to_np(x, copy=False)
     y = pd_to_np(y, copy=False)
     z = pd_to_np(z, copy=False)
