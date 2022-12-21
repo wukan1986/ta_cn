@@ -8,6 +8,7 @@ from functools import wraps
 from typing import Union, List, Tuple, Dict, Any
 
 import pandas as pd
+import polars as pl
 from loguru import logger
 
 AXIS_I = 'axis_0'
@@ -59,7 +60,7 @@ def dataframe_calc(df: pd.DataFrame, i, j, *args):
             df = func(df)
         else:
             # 注意分组方向
-            df = df.groupby(by=groupby).apply(func)
+            df = df.groupby(by=groupby, group_keys=False).apply(func)
 
     return df
 
@@ -165,15 +166,15 @@ def save_parquet(df, i, j, path, split_axis):
     if split_axis is None:
         # 输入和输出同方向，整行或整列保存
         name = f'{i}__{j}.parquet'.replace('*', 'X')
-        df.to_parquet(path / name, compression='gzip')
+        df.to_parquet(path / name, compression='zstd')
     elif split_axis == 1:
         # 整列拆分成多行
         for key, group in df.groupby(by=AXIS_J):
-            group.to_parquet(path / f'{i}__{key:02d}.parquet', compression='gzip')
+            group.to_parquet(path / f'{i}__{key:02d}.parquet', compression='zstd')
     else:
         # 整行拆分成多列
         for key, group in df.groupby(by=AXIS_I):
-            group.to_parquet(path / f'{key:02d}__{j}.parquet', compression='gzip')
+            group.to_parquet(path / f'{key:02d}__{j}.parquet', compression='zstd')
 
 
 def load_parquet_index(path: Union[str, pathlib.Path], pattern: Union[str, List[str]], columns=None):
@@ -321,15 +322,51 @@ def describe_win(df: pd.DataFrame):
     return pd.concat([desc, y])
 
 
-# time装饰器
 def timer(func):
+    """timer装饰器"""
+
     @wraps(func)
     def wrap(*args, **kwargs):
         begin_time = time.perf_counter()
         logger.info('Start call func:%r args:[%r, %r]' % (func.__name__, args, kwargs))
         result = func(*args, **kwargs)
         start_time = time.perf_counter()
-        logger.info('End call func:%r args:[%r, %r] took: %2.4f sec' % (func.__name__, args, kwargs, start_time - begin_time))
+        logger.info(
+            'End call func:%r args:[%r, %r] took: %2.4f sec' % (func.__name__, args, kwargs, start_time - begin_time))
         return result
 
     return wrap
+
+
+def pl_np_wraps(func, in_num: int = 1, out_num: int = 1, dtype=pl.Float32):
+    """普通函数包装，将输入由Series转成numpy，将输出由numpy转回Series
+
+    Parameters
+    ----------
+    func:
+        需要封装的函数
+    in_num:int
+        入参需要转numpy的数量
+    out_num:int
+        出参需要转Series的数量
+    dtype:
+        返回前，指定数据类型，可减少内存占用
+
+    Notes
+    -----
+    TA-Lib 0.4.24 开始已经支持polars, 可以不套用此装饰器
+
+    """
+
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        args_left = (_.to_numpy() for _ in args[:in_num])
+        args_right = args[in_num:]
+
+        outs = func(*args_left, *args_right, **kwargs)
+        if out_num == 1:
+            return pl.Series(outs, dtype=dtype)
+        else:
+            return tuple(pl.Series(_, dtype=dtype) for _ in outs)
+
+    return decorated
