@@ -1,9 +1,15 @@
 import numba
 import numpy as np
 
-from .. import bn_wraps as bn, numba_cache
+from .. import bn_wraps as bn
 from ..nb import numpy_rolling_apply, _rolling_func_1_nb
 from ..utils import pd_to_np
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _avedev_nb(a):
+    """avedev平均绝对偏差"""
+    return np.mean(np.abs(a - np.mean(a)))
 
 
 def AVEDEV(real, timeperiod: int):
@@ -11,12 +17,6 @@ def AVEDEV(real, timeperiod: int):
 
     AVEDEV(real, timeperiod=20)
     """
-
-    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
-    def _avedev_nb(a):
-        """avedev平均绝对偏差"""
-        return np.mean(np.abs(a - np.mean(a)))
-
     return numpy_rolling_apply([pd_to_np(real)], timeperiod, _rolling_func_1_nb, _avedev_nb)
 
 
@@ -38,6 +38,44 @@ def VAR(x, d):
 def VARP(x, d):
     """总体方差"""
     return bn.move_var(x, window=d, axis=0, ddof=0)
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _limit_count_nb(arr, out1, out2, d):
+    is_1d = arr.ndim == 1
+    x = arr.shape[0]
+    y = 1 if is_1d else arr.shape[1]
+
+    for j in range(y):
+        a = arr if is_1d else arr[:, j]
+        nn = out1 if is_1d else out1[:, j]
+        mm = out2 if is_1d else out2[:, j]
+        n = 0  # N天
+        m = 0  # M板
+        k = 0  # 连续False个数
+        f = True  # 前面的False不处理
+        for i in range(x):
+            if a[i]:
+                # 正常统计
+                k = 0
+                n += 1
+                m += 1
+                nn[i] = n
+                mm[i] = m
+                f = False
+            else:
+                if f:
+                    continue
+                k += 1  # 非False计数
+                nn[i] = -k  # 表示离上涨停的天数，-1表示昨天是涨停的
+                if k > d:
+                    m = 0
+                    n = 0
+                else:
+                    n += 1
+                mm[i] = 0
+    # N天M板
+    return out1, out2
 
 
 def limit_count(x, d):
@@ -85,45 +123,7 @@ def limit_count(x, d):
     8. 2天2板
 
     """
-
-    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
-    def _limit_count_nb(arr, out1, out2):
-        is_1d = arr.ndim == 1
-        x = arr.shape[0]
-        y = 1 if is_1d else arr.shape[1]
-
-        for j in range(y):
-            a = arr if is_1d else arr[:, j]
-            nn = out1 if is_1d else out1[:, j]
-            mm = out2 if is_1d else out2[:, j]
-            n = 0  # N天
-            m = 0  # M板
-            k = 0  # 连续False个数
-            f = True  # 前面的False不处理
-            for i in range(x):
-                if a[i]:
-                    # 正常统计
-                    k = 0
-                    n += 1
-                    m += 1
-                    nn[i] = n
-                    mm[i] = m
-                    f = False
-                else:
-                    if f:
-                        continue
-                    k += 1  # 非False计数
-                    nn[i] = -k  # 表示离上涨停的天数，-1表示昨天是涨停的
-                    if k > d:
-                        m = 0
-                        n = 0
-                    else:
-                        n += 1
-                    mm[i] = 0
-        # N天M板
-        return out1, out2
-
     x = pd_to_np(x, copy=False)
     out1 = np.zeros_like(x, dtype=int)
     out2 = np.zeros_like(x, dtype=int)
-    return _limit_count_nb(x, out1, out2)
+    return _limit_count_nb(x, out1, out2, d)

@@ -6,9 +6,9 @@ import pandas as pd
 import polars as pl
 import talib
 
-import ta_cn.talib as ta2d
+import ta_cn.talib as ta
 
-ta2d.init(mode=1, skipna=False)
+ta2d = ta.init(mode=2, skipna=False, to_globals=False)
 
 pl.Config.set_tbl_rows(50)
 

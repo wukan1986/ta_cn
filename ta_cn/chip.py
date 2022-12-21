@@ -1,10 +1,8 @@
 import numba
 import numpy as np
 
-from ta_cn import numba_cache
 
-
-@numba.jit(nopython=True, cache=numba_cache, nogil=True)
+@numba.jit(nopython=True, cache=True, nogil=True)
 def chip(high, low, avg, turnover,
          start=None, stop=None, step=0.2):
     """筹码分布，可用于WINNER或COST指标

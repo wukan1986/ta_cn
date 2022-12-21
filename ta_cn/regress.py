@@ -6,7 +6,6 @@ import pandas as pd
 
 from . import bn_wraps as bn
 from . import talib as ta
-from . import numba_cache
 from .nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb, extend_shape
 from .utils import pd_to_np
 
@@ -19,21 +18,29 @@ FORCAST = _ta2d.LINEARREG
 SLOPE = _ta2d.LINEARREG_SLOPE
 
 
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _slope_y_nb(y, x, m_x):
+    """slope线性回归斜率。由于x固定，所以提前在外部计算，加快速度"""
+    m_y = np.mean(y)
+    return np.sum((x - m_x) * (y - m_y)) / np.sum((x - m_x) ** 2)
+
+
 def SLOPE_Y(real, timeperiod):
     """numba版，输出结果与LINEARREG_SLOPE一样
 
     SLOPE_Y(real, timeperiod=14)
     """
-
-    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
-    def _slope_y_nb(y, x, m_x):
-        """slope线性回归斜率。由于x固定，所以提前在外部计算，加快速度"""
-        m_y = np.mean(y)
-        return np.sum((x - m_x) * (y - m_y)) / np.sum((x - m_x) ** 2)
-
     x = np.arange(timeperiod)
     m_x = np.mean(x)
     return numpy_rolling_apply([pd_to_np(real)], timeperiod, _rolling_func_1_nb, _slope_y_nb, x, m_x)
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _slope_yx_nb(y, x):
+    """slope线性回归斜率。y与x是一直变化的"""
+    m_x = np.mean(x)
+    m_y = np.mean(y)
+    return np.sum((x - m_x) * (y - m_y)) / np.sum((x - m_x) ** 2)
 
 
 def SLOPE_YX(real0, real1, timeperiod):
@@ -41,14 +48,6 @@ def SLOPE_YX(real0, real1, timeperiod):
 
     SLOPE_YX(real0, real1, timeperiod=30)
     """
-
-    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
-    def _slope_yx_nb(y, x):
-        """slope线性回归斜率。y与x是一直变化的"""
-        m_x = np.mean(x)
-        m_y = np.mean(y)
-        return np.sum((x - m_x) * (y - m_y)) / np.sum((x - m_x) ** 2)
-
     return numpy_rolling_apply([pd_to_np(real0), pd_to_np(real1)],
                                timeperiod, _rolling_func_2_nb, _slope_yx_nb)
 
@@ -136,6 +135,25 @@ def ts_simple_regress(y, x, d, lag=0, rettype=0):
 warnings.filterwarnings("ignore", category=numba.NumbaPerformanceWarning)
 
 
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _rolling_func_xy_nb(x, y, out, timeperiod, func, *args):
+    """滚动多元"""
+    if x.ndim == 3:
+        for i, (yy, xx) in enumerate(zip(y, x)):
+            out[i + timeperiod - 1] = func(yy, xx, *args)
+
+    return out
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _ts_ols_nb(y, x):
+    """使用可逆矩阵计算多元回归。
+
+    由于sliding_window_view后的形状再enumerate后比较特殊，所以原公式的转置进行了调整
+    """
+    return np.dot((np.dot(np.linalg.inv(np.dot(x, x.T)), x)), y)
+
+
 def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
     """时序上滚动多元线性回归
 
@@ -158,24 +176,6 @@ def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
         残差。与y形状类似，由实际y-预测y而得到
 
     """
-
-    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
-    def _rolling_func_xy_nb(x, y, out, timeperiod, func, *args):
-        """滚动多元"""
-        if x.ndim == 3:
-            for i, (yy, xx) in enumerate(zip(y, x)):
-                out[i + timeperiod - 1] = func(yy, xx, *args)
-
-        return out
-
-    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
-    def _ts_ols_nb(y, x):
-        """使用可逆矩阵计算多元回归。
-
-        由于sliding_window_view后的形状再enumerate后比较特殊，所以原公式的转置进行了调整
-        """
-        return np.dot((np.dot(np.linalg.inv(np.dot(x, x.T)), x)), y)
-
     _y = pd_to_np(y)
     _x = pd_to_np(x)
     if add_constant:
@@ -189,20 +189,20 @@ def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
     return coef, residual
 
 
+@numba.jit(nopython=True, cache=True, nogil=True)
+def _cs_ols_nb(y, x):
+    """使用可逆矩阵计算多元回归。
+
+    标准的多元回归
+    """
+    return np.dot((np.dot(np.linalg.inv(np.dot(x.T, x)), x.T)), y)
+
+
 def multiple_regress(y, x, add_constant=True):
     """横截面上的多元回归。主要用于中性化多元回归场景
 
     需要先按日期进行groupby，然后再应用回归函数
     """
-
-    @numba.jit(nopython=True, cache=numba_cache, nogil=True)
-    def _cs_ols_nb(y, x):
-        """使用可逆矩阵计算多元回归。
-
-        标准的多元回归
-        """
-        return np.dot((np.dot(np.linalg.inv(np.dot(x.T, x)), x.T)), y)
-
     _y = pd_to_np(y)
     _x = pd_to_np(x)
     if add_constant:
