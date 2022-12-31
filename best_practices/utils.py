@@ -177,37 +177,8 @@ def save_parquet(df, i, j, path, split_axis):
             group.to_parquet(path / f'{key:02d}__{j}.parquet', compression='zstd')
 
 
-def load_parquet_index(path: Union[str, pathlib.Path], pattern: Union[str, List[str]], columns=None):
-    """根据文件名模式（非正则表达式）。加载多个parquet文件，纵向合并
-
-    Parameters
-    ----------
-    path: str
-        目录
-    pattern: str or list
-        模式。如果是列表，将依次加载合并
-    columns: list
-        指定要加载的列。按需加载可以减少内存占用
-
-    Returns
-    -------
-    pd.DataFrame
-
-    Examples
-    --------
-    >>> load_parquet_index(path, f'{year}*', columns=None)
-
-    """
-    if isinstance(pattern, str):
-        # 一个过滤条件时，拼接一组
-        return pd.concat([pd.read_parquet(_, columns=columns) for _ in pathlib.Path(path).glob(pattern)])
-    if isinstance(pattern, list):
-        # 多个过滤条件时，拼接多组
-        return pd.concat([load_parquet_index(path, _, columns=columns) for _ in pattern])
-
-
-def load_parquet_column(path: Union[str, pathlib.Path], pattern: Union[str, List[str]], columns=None):
-    """根据文件名模式（非正则表达式）。加载多个parquet文件，横向合并
+def load_parquet(path: Union[str, pathlib.Path], pattern: Union[str, List[str]], axis, columns=None, func=None):
+    """根据文件名模式（非正则表达式）。加载多个parquet文件，必须同结构
 
     Parameters
     ----------
@@ -215,8 +186,11 @@ def load_parquet_column(path: Union[str, pathlib.Path], pattern: Union[str, List
         目录
     pattern: str or list
         模式。支持?*通配符。如果是列表，将依次加载合并
+    axis:
+        concat合并方向
     columns: list
         指定要加载的列。按需加载可以减少内存占用
+    func
 
     Returns
     -------
@@ -227,88 +201,62 @@ def load_parquet_column(path: Union[str, pathlib.Path], pattern: Union[str, List
     需要有相同的索引，否则合并错误
 
     """
+    if func is None:
+        func = lambda x: x
+
     if isinstance(pattern, str):
         # 一个过滤条件时，拼接一组
-        return pd.concat([pd.read_parquet(_, columns=columns) for _ in pathlib.Path(path).glob(pattern)], axis=1)
+        return pd.concat([func(pd.read_parquet(_, columns=columns)) for _ in pathlib.Path(path).glob(pattern)],
+                         axis=axis)
     if isinstance(pattern, list):
         # 多个过滤条件时，拼接多组
-        return pd.concat([load_parquet_column(path, _, columns=columns) for _ in pattern], axis=1)
+        return pd.concat([load_parquet(path, _, columns=columns) for _ in pattern], axis=axis)
 
 
-def load_parquet_two(left_path, right_path,
-                     left_pattern, right_pattern,
-                     **merge_kwargs):
-    """加载两组文件，并横向合并
-
-    Parameters
-    ----------
-    left_path:
-    right_path
-    left_pattern
-    right_pattern
-    merge_kwargs:
-        pd.merge的参数
-
-    Returns
-    -------
-    pd.DataFrame
-
-    """
-    df_left = load_parquet_index(left_path, left_pattern)
-    df_right = load_parquet_index(right_path, right_pattern)
-    return pd.merge(df_left, df_right, how='left', suffixes=('', '_DROP'), **merge_kwargs).filter(regex='^(?!.*_DROP)')
-
-
-def func_load_index_column(i, j,
-                           left_path, right_path,
-                           left_pattern, right_pattern,
-                           left_on=None, right_on=None,
-                           left_index=False, right_index=False):
+def func_load_parquet(i, j,
+                      path=[],
+                      pattern=[],
+                      axis=[],
+                      func=[],
+                      on=[],
+                      index=[]):
     """加载两路径下的数据，先纵向合并，再横向合并
 
     Parameters
     ----------
     i
     j
-    left_path
-    right_path
-    left_pattern
-    right_pattern
-    left_on
-    right_on
-    left_index
-    right_index
-
-    Returns
-    -------
-
-    """
-    return load_parquet_two(left_path, right_path,
-                            left_pattern.format(i, j), right_pattern.format(i, j),
-                            left_on=left_on, right_on=right_on,
-                            left_index=left_index, right_index=right_index)
-
-
-def func_load_index(i, j, path, columns=None):
-    """加载路径下的数据，并纵向合并
-
-    Parameters
-    ----------
-    i:
-        行信息
-    j:
-        列信息
     path
-        路径
-    columns
-        指定列名
+    pattern
+    axis
+    func
+    on
+    index
 
     Returns
     -------
-    pd.DataFrame
 
     """
-    return load_parquet_index(path, f'{i}__{j}.parquet', columns)
+    dfs = []
+    for k in range(len(path)):
+        df = load_parquet(path[k], pattern[k].format(i, j), axis=axis[k], func=None)
+        f = func[k]
+        if f is not None:
+            df = f(df)
+        dfs.append(df)
+
+    left = dfs[0]
+    left_on = on[0]
+    left_index = index[0]
+    for k in range(1, len(dfs)):
+        right = dfs[k]
+        right_on = on[k]
+        right_index = index[k]
+        left = pd.merge(left, right, how='left', suffixes=('', '_DROP'),
+                        left_on=left_on, right_on=right_on,
+                        left_index=left_index, right_index=right_index,
+                        ).filter(regex='^(?!.*_DROP)')
+    return left
 
 
 def describe_win(df: pd.DataFrame):

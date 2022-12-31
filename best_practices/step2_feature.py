@@ -61,12 +61,7 @@ def calc_ts(df) -> LazyFrame:
         pl.col('close_adj').map(lambda x: pl_np_wraps(ts_returns)(x, 5)).alias('mom_5'),
         pl.col('close_adj').map(lambda x: pl_np_wraps(ts_returns)(x, 10)).alias('mom_10'),
         #
-        pl.col('close_adj').map(lambda x: SMA(x, 5)).cast(pl.Float32).alias('sma_5'),
-        pl.col('close_adj').map(lambda x: SMA(x, 10)).cast(pl.Float32).alias('sma_10'),
-        pl.col('close_adj').map(lambda x: SMA(x, 20)).cast(pl.Float32).alias('sma_20'),
-        pl.col('close_adj').map(lambda x: SMA(x, 60)).cast(pl.Float32).alias('sma_60'),
-        pl.col('close_adj').map(lambda x: SMA(x, 120)).cast(pl.Float32).alias('sma_120'),
-        pl.col('close_adj').map(lambda x: SMA(x, 240)).cast(pl.Float32).alias('sma_240'),
+        *[pl.col('CLOSE').pct_change(i).alias(f'ROCP_{i}') for i in (1, 3, 5, 10, 20, 60)],
 
         pl.col('close_adj').map(lambda x: RSI(x, 6)).cast(pl.Float32).alias('rsi_6'),
         pl.col('close_adj').map(lambda x: RSI(x, 12)).cast(pl.Float32).alias('rsi_12'),
@@ -151,8 +146,8 @@ def calc_cs2(df: LazyFrame):
 
 
 if __name__ == '__main__':
-    PATH_STEP1_OUTPUT = r'd:\Users\Kan\Documents\GitHub\ddump\data3\step1'
-    PATH_STEP2_OUTPUT = r'd:\Users\Kan\Documents\GitHub\ddump\data3\step2'
+    PATH_STEP1_OUTPUT = r'M:\data3\step1'
+    PATH_STEP2_OUTPUT = r'M:\data3\step2'
 
     # 路径准备
     PATH_STEP1_OUTPUT = pathlib.Path(PATH_STEP1_OUTPUT)
