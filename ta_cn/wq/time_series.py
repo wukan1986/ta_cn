@@ -400,7 +400,8 @@ def ts_scale(x, d, constant=0):
 This operator is similar to scale down operator but acts in time series space."""
     t1 = ts_min(x, d)
     t2 = ts_max(x, d)
-    return (x - t1) / (t2 - t1) + constant
+    with np.errstate(divide='ignore', invalid='ignore'):
+        return (x - t1) / (t2 - t1) + constant
 
 
 # 与scipy.stats.skew结果相同，与pd.rolling.skew结果不同, bias的问题
