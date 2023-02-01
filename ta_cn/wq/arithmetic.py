@@ -1,9 +1,8 @@
 """
 Arithmetic Operators
 """
-from functools import reduce
-
 import numpy as np
+from functools import reduce
 
 from .time_series import ts_delta
 
@@ -42,6 +41,45 @@ def divide(*args):
     """
     with np.errstate(divide='ignore', invalid='ignore'):
         return reduce(np.true_divide, args)
+
+
+def safe_divide(a, b, posinf_=np.inf, neginf_=-np.inf, nan_=np.nan, is_close=True, replace=True):
+    """安全除法
+    1. 解决除0时产生异常值。如：1/0=inf -1/0=-inf 0/0=nan
+    2. 解决数字接近0时产生异常值
+
+    Parameters
+    ----------
+    a
+    b
+    posinf_: float
+        正数/0时,将inf替换成posinf_
+    neginf_: float
+        负数/0时,将-inf替换成neginf_
+    nan_: float
+        0/0时，将nan替换成nan_，其它nan/0, 0/nan, nan/nan还是保持nan
+    is_close: bool
+        数字接近于0时是否当成0使用。防止除很小值时产生很大值
+    replace: bool
+        是否进行安全除法替换
+
+    """
+    if is_close:
+        a_is_zero = np.isclose(a, 0)
+        b_is_zero = np.isclose(b, 0)
+    else:
+        a_is_zero = a == 0
+        b_is_zero = b == 0
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        out = a / b
+
+    if replace:
+        out[b_is_zero & (a > 0)] = posinf_
+        out[b_is_zero & (a < 0)] = neginf_
+        out[b_is_zero & a_is_zero] = nan_
+
+    return out
 
 
 def exp(x):
