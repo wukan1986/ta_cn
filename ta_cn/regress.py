@@ -179,7 +179,7 @@ def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
     _y = pd_to_np(y)
     _x = pd_to_np(x)
     if add_constant:
-        tmp = np.ones(shape=(_x.shape[0], _x.shape[1] + 1))
+        tmp = np.ones(shape=(_x.shape[0], _x.shape[1] + 1), dtype=_x.dtype)
         tmp[:, 1:] = _x
         _x = tmp
 
@@ -195,7 +195,11 @@ def _cs_ols_nb(y, x):
 
     标准的多元回归
     """
-    return np.dot((np.dot(np.linalg.inv(np.dot(x.T, x)), x.T)), y)
+    # https://github.com/tirthajyoti/Machine-Learning-with-Python/blob/master/Regression/Linear_Regression_Methods.ipynb
+    # 由于出现了不可逆，导致常用的inv失效果，只能使用Moore-Penrose pseudoinverse
+    # numpy.linalg.LinAlgError: Matrix is singular to machine precision.
+    # return np.dot((np.dot(np.linalg.inv(np.dot(x.T, x)), x.T)), y)
+    return np.linalg.pinv(x).dot(y)
 
 
 def multiple_regress(y, x, add_constant=True):
@@ -209,7 +213,7 @@ def multiple_regress(y, x, add_constant=True):
         if _x.ndim == 1:
             # 一维数据转成二维数据
             _x = _x.reshape(-1, 1)
-        tmp = np.ones(shape=(_x.shape[0], _x.shape[1] + 1))
+        tmp = np.ones(shape=(_x.shape[0], _x.shape[1] + 1), dtype=_x.dtype)
         tmp[:, 1:] = _x
         _x = tmp
     coef = _cs_ols_nb(_y, _x)

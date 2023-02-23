@@ -152,7 +152,7 @@ def extend_shape(x, d, fill_value=np.nan):
     """扩展矩阵，在前部添加空值，用于sliding_window_view后还是保持形状"""
     shape = list(x.shape)
     shape[0] += d
-    y = np.empty(shape=tuple(shape))
+    y = np.empty(shape=tuple(shape), dtype=x.dtype)
     y[:d] = fill_value
     y[d:] = x
     return y
