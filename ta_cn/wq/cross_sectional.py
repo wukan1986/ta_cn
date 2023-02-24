@@ -16,7 +16,8 @@ def normalize(x, useStd=False, limit=0.0):
     if useStd:
         # 这里用ddof=1才能与文档示例的数值对应上
         t2 = np.nanstd(x, axis=axis, keepdims=True, ddof=1)
-        r = (x - t1) / t2
+        with np.errstate(divide='ignore', invalid='ignore'):
+            r = (x - t1) / t2
     else:
         r = (x - t1)
 
@@ -47,8 +48,8 @@ def rank(x, rate=2, pct=True):
 
     if pct:
         t2 = np.nansum(~np.isnan(x), axis=axis, keepdims=True)
-
-        return t1 / t2
+        with np.errstate(divide='ignore', invalid='ignore'):
+            return t1 / t2
     else:
         return t1
 
@@ -97,7 +98,8 @@ def scale_down(x, constant=0):
     m1 = np.nanmin(x, axis=axis, keepdims=True)
     m2 = np.nanmax(x, axis=axis, keepdims=True)
 
-    return (x - m1) / (m2 - m1) - constant
+    with np.errstate(divide='ignore', invalid='ignore'):
+        return (x - m1) / (m2 - m1) - constant
 
 
 def truncate(x, maxPercent=0.01):
@@ -135,7 +137,8 @@ def zscore(x):
     _mean = np.nanmean(x, axis=axis, keepdims=True)
     _std = np.nanstd(x, axis=axis, keepdims=True, ddof=0)
 
-    return (x - _mean) / _std
+    with np.errstate(divide='ignore', invalid='ignore'):
+        return (x - _mean) / _std
 
 
 def rank_gmean_amean_diff(*args):
