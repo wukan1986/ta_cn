@@ -209,15 +209,21 @@ def multiple_regress(y, x, add_constant=True):
     """
     _y = pd_to_np(y)
     _x = pd_to_np(x)
-    if add_constant:
-        if _x.ndim == 1:
-            # 一维数据转成二维数据
-            _x = _x.reshape(-1, 1)
-        tmp = np.ones(shape=(_x.shape[0], _x.shape[1] + 1), dtype=_x.dtype)
-        tmp[:, 1:] = _x
-        _x = tmp
-    coef = _cs_ols_nb(_y, _x)
-    y_hat = np.sum(_x * coef, axis=1)
+    # 拼接出y1x这种大矩阵
+    _y1x = np.vstack((_y, np.ones_like(_y), _x.T)).T
+
+    # 找到某行出现nan
+    mask = ~np.any(np.isnan(_y1x), axis=1)
+
+    # 位置1开始加了常量1，位置2开始没有常量1
+    _1x = _y1x[mask, 2 - add_constant:]
+    _1y = _y1x[mask, 0]
+
+    coef = _cs_ols_nb(_1y, _1x)
+
+    y_hat = np.full_like(_y, np.nan, dtype=_y.dtype)
+    y_hat[mask] = np.sum(_1x * coef, axis=1)
+
     residual = _y - y_hat
     return residual, y_hat, coef
 

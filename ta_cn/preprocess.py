@@ -30,6 +30,9 @@ def winsorize_mad(x, n=3, constant=1.4826):
 
     """
     x = pd_to_np(x, copy=False)
+    if np.isnan(x).all():
+        return x
+
     axis = x.ndim - 1
     _median = np.nanmedian(x, axis=axis, keepdims=True)
     _mad = np.nanmedian(abs(x - _median), axis=axis, keepdims=True)

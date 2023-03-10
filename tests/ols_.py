@@ -3,14 +3,16 @@ import time
 import numpy as np
 import statsmodels.api as sm
 from statsmodels.regression.rolling import RollingOLS
-
 from ta_cn.regress import multiple_regress, ts_multiple_regress
 
 y = np.random.rand(1000)
+y[1] = np.nan
 x = np.random.rand(1000 * 4).reshape(-1, 4)
-coef, residual = multiple_regress(y, x)
+x = np.random.rand(1000 * 1)#.reshape(-1, 4)
+# x[1, 1] = np.nan
+coef, residual, _ = multiple_regress(y, x, add_constant=False)
 t1 = time.time()
-coef, residual = multiple_regress(y, x)
+coef, residual, _ = multiple_regress(y, x)
 t2 = time.time()
 # print(residual)
 

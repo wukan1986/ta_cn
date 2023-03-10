@@ -11,6 +11,10 @@ from ..utils import pd_to_np
 
 def normalize(x, useStd=False, limit=0.0):
     """Calculates the mean value of all valid alpha values for a certain date, then subtracts that mean from each element."""
+    x = pd_to_np(x, copy=False)
+    if np.isnan(x).all():
+        return x
+
     axis = x.ndim - 1
     t1 = np.nanmean(x, axis=axis, keepdims=True)
     if useStd:
@@ -133,6 +137,8 @@ def winsorize(x, std=4):
 def zscore(x):
     """Z-score is a numerical measurement that describes a value's relationship to the mean of a group of values. Z-score is measured in terms of standard deviations from the mean"""
     x = pd_to_np(x, copy=False)
+    if np.isnan(x).all():
+        return x
     axis = x.ndim - 1
     _mean = np.nanmean(x, axis=axis, keepdims=True)
     _std = np.nanstd(x, axis=axis, keepdims=True, ddof=0)
