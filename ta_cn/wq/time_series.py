@@ -382,17 +382,13 @@ def ts_regression(y, x, d, lag=0, rettype=0):
 
 def ts_returns(x, d, mode=1):
     """Returns the relative change in the x value ."""
-    if d >= 0:
-        t1 = ts_delay(x, d)
-        if mode == 1:
-            return x / t1 - 1.
-        if mode == 2:
-            return (x - t1) / ((x + t1) / 2)
-    else:
-        # 负数相当于pct_change(d).shift(-d),用于机器学习打标签
-        t1 = ts_delay(x, d)
-        if mode == 1:
-            return t1 / x - 1
+    t1 = ts_delay(x, d)
+    if mode == 1:
+        return x / t1 - 1.
+    if mode == 2:
+        return (x - t1) / ((x + t1) / 2)
+    # pct_change(d).shift(-d) 与pct_change(-d)不等价
+    # ts_delay(x, d)/x-1与x/ts_delay(x, d)-1的区别
 
 
 def ts_scale(x, d, constant=0):
