@@ -70,12 +70,12 @@ def ts_simple_regress(y, x, d, lag=0, rettype=0):
 
     Returns
     -------
+    residual_hat: ndarray
+        回归残差项
     intercept_hat: ndarray
         回归截距项
     beta_hat: ndarray
         回归系数项
-    residual_hat: ndarray
-        回归残差项
 
     """
     # 准备
@@ -151,7 +151,8 @@ def _ts_ols_nb(y, x):
 
     由于sliding_window_view后的形状再enumerate后比较特殊，所以原公式的转置进行了调整
     """
-    return np.dot((np.dot(np.linalg.inv(np.dot(x, x.T)), x)), y)
+    # return np.dot((np.dot(np.linalg.inv(np.dot(x, x.T)), x)), y)
+    return np.linalg.pinv(x.T).dot(y)
 
 
 def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
@@ -170,23 +171,31 @@ def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
 
     Returns
     -------
-    coef:
-        系数。与x形状类似，每个特性占一例。时序变化，所以每天都有一行
     residual:
         残差。与y形状类似，由实际y-预测y而得到
+    y_hat:
+        预测y
+    coef:
+        系数。与x形状类似，每个特性占一例。时序变化，所以每天都有一行
 
     """
     _y = pd_to_np(y)
     _x = pd_to_np(x)
-    if add_constant:
-        tmp = np.ones(shape=(_x.shape[0], _x.shape[1] + 1), dtype=_x.dtype)
-        tmp[:, 1:] = _x
-        _x = tmp
+    # 拼接出y1x这种大矩阵
+    _y1x = np.vstack((_y, np.ones_like(_y), _x.T)).T
 
-    coef = numpy_rolling_apply([_x, _y], timeperiod, _rolling_func_xy_nb, _ts_ols_nb)
-    y_hat = np.sum(_x * coef, axis=1)
+    # 找到某行出现nan
+    mask = ~np.any(np.isnan(_y1x), axis=1)
+
+    # 位置1开始加了常量1，位置2开始没有常量1
+    _1x = _y1x[mask, 2 - add_constant:]
+    _1y = _y1x[mask, 0]
+
+    coef = numpy_rolling_apply([_1x, _1y], timeperiod, _rolling_func_xy_nb, _ts_ols_nb)
+    y_hat = np.full_like(_y, np.nan, dtype=_y.dtype)
+    y_hat[mask] = np.sum(_1x * coef, axis=1)
     residual = _y - y_hat
-    return coef, residual
+    return residual, y_hat, coef
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
@@ -222,7 +231,7 @@ def multiple_regress(y, x, add_constant=True):
     coef = _cs_ols_nb(_1y, _1x)
 
     y_hat = np.full_like(_y, np.nan, dtype=_y.dtype)
-    y_hat[mask] = np.sum(_1x * coef, axis=1)
+    y_hat[mask] = _1x @ coef
 
     residual = _y - y_hat
     return residual, y_hat, coef
@@ -233,5 +242,5 @@ def REGRESI(y, *args, timeperiod=60):
         x = pd.concat(args, axis=1)
     else:
         x = np.concatenate(args, axis=1)
-    coef, resi = ts_multiple_regress(y, x, timeperiod=timeperiod, add_constant=True)
-    return resi
+    residual, y_hat, coef = ts_multiple_regress(y, x, timeperiod=timeperiod, add_constant=True)
+    return residual
