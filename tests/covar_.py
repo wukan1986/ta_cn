@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from ta_cn.nb import numpy_rolling_apply, _rolling_func_2_nb, _cov_nb
+from ta_cn.nb import numpy_rolling_apply_1, _rolling_func_2_1_nb, _cov_nb
 from ta_cn.utils import np_to_pd, pd_to_np
 
 
 def COVAR(real0, real1, timeperiod=30):
-    return numpy_rolling_apply([pd_to_np(real0), pd_to_np(real1)],
-                               timeperiod, _rolling_func_2_nb, _cov_nb)
+    return numpy_rolling_apply_1([pd_to_np(real0), pd_to_np(real1)],
+                                 timeperiod, _rolling_func_2_1_nb, _cov_nb)
 
 
 # 移动相关系数

@@ -6,7 +6,7 @@ import pandas as pd
 
 from . import bn_wraps as bn
 from . import talib as ta
-from .nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb, extend_shape
+from .nb import numpy_rolling_apply_1, _rolling_func_1_1_nb, _rolling_func_2_1_nb, extend_shape
 from .utils import pd_to_np
 
 _ta1d = ta.init(mode=1, skipna=False)
@@ -32,7 +32,7 @@ def SLOPE_Y(real, timeperiod):
     """
     x = np.arange(timeperiod)
     m_x = np.mean(x)
-    return numpy_rolling_apply([pd_to_np(real)], timeperiod, _rolling_func_1_nb, _slope_y_nb, x, m_x)
+    return numpy_rolling_apply_1([pd_to_np(real)], timeperiod, _rolling_func_1_1_nb, _slope_y_nb, x, m_x)
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
@@ -48,8 +48,8 @@ def SLOPE_YX(real0, real1, timeperiod):
 
     SLOPE_YX(real0, real1, timeperiod=30)
     """
-    return numpy_rolling_apply([pd_to_np(real0), pd_to_np(real1)],
-                               timeperiod, _rolling_func_2_nb, _slope_yx_nb)
+    return numpy_rolling_apply_1([pd_to_np(real0), pd_to_np(real1)],
+                                 timeperiod, _rolling_func_2_1_nb, _slope_yx_nb)
 
 
 def ts_simple_regress(y, x, d, lag=0, rettype=0):
@@ -191,7 +191,7 @@ def ts_multiple_regress(y, x, timeperiod=10, add_constant=True):
     _1x = _y1x[mask, 2 - add_constant:]
     _1y = _y1x[mask, 0]
 
-    coef = numpy_rolling_apply([_1x, _1y], timeperiod, _rolling_func_xy_nb, _ts_ols_nb)
+    coef = numpy_rolling_apply_1([_1x, _1y], timeperiod, _rolling_func_xy_nb, _ts_ols_nb)
     y_hat = np.full_like(_y, np.nan, dtype=_y.dtype)
     y_hat[mask] = np.sum(_1x * coef, axis=1)
     residual = _y - y_hat

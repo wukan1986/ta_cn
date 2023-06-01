@@ -3,7 +3,7 @@ import numpy as np
 
 from . import SUM
 from .. import EPSILON
-from ..nb import numpy_rolling_apply, _rolling_func_1_nb
+from ..nb import numpy_rolling_apply_1, _rolling_func_1_1_nb
 from ..utils import np_to_pd, num_to_np, pd_to_np
 
 
@@ -59,4 +59,4 @@ def LAST(real, n, m):
 
     LAST(real, n=20, m=10)
     """
-    return numpy_rolling_apply([pd_to_np(real)], n, _rolling_func_1_nb, _last_nb, n, m)
+    return numpy_rolling_apply_1([pd_to_np(real)], n, _rolling_func_1_1_nb, _last_nb, n, m)
