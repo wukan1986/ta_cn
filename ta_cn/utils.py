@@ -7,7 +7,7 @@ try:
     import polars as pl
 
     POLARS_INSTALLED = True
-except:
+except ImportError:
     POLARS_INSTALLED = False
 
 

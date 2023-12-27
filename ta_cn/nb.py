@@ -101,6 +101,40 @@ def _rolling_func_3_1_nb(arr0, arr1, arr2, out0, timeperiod, func, *args):
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
+def _rolling_func_3_2_nb(arr0, arr1, arr2, out0, out1, timeperiod, func, *args):
+    """滚动函数，在二维或三维数上遍历，三组输入
+
+    Parameters
+    ----------
+    arr0:
+        输入。二维或三维
+    out0:
+        输出。一维或二维。降了一个维度
+    window: int
+        窗口长度
+    func:
+        单向量处理函数
+    args:
+        func的位置参数
+
+    Returns
+    -------
+    np.ndarray
+        一维或二维数组
+
+    """
+    if arr0.ndim == 3:
+        for i, (aa, bb, cc) in enumerate(zip(arr0, arr1, arr2)):
+            for j, (a, b, c) in enumerate(zip(aa, bb, cc)):
+                out0[i + timeperiod - 1, j], out1[i + timeperiod - 1, j] = func(a, b, c, *args)
+    elif arr0.ndim == 2:
+        for i, (a, b, c) in enumerate(zip(arr0, arr1, arr2)):
+            out0[i + timeperiod - 1], out1[i + timeperiod - 1] = func(a, b, c, *args)
+
+    return out0, out1
+
+
+@numba.jit(nopython=True, cache=True, nogil=True)
 def _rolling_func_2_2_nb(arr0, arr1, out0, out1, timeperiod, func, *args):
     """滚动函数，在二维或三维数上遍历，二组输入
 

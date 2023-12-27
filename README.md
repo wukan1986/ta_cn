@@ -1,7 +1,11 @@
 # ta_cn 中国版技术指标
 
+## !!! 注意：如要在`polars`中使用技术指标，请使用[polars_ta](https://github.com/wukan1986/polars_ta)
+
 ## 项目背景
+
 初学量化，技术指标一般使用`TA-Lib`，但存在以下问题
+
 1. 部分技术指标与国内不同。但大部分中国股民都是参考国内技术指标进行交易。需要实现中国版指标
 2. `TA-Lib`只支持单支序列，要计算多支股票需循环，耗时久。
 
@@ -9,18 +13,21 @@
 特别是将`+`、`-`、`*`、`/`等中缀操作符转成`ADD()`、`SUB()`、`MUL()`、`DIV()`前缀函数，可直接输到遗传算法工具中
 
 所以开始参考`Alpha101`和各券商金融工程研报，试着实现一些算子，但后期实现中发现一些问题
+
 1. 每家金工的研报指标命名上都有区别，难以统一
 2. 指标太多，实现工作太大
 
 直到看到了`MyTT`这个项目才意识到，指标命名参考股票软件的公式才是最方便直接的，可以直接到各股软中复制公式。遇到性能问题再针对性转换即可。
 
 ## 本人为何不直接用`MyTT`，而是重复造轮子呢？
+
 1. 大部分公式只支持单条数据，遇到几千支股票的DataFrame，循环太慢
 2. `TA-Lib`与国内指标不同，区别在哪，没有对比。错过了很好的教学机会
 3. 为了行数短牺牲了可读性
 4. 部分函数直接复制于股票软件，代码没有优化，有重复计算
 
 ## 再次大迭代，仿WorldQuant
+
 1. 2022年9月初，知道WorldQuant Websim重新开放为WorldQuant BRAIN后，开始研究国外的平台
 2. WQ公式更加科学。例如：
     1. WQ时序有`ts_`前缀
@@ -29,25 +36,29 @@
     4. WQ公式为Alpha因子而设计，有大量的权重处理等函数
 
 ## 目标
+
 1. 优先实现WorldQuant公式，然后实现通达信公式
 2. 通过在通达信中导入WQ公式并别名，来实现通达信公式覆盖
 3. 支持二维矩阵计算
 4. 支持长表和宽表，支持NaN跳过
 5. 最终实现WQ的本地版
 
-
 ## 实现方案优先级
+
 1. bottleneck。支持二维数据，优先使用
 2. TA-Lib。封装了常用函数，次要选择
 3. numba。速度受影响，最后才用它
 
 ## 安装
+
 1. 只想使用二维矩阵TA-Lib，只需安装基础版即可
+
 ```commandline
 pip install ta_cn -i https://mirrors.aliyun.com/pypi/simple --upgrade
 ```
 
 2. 使用中国版指标加速
+
 ```commandline
 pip install ta_cn[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 ```
@@ -55,16 +66,19 @@ pip install ta_cn[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 3. 开发人员安装。开发迭代很快，只有版本稳定才会发布到`PyPI`，需要时效更高的安装方法
     1. 从github下载zip文件
     2. 解压zip, 进入解压后目录，输入以下命令
+
 ```commandline
 pip install .[cn] -i https://mirrors.aliyun.com/pypi/simple --upgrade
 ```
 
 4. 库维护者安装。可修改本地文件
+
 ```commandline
 pip install -e .
 ```
 
 ## 常见使用方法
+
 1. 转发原生talib，输入一维向量
     - 优点: 本库提供了跳过空值的功能
     - 缺点: 不要在大量循环中调用，因为跳过空值的功能每调用一次就要预分配内存
@@ -79,8 +93,9 @@ pip install -e .
 5. 输入为宽表
     - 优点：计算快
     - 缺点：计算前需要准备数据为指定格式，占大量内存
-    
+
 ## 停牌处理，跳过空值
+
 1. TA-Lib遇到空值后面结果全为NaN
 2. 跳过NaN后，导致数据长度不够，部分函数可能报错
 3. 方案一：将所有数据进行移动，时序指标移动到最后，横截面指标移动到最右。
@@ -89,8 +104,9 @@ pip install -e .
 4. 方案二：预先初始化空白区，计算指标时屏蔽NaN,算完后回填
     - 优点：外部调用简单，不需要对数据提前处理
     - 缺点：由于有大量的是否跳过NaN的处理，所以速度慢
-    
+
 ### 常见示例
+
 ```python
 import numpy as np
 
@@ -127,6 +143,7 @@ print(r)
 ```
 
 ### 使用ta_cn中定义的公式
+
 ```python
 import numpy as np
 
@@ -157,6 +174,7 @@ print(z)
 ```
 
 ## 长宽表处理
+
 二维矩阵计算，的确方便，`Alpha101`中的公式很快就可以实现，即支持时序又支持截面，但其中有一个难点，
 就是NaN值的处理。`pushna`和`pullna`可用于解决此问题，但在公式中嵌入就比较棘手。
 
@@ -164,8 +182,10 @@ print(z)
 如果明确数据内不会产生空值，可以不使用长宽表装饰器，效率会更快。
 
 ### 长表
+
 处理慢一些，但结果更适合于机器学习。
 底层主要通过`series_groupby_apply`（针对单列输入）和`dataframe_groupby_apply`（针对多列输入）装饰器来实现跳过空值。
+
 ```python
 import pandas as pd
 
@@ -209,8 +229,10 @@ print(r.unstack())
 ```
 
 ### 宽表
+
 处理速度通常比长表要快。核心是输入需要封装成`WArr`,输出要`.raw()`提取。
 底层通过`wide_wraps`装饰器来实现空值跳过，通过`long_wraps`装饰器来实现长表函数转宽表函数
+
 ```python
 import pandas as pd
 
@@ -241,17 +263,21 @@ print(d.iloc[-5:])
 ```
 
 ## 指标对比清单
+
 参考 [指标对比](指标对比.xlsx) 未完工，待补充
 
 ## Alpha101/Alpha191
+
 本项目，试着用公式系统实现`Alpha101`、`Alpha191`，请参考examples文件下的测试示例。它最大的特点是尽量保持原公式的形式，
 少改动，防止乱中出错。然后再优化代码提高效率。
 
 ## 停牌处理，空值填充
+
 1. 板块指数，停牌了也要最近的行情进行计算，否则指数过小
 2. 停牌期的开高低收都是最近的收盘价，收盘价可以ffill
 
 ## 参考项目
+
 1. [TA-Lib](https://github.com/TA-Lib/ta-lib) TA-Lib C语言版，非官方镜像
 2. [ta-lib](https://github.com/mrjbq7/ta-lib) TA-Lib Python版封装
 3. [MyTT](https://github.com/mpquant/MyTT) My麦语言 T通达信 T同花顺
@@ -262,4 +288,5 @@ print(d.iloc[-5:])
 8. [WorldQuant算子详情](https://platform.worldquantbrain.com/learn/data-and-operators/detailed-operator-descriptions)
 
 ## 交流群
+
 ta_cn技术指标交流群: 601477228
