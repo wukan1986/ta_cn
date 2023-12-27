@@ -53,13 +53,13 @@ def calc_ts(df) -> LazyFrame:
     # 第一阶段
     df = df.with_columns([
         # 收益率标签
-        pl.col('close_adj').map(lambda x: pl_np_wraps(ts_returns)(x, -1)).alias('returns_1'),
-        pl.col('close_adj').map(lambda x: pl_np_wraps(ts_returns)(x, -5)).alias('returns_5'),
-        pl.col('close_adj').map(lambda x: pl_np_wraps(ts_returns)(x, -10)).alias('returns_10'),
+        pl.col('close_adj').pct_change(1).shift(-1).alias('returns_1'),
+        pl.col('close_adj').pct_change(5).shift(-5).alias('returns_5'),
+        pl.col('close_adj').pct_change(10).shift(-10).alias('returns_10'),
 
-        pl.col('close_adj').map(lambda x: pl_np_wraps(ts_returns)(x, 1)).alias('mom_1'),
-        pl.col('close_adj').map(lambda x: pl_np_wraps(ts_returns)(x, 5)).alias('mom_5'),
-        pl.col('close_adj').map(lambda x: pl_np_wraps(ts_returns)(x, 10)).alias('mom_10'),
+        pl.col('close_adj').pct_change(1).alias('mom_1'),
+        pl.col('close_adj').pct_change(5).alias('mom_5'),
+        pl.col('close_adj').pct_change(10).alias('mom_10'),
         #
         *[pl.col('CLOSE').pct_change(i).alias(f'ROCP_{i}') for i in (1, 3, 5, 10, 20, 60)],
 

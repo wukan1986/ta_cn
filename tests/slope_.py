@@ -7,6 +7,8 @@ import pandas as pd
 import ta_cn.talib as ta
 from ta_cn.regress import SLOPE
 
+ta.init(mode=2, skipna=False, to_globals=True)
+
 if __name__ == '__main__':
     # 准备数据
     h = np.random.rand(1000).reshape(-1, 5) + 10

@@ -3,6 +3,12 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
+try:
+    import polars as pl
+
+    POLARS_INSTALLED = True
+except ImportError:
+    POLARS_INSTALLED = False
 
 
 def to_pd(func):
@@ -104,6 +110,11 @@ def pd_to_np(x: Union[pd.DataFrame, pd.Series], copy: bool = False) -> np.ndarra
 
     if isinstance(x, (pd.Series, pd.DataFrame)):
         return x.values
+
+    # 新加了这一条需要安装polars
+    if POLARS_INSTALLED:
+        if isinstance(x, (pl.Series, pl.DataFrame)):
+            return x.to_numpy()
 
     return x
 

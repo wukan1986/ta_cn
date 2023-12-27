@@ -2,7 +2,7 @@ import numba
 import numpy as np
 
 from .. import bn_wraps as bn
-from ..nb import numpy_rolling_apply, _rolling_func_1_nb
+from ..nb import numpy_rolling_apply_1, _rolling_func_1_1_nb
 from ..utils import pd_to_np
 
 
@@ -17,7 +17,7 @@ def AVEDEV(real, timeperiod: int):
 
     AVEDEV(real, timeperiod=20)
     """
-    return numpy_rolling_apply([pd_to_np(real)], timeperiod, _rolling_func_1_nb, _avedev_nb)
+    return numpy_rolling_apply_1([pd_to_np(real)], timeperiod, _rolling_func_1_1_nb, _avedev_nb)
 
 
 def STD(x, d):

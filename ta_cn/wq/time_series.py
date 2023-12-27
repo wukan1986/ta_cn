@@ -7,7 +7,7 @@ from numba.typed import List
 
 from .. import bn_wraps as bn
 from .. import talib as ta
-from ..nb import numpy_rolling_apply, _rolling_func_1_nb, _rolling_func_2_nb, _rolling_func_3_nb
+from ..nb import numpy_rolling_apply_1, _rolling_func_1_1_nb, _rolling_func_2_1_nb, _rolling_func_3_1_nb
 from ..regress import ts_simple_regress
 from ..utils import pd_to_np
 
@@ -103,9 +103,9 @@ def kth_element(x, d, k=1, ignore=[]):
 
     # 由于原文档中数据需要[::-1]，所以backfill其实是ffill
     # ignore参数用来计数时跳过，文档不对应
-    return numpy_rolling_apply([pd_to_np(x)],
-                               d, _rolling_func_1_nb, _kth_element_nb,
-                               k, List(ignore))
+    return numpy_rolling_apply_1([pd_to_np(x)],
+                                 d, _rolling_func_1_1_nb, _kth_element_nb,
+                                 k, List(ignore))
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
@@ -119,8 +119,8 @@ def _last_diff_value_nb(arr):
 
 def last_diff_value(x, d):
     """Returns last x value not equal to current x value from last d days"""
-    return numpy_rolling_apply([pd_to_np(x)],
-                               d, _rolling_func_1_nb, _last_diff_value_nb)
+    return numpy_rolling_apply_1([pd_to_np(x)],
+                                 d, _rolling_func_1_1_nb, _last_diff_value_nb)
 
 
 def ts_arg_max(x, d):
@@ -164,8 +164,8 @@ def _co_kurtosis_nb(arr0, arr1):
 
 def ts_co_kurtosis(y, x, d):
     """Returns cokurtosis of y and x for the past d days."""
-    return numpy_rolling_apply([pd_to_np(y), pd_to_np(x)],
-                               d, _rolling_func_2_nb, _co_kurtosis_nb)
+    return numpy_rolling_apply_1([pd_to_np(y), pd_to_np(x)],
+                                 d, _rolling_func_2_1_nb, _co_kurtosis_nb)
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
@@ -178,8 +178,8 @@ def ts_corr(x, y, d):
     if True:
         return _ta2d.CORREL(x, y, timeperiod=d)
     else:
-        return numpy_rolling_apply([pd_to_np(x), pd_to_np(y)],
-                                   d, _rolling_func_2_nb, _corr_nb)
+        return numpy_rolling_apply_1([pd_to_np(x), pd_to_np(y)],
+                                     d, _rolling_func_2_1_nb, _corr_nb)
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
@@ -193,8 +193,8 @@ def _co_skewness_nb(arr0, arr1):
 
 def ts_co_skewness(y, x, d):
     """Returns coskewness of y and x for the past d days."""
-    return numpy_rolling_apply([pd_to_np(y), pd_to_np(x)],
-                               d, _rolling_func_2_nb, _co_skewness_nb)
+    return numpy_rolling_apply_1([pd_to_np(y), pd_to_np(x)],
+                                 d, _rolling_func_2_1_nb, _co_skewness_nb)
 
 
 def ts_count_nans(x, d):
@@ -210,8 +210,8 @@ def _covariance_nb(arr0, arr1):
 
 def ts_covariance(y, x, d):
     """Returns covariance of y and x for the past d days"""
-    return numpy_rolling_apply([pd_to_np(y), pd_to_np(x)],
-                               d, _rolling_func_2_nb, _covariance_nb)
+    return numpy_rolling_apply_1([pd_to_np(y), pd_to_np(x)],
+                                 d, _rolling_func_2_1_nb, _covariance_nb)
 
 
 def ts_decay_exp_window(x, d, factor=0.5):
@@ -264,7 +264,7 @@ def _kurtosis_nb(arr):
 
 def ts_kurtosis(x, d):
     """Returns kurtosis of x for the last d days."""
-    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _kurtosis_nb) - 3
+    return numpy_rolling_apply_1([pd_to_np(x)], d, _rolling_func_1_1_nb, _kurtosis_nb) - 3
 
 
 def ts_max(x, d):
@@ -320,7 +320,7 @@ def ts_moment(x, d, k=0):
         # 结果是一样的，使用计算更快的版本
         return bn.move_var(x, window=d, axis=0)
     # 计算K阶中心矩
-    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _moment_nb, k)
+    return numpy_rolling_apply_1([pd_to_np(x)], d, _rolling_func_1_1_nb, _moment_nb, k)
 
 
 # TODO: 不知道是否写正确，需要check
@@ -339,8 +339,8 @@ def _partial_corr_nb(arr0, arr1, arr2):
 def ts_partial_corr(x, y, z, d):
     """Returns partial correlation of x, y, z for the past d days."""
 
-    return numpy_rolling_apply([pd_to_np(x), pd_to_np(y), pd_to_np(z)],
-                               d, _rolling_func_3_nb, _partial_corr_nb)
+    return numpy_rolling_apply_1([pd_to_np(x), pd_to_np(y), pd_to_np(z)],
+                                 d, _rolling_func_3_1_nb, _partial_corr_nb)
 
 
 @numba.jit(nopython=True, cache=True, nogil=True)
@@ -350,7 +350,7 @@ def _percentage_nb(a, percentage):
 
 def ts_percentage(x, d, percentage=0.5):
     """Returns percentile value of x for the past d days."""
-    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _percentage_nb, percentage)
+    return numpy_rolling_apply_1([pd_to_np(x)], d, _rolling_func_1_1_nb, _percentage_nb, percentage)
 
 
 def ts_poly_regression(y, x, d, k=1):
@@ -365,7 +365,7 @@ def _product_nb(a):
 
 def ts_product(x, d):
     """Returns product of x for the past d days"""
-    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _product_nb)
+    return numpy_rolling_apply_1([pd_to_np(x)], d, _rolling_func_1_1_nb, _product_nb)
 
 
 def ts_rank(x, d, constant=0):
@@ -382,17 +382,13 @@ def ts_regression(y, x, d, lag=0, rettype=0):
 
 def ts_returns(x, d, mode=1):
     """Returns the relative change in the x value ."""
-    if d >= 0:
-        t1 = ts_delay(x, d)
-        if mode == 1:
-            return x / t1 - 1.
-        if mode == 2:
-            return (x - t1) / ((x + t1) / 2)
-    else:
-        # 负数相当于pct_change(d).shift(-d),用于机器学习打标签
-        t1 = ts_delay(x, d)
-        if mode == 1:
-            return t1 / x - 1
+    t1 = ts_delay(x, d)
+    if mode == 1:
+        return x / t1 - 1.
+    if mode == 2:
+        return (x - t1) / ((x + t1) / 2)
+    # pct_change(d).shift(-d) 与pct_change(-d)不等价
+    # ts_delay(x, d)/x-1与x/ts_delay(x, d)-1的区别
 
 
 def ts_scale(x, d, constant=0):
@@ -413,7 +409,7 @@ def _skewness_nb(arr):
 
 def ts_skewness(x, d):
     """Return skewness of x for the past d days."""
-    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _skewness_nb)
+    return numpy_rolling_apply_1([pd_to_np(x)], d, _rolling_func_1_1_nb, _skewness_nb)
 
 
 def ts_std_dev(x, d):
@@ -459,8 +455,8 @@ def _triple_corr_nb(arr0, arr1, arr2):
 
 def ts_triple_corr(x, y, z, d):
     """Returns triple correlation of x, y, z for the past d days."""
-    return numpy_rolling_apply([pd_to_np(x), pd_to_np(y), pd_to_np(z)],
-                               d, _rolling_func_3_nb, _triple_corr_nb)
+    return numpy_rolling_apply_1([pd_to_np(x), pd_to_np(y), pd_to_np(z)],
+                                 d, _rolling_func_3_1_nb, _triple_corr_nb)
 
 
 def ts_zscore(x, d):
@@ -496,7 +492,7 @@ def _quantile_nb(a, q):
 
 def ts_quantile(x, d, driver="gaussian"):
     """It calculates ts_rank and apply to its value an inverse cumulative density function from driver distribution. Possible values of driver (optional ) are "gaussian", "uniform", "cauchy" distribution where "gaussian" is the default."""
-    return numpy_rolling_apply([pd_to_np(x)], d, _rolling_func_1_nb, _quantile_nb, 0.5)
+    return numpy_rolling_apply_1([pd_to_np(x)], d, _rolling_func_1_1_nb, _quantile_nb, 0.5)
 
 
 # ------------------------

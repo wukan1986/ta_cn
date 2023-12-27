@@ -4,7 +4,7 @@ import numpy as np
 from . import ABS, MAX, REF
 from .. import bn_wraps as bn
 from .. import talib as ta
-from ..nb import numpy_rolling_apply, _rolling_func_1_nb
+from ..nb import numpy_rolling_apply_1, _rolling_func_1_1_nb
 from ..utils import pd_to_np
 
 _ta1d = ta.init(mode=1, skipna=False, to_globals=False)
@@ -136,4 +136,4 @@ def _bars_since_n_nb(a, n):
 
 def BARSSINCEN(cond, timeperiod):
     """BARSSINCEN(X,N):N周期内第一次X不为0到现在的天数"""
-    return numpy_rolling_apply([pd_to_np(cond)], timeperiod, _rolling_func_1_nb, _bars_since_n_nb, timeperiod)
+    return numpy_rolling_apply_1([pd_to_np(cond)], timeperiod, _rolling_func_1_1_nb, _bars_since_n_nb, timeperiod)

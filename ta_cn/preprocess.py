@@ -30,6 +30,9 @@ def winsorize_mad(x, n=3, constant=1.4826):
 
     """
     x = pd_to_np(x, copy=False)
+    if np.isnan(x).all():
+        return x
+
     axis = x.ndim - 1
     _median = np.nanmedian(x, axis=axis, keepdims=True)
     _mad = np.nanmedian(abs(x - _median), axis=axis, keepdims=True)
@@ -57,6 +60,10 @@ def winsorize_quantile(x, min_=0.1, max_=0.9):
 
     """
     x = pd_to_np(x, copy=False)
+    # RuntimeWarning: All-NaN slice encountered r, k = function_base._ureduce(a,
+    if np.isnan(x).all():
+        return x
+
     axis = x.ndim - 1
     q = np.nanquantile(x, [min_, max_], axis=axis, keepdims=True)
     return np.clip(x, q[0], q[1])
